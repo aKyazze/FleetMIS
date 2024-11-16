@@ -12,5 +12,9 @@ urlpatterns = [
     path('vehicles/', views.vehicle_view, name='vehicle'),
     
     # Add new vehicle
-    path('add-vehicle/', views.add_vehicle, name='add_vehicle')
+    path('add-vehicle/', views.add_vehicle, name='add_vehicle'), 
+    path('edit-vehicle/<int:vehicle_id>/', views.vehicle_update, name='edit_vehicle'),
+    path('delete-vehicle/<int:vehicle_id>/', views.vehicle_delete, name='delete_vehicle'),
+    path('allocate-vehicle/<int:vehicle_id>/', views.allocate_vehicle, name='allocate_vehicle'),
+
 ]

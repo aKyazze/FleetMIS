@@ -4,16 +4,20 @@ from django.db import models
 
 # Vehicle Entity:
 class Vehicle(models.Model):
+  STATUS = [
+    ("Av", "Available"), 
+    ("Al", "Allocated")
+  ]
  # vehicle_id = models.AutoField(primary_key=True)
   vehicle_plate = models.CharField(max_length=20)
   vehicle_type = models.CharField(max_length=50)
   mileage = models.PositiveIntegerField()
   engine_type = models.CharField(max_length=50)
+  status = models.CharField(max_length=2, choices=STATUS, default="Available")
   
   def __str__(self):
-      return f"{self.vehicle_plate} {self.vehicle_type} ({self.mileage})"
+      return f"{self.vehicle_plate} {self.vehicle_type} ({self.mileage})- {self.status}"
 
-  
   
 #Driver Entity:
 class Driver(models.Model):

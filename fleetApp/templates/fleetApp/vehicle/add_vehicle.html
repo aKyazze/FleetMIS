@@ -11,7 +11,7 @@
         {% csrf_token %}
         {{ form.as_p }}
         <button type="submit">Add Vehicle</button>
+        <a href="{% url 'vehicle' %}" class="btn btn-primary">Cancel</a>
     </form>
-    <a href="{% url 'home' %}">Back to Home</a>
     </div>
 {% endblock %}

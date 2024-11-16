@@ -1,21 +1,17 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  {% load static %}
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-  <title>Confirm Vehicle Deletion</title>
-</head>
-<body>
-  <div class="form-container">
+{% extends "main.html" %}
+
+{% block title %}Vehicles | Delete {% endblock %}
+
+{% block header %}Delete Vehicle{% endblock %}
+
+{% block content %}
+<div class="form-container">
     <h1>Confirm Deletion</h1>
     <p>Are you sure you want to delete the vehicle {{ vehicle }}?</p>
     <form method="POST">
       {% csrf_token %}
       <button type="submit">Yes, Delete</button>
+      <a href="{% url 'vehicle' %}" class="btn btn-primary">Cancel</a>
     </form>
-    <a href="{% url 'home' %}">Cancel</a>
   </div>
-</body>
-</html>
+  {% endblock %}

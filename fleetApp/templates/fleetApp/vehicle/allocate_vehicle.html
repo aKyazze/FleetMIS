@@ -1,0 +1,17 @@
+{% extends "main.html" %}
+
+{% block title %}Allocate Vehicle{% endblock %}
+
+{% block header %}Allocate Vehicle to Driver{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h1>Allocate Vehicle: {{ vehicle.vehicle_plate }}</h1>
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-success">Allocate</button>
+        <a href="{% url 'vehicle' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}
