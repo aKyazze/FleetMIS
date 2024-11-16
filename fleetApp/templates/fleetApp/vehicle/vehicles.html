@@ -1,0 +1,30 @@
+{% extends "main.html" %}
+
+{% block title %}Vehicles | Fleet Management{% endblock %}
+
+{% block header %}Manage Vehicles{% endblock %}
+
+{% block content %}
+<h2 class="text-secondary">Vehicles List</h2>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Vehicle Type</th>
+            <th>License Plate</th>
+            <th>Mileage</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for vehicle in vehicles %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ vehicle.vehicle_type }}</td>
+            <td>{{ vehicle.vehicle_plate }}</td>
+            <td>{{ vehicle.mileage }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<a href="{% url 'add_vehicle' %}" class="btn btn-primary">Add Vehicles</a>
+{% endblock %}

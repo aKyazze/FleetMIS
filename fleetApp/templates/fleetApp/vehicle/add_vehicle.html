@@ -1,0 +1,17 @@
+{% extends "main.html" %}
+
+{% block title %}Vehicles | Add{% endblock %}
+
+{% block header %}Add New Vehicle{% endblock %}
+
+{% block content %}
+    <div class="form-container">
+    <h1>Add Vehicle</h1>
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Add Vehicle</button>
+    </form>
+    <a href="{% url 'home' %}">Back to Home</a>
+    </div>
+{% endblock %}
