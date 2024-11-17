@@ -5,13 +5,11 @@ urlpatterns = [
          # Main view
     path('', views.main_view, name='main'),
     
-         # Home view
+         # Home urls
     path('home/', views.home_view, name='home'),
     
-         # Vehicle view
+         # Vehicle urls
     path('vehicles/', views.vehicle_view, name='vehicle'),
-    
-    # Add new vehicle
     path('add-vehicle/', views.add_vehicle, name='add_vehicle'), 
     path('edit-vehicle/<int:vehicle_id>/', views.vehicle_update, name='edit_vehicle'),
     path('delete-vehicle/<int:vehicle_id>/', views.vehicle_delete, name='delete_vehicle'),
