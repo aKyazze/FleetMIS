@@ -14,3 +14,10 @@ class VehicleAllocationForm(forms.Form):
         queryset=Driver.objects.all(),
         empty_label="Select a Driver"
     )
+
+class DriverForm(forms.ModelForm):
+    class Meta:
+        model = Driver
+        fields = ['driver_name', 'gender', 'contact', 'email_address']
+        
+

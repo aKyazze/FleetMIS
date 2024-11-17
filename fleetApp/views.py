@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
 from .models import Vehicle, Driver
-from .forms import VehicleForm, VehicleAllocationForm
+from .forms import VehicleForm, VehicleAllocationForm, DriverForm
 
 # Create your views here.
 
@@ -14,7 +15,7 @@ def home_view(request):
     
     return render(request, 'fleetApp/base/home.html')
 
-# This is Vehicle View
+###################################################################### This Section for Vehicle Views ##############################################################
 def vehicle_view(request):
     vehicles = Vehicle.objects.all()
     return render(request, 'fleetApp/vehicle/vehicles.html', {'vehicles': vehicles})
@@ -72,6 +73,49 @@ def allocate_vehicle(request, vehicle_id):
         form = VehicleAllocationForm()
 
     return render(request, 'fleetApp/vehicle/allocate_vehicle.html', {'form': form, 'vehicle': vehicle})
+
+
+###################################################################### This Section for Driver Views ##############################################################
+
+def drivers_list(request):
+    drivers = Driver.objects.select_related('vehicle').all()
+    for driver in drivers:
+        if not driver.vehicle:
+            driver.vehicle_plate = "Unassigned"
+        else:
+            driver.vehicle_plate = driver.vehicle.vehicle_plate
+    form = DriverForm()
+    return render(request, 'fleetApp/driver/drivers.html', {'drivers': drivers, 'form': form})
+
+def add_driver(request):
+    if request.method == 'POST':
+        form = DriverForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Driver added successfully!")
+            return redirect('drivers')
+    else:
+        form = DriverForm()
+    return render(request, 'fleetApp/driver/add_driver.html', {'form': form})
+
+def edit_driver(request, driver_id):
+    driver = get_object_or_404(Driver, id=driver_id)
+    if request.method == 'POST':
+        form = DriverForm(request.POST, instance=driver)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Driver updated successfully!")
+            return redirect('drivers')
+    else:
+        form = DriverForm(instance=driver)
+    return render(request, 'fleetApp/driver/edit_driver.html', {'form': form, 'driver': driver})
+
+def delete_driver(request, driver_id):
+    driver = get_object_or_404(Driver, id=driver_id)
+    if request.method == 'POST':
+        driver.delete()
+        return redirect('drivers')
+    return render(request, 'fleetApp/driver/driver_delete.html', {'drivers': driver})
 
 
 

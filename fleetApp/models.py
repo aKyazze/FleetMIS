@@ -21,15 +21,19 @@ class Vehicle(models.Model):
   
 #Driver Entity:
 class Driver(models.Model):
+  GENDER_OPTION = [
+    ("M", "Male"), 
+    ("F", "Female")
+  ]
   #driver_id = models.AutoField(primary_key=True)
   driver_name = models.CharField(max_length=50)
-  gender = models.CharField(max_length=10)
+  gender = models.CharField(max_length=2, choices=GENDER_OPTION)
   contact = models.CharField(max_length=20)
   email_address = models.EmailField()
   vehicle = models.ForeignKey(Vehicle, on_delete=models.SET_NULL, null=True)
   
   def __str__(self):
-      return f"{self.name} {self.contact} {self.vehicle}"
+      return f"{self.driver_name} {self.contact} {self.vehicle}"
     
 #Requisition Entity:
 class Requisition(models.Model):

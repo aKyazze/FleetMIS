@@ -1,0 +1,67 @@
+{% extends "main.html" %}
+{% block title %}Drivers | Fleet Management{% endblock %}
+
+{% block header %}Manage Drivers{% endblock %}
+
+{% block content %}
+<div class="container">
+    
+    <!-- Add Driver Button -->
+    <button type="button" class="btn btn-primary my-3" data-bs-toggle="modal" data-bs-target="#addDriverModal">
+        Add Driver
+    </button>
+    
+    <!-- Drivers Table -->
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Gender</th>
+                <th>Contact</th>
+                <th>Email</th>
+                <th>Assigned Vehicle</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for driver in drivers %}
+            <tr>
+                <td>{{ forloop.counter }}</td> 
+                <td>{{ driver.driver_name }}</td>
+                <td>{{ driver.gender }}</td>
+                <td>{{ driver.contact }}</td>
+                <td>{{ driver.email_address }}</td>
+                <td>{{ driver.vehicle_plate }}</td>
+                <td>
+                    <a href="{% url 'edit_driver' driver.id %}" class="btn btn-sm btn-warning">Edit</a>
+
+                    <a href="{% url 'delete_driver' driver.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sureyou want to delete this Driver?');">Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Add Driver Modal -->
+<div class="modal fade" id="addDriverModal" tabindex="-1" aria-labelledby="addDriverModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{% url 'add_driver' %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addDriverModalLabel">Add New Driver</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    {{ form.as_p }}
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

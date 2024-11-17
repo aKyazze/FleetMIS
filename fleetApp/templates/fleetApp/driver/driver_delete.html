@@ -1,0 +1,17 @@
+{% extends "main.html" %}
+
+{% block title %}Drivers | Delete {% endblock %}
+
+{% block header %}Delete Drivers{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h1>Confirm Deletion</h1>
+    <p>Are you sure you want to delete the driver {{ drivers }}?</p>
+    <form method="POST">
+      {% csrf_token %}
+      <button type="submit">Yes, Delete</button>
+      <a href="{% url 'drivers' %}" class="btn btn-primary">Cancel</a>
+    </form>
+  </div>
+  {% endblock %}
