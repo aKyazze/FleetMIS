@@ -4,6 +4,12 @@ from django.db import models
 
 # Vehicle Entity:
 class Vehicle(models.Model):
+  ENGIN = [
+    ("GAS", "Gasoline"),
+    ("HYB", "Hybrid"),
+    ("DIS", "Diesel"),
+    ("ELE", "Electric")
+  ]
   STATUS = [
     ("Av", "Available"), 
     ("Al", "Allocated")
@@ -12,7 +18,7 @@ class Vehicle(models.Model):
   vehicle_plate = models.CharField(max_length=20)
   vehicle_type = models.CharField(max_length=50)
   mileage = models.PositiveIntegerField()
-  engine_type = models.CharField(max_length=50)
+  engine_type = models.CharField(max_length=4, choices=ENGIN)
   status = models.CharField(max_length=2, choices=STATUS, default="Available")
   
   def __str__(self):
