@@ -3,10 +3,10 @@ from . import views
 
 urlpatterns = [
          # Main view
-    path('', views.main_view, name='main'),
+   # path('', views.main_view, name='main'),
     
          # Home urls
-    path('home/', views.home_view, name='home'),
+    path('', views.home_view, name='home'),
     
          ############################################################################# Vehicle urls ###########################
     path('vehicles/', views.vehicle_view, name='vehicle'),
