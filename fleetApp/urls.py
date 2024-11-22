@@ -14,6 +14,8 @@ urlpatterns = [
     path('edit-vehicle/<int:vehicle_id>/', views.vehicle_update, name='edit_vehicle'),
     path('delete-vehicle/<int:vehicle_id>/', views.vehicle_delete, name='delete_vehicle'),
     path('allocate-vehicle/<int:vehicle_id>/', views.allocate_vehicle, name='allocate_vehicle'),
+    path('return_vehicle/<int:vehicle_id>/', views.return_vehicle, name='return_vehicle'),
+
 
 #################################################################### Driver urls
      path('drivers/', views.drivers_list, name='drivers'),

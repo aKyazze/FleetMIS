@@ -23,6 +23,10 @@ class Vehicle(models.Model):
   
   def __str__(self):
       return f"{self.vehicle_plate} {self.vehicle_type} ({self.mileage})- {self.status}"
+    
+  def return_vehicle(self):
+      self.status = 'Available'
+      self.save()
 
   
 #Driver Entity:
@@ -37,6 +41,7 @@ class Driver(models.Model):
   contact = models.CharField(max_length=20)
   email_address = models.EmailField()
   vehicle = models.ForeignKey(Vehicle, on_delete=models.SET_NULL, null=True)
+  
   
   def __str__(self):
       return f"{self.driver_name} {self.contact} {self.vehicle}"

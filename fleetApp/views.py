@@ -15,7 +15,7 @@ def home_view(request):
     
     return render(request, 'fleetApp/base/home.html')
 
-###################################################################### This Section for Vehicle Views ##############################################################
+################################### This Section for Vehicle Views ######################################################
 def vehicle_view(request):
     vehicles = Vehicle.objects.all()
     return render(request, 'fleetApp/vehicle/vehicles.html', {'vehicles': vehicles})
@@ -63,29 +63,52 @@ def allocate_vehicle(request, vehicle_id):
             # Allocate the vehicle to the selected driver
             driver.vehicle = vehicle
             driver.save()
-            
             # Update vehicle status
             vehicle.status = "Allocated"
             vehicle.save()
 
-            return redirect('vehicle')  # Redirect to vehicle list
+            return redirect('vehicle') 
     else:
         form = VehicleAllocationForm()
 
     return render(request, 'fleetApp/vehicle/allocate_vehicle.html', {'form': form, 'vehicle': vehicle})
 
+# Return a Vehicle View 
+def return_vehicle(request, vehicle_id):
+    vehicle = get_object_or_404(Vehicle, id=vehicle_id)
+    vehicle.status = 'Available'  # Update the vehicle status to "Available"
+    
+    # Get the driver associated with the vehicle (if any)
+    driver = Driver.objects.filter(vehicle=vehicle).first()  # Find the driver with the given vehicle
 
-###################################################################### This Section for Driver Views ##############################################################
+    if driver:
+        driver.vehicle = None  # Clear the vehicle assignment for the driver
+        driver.save()  # Save the driver with the updated vehicle assignment
+    
+    vehicle.save()  # Save the vehicle status
+    
+    return redirect('vehicle')
 
+
+
+
+######################################## This Section for Driver Views #######################################################
+
+# Driver List View 
 def drivers_list(request):
-    drivers = Driver.objects.select_related('vehicle').all()
+    drivers = Driver.objects.select_related('vehicle').all()  # Get drivers with their associated vehicles
+    
+    # Loop through drivers to ensure "Unassigned" is shown if no vehicle is assigned
     for driver in drivers:
         if not driver.vehicle:
-            driver.vehicle_plate = "Unassigned"
+            driver.vehicle_plate = "Unassigned"  # Set the vehicle_plate to "Unassigned" if no vehicle is assigned
         else:
-            driver.vehicle_plate = driver.vehicle.vehicle_plate
-    form = DriverForm()
+            driver.vehicle_plate = driver.vehicle.vehicle_plate  # Otherwise, display the vehicle plate
+
+    form = DriverForm()  # Driver form (if needed for adding new drivers)
     return render(request, 'fleetApp/driver/drivers.html', {'drivers': drivers, 'form': form})
+
+# New Driver View 
 
 def add_driver(request):
     if request.method == 'POST':
@@ -97,6 +120,9 @@ def add_driver(request):
     else:
         form = DriverForm()
     return render(request, 'fleetApp/driver/add_driver.html', {'form': form})
+
+
+# Driver Updtte View 
 
 def edit_driver(request, driver_id):
     driver = get_object_or_404(Driver, id=driver_id)
@@ -110,6 +136,9 @@ def edit_driver(request, driver_id):
         form = DriverForm(instance=driver)
     return render(request, 'fleetApp/driver/edit_driver.html', {'form': form, 'driver': driver})
 
+
+# Driver Removing View 
+
 def delete_driver(request, driver_id):
     driver = get_object_or_404(Driver, id=driver_id)
     if request.method == 'POST':
@@ -117,6 +146,8 @@ def delete_driver(request, driver_id):
         return redirect('drivers')
     return render(request, 'fleetApp/driver/driver_delete.html', {'drivers': driver})
 
+
+######################################## This Section for Requisition Views #######################################################
 
 
 
