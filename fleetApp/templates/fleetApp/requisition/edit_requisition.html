@@ -1,0 +1,36 @@
+{% extends "main.html" %}
+{% load crispy_forms_tags %}
+{% block title %}Fleet Management | Edit Requisition{% endblock %}
+{% block header %}Edit Requisition{% endblock %}
+{% block content %}
+<div class="container">
+    <form method="POST" action="{% url 'edit_requisition' requisition.id %}">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="requestDate" class="form-label">Request Date</label>
+            <input type="date" class="form-control" id="requestDate" name="request_date" value="{{ requisition.request_date }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="applicantName" class="form-label">Applicant Name</label>
+            <input type="text" class="form-control" id="applicantName" name="applicant_name" value="{{ requisition.applicant_name }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="applicantEmail" class="form-label">Applicant Email</label>
+            <input type="email" class="form-control" id="applicantEmail" name="applicant_email" value="{{ requisition.applicant_email }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="currentLocation" class="form-label">Current Location</label>
+            <input type="text" class="form-control" id="currentLocation" name="current_location" value="{{ requisition.current_location }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="destination" class="form-label">Destination</label>
+            <input type="text" class="form-control" id="destination" name="destination" value="{{ requisition.destination }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="purpose" class="form-label">Purpose</label>
+            <textarea class="form-control" id="purpose" name="purpose" rows="3" required>{{ requisition.purpose }}</textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Update Requisition</button>
+    </form>
+</div>
+{% endblock %}

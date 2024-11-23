@@ -29,7 +29,10 @@ def add_vehicle(request):
             return redirect('vehicle')
     else:
         form = VehicleForm()
-    return render(request, 'fleetApp/vehicle/add_vehicle.html', {'form': form})
+    context = {
+        'form': form
+    }
+    return render(request, 'fleetApp/vehicle/add_vehicle.html', context)
 
 # Update or Edit Vehicle View
 def vehicle_update(request, vehicle_id):
@@ -41,7 +44,11 @@ def vehicle_update(request, vehicle_id):
             return redirect('vehicle')
     else:
         form = VehicleForm(instance=vehicle)
-    return render(request, 'fleetApp/vehicle/edit_vehicle.html', {'form': form, 'vehicle': vehicle})
+    context = {
+        'form': form, 
+        'vehicle': vehicle
+    }
+    return render(request, 'fleetApp/vehicle/edit_vehicle.html', context)
 
 
 # Delete Vehicle View 
@@ -50,7 +57,10 @@ def vehicle_delete(request, vehicle_id):
     if request.method == 'POST':
         vehicle.delete()
         return redirect('vehicle')
-    return render(request, 'fleetApp/vehicle/vehicle_confirm_delete.html', {'vehicle': vehicle})
+    context = {
+        'vehicle': vehicle
+    }
+    return render(request, 'fleetApp/vehicle/vehicle_confirm_delete.html', context)
 
 # Assign or Allocate a Vehicle View 
 def allocate_vehicle(request, vehicle_id):
@@ -70,46 +80,44 @@ def allocate_vehicle(request, vehicle_id):
             return redirect('vehicle') 
     else:
         form = VehicleAllocationForm()
-
-    return render(request, 'fleetApp/vehicle/allocate_vehicle.html', {'form': form, 'vehicle': vehicle})
+        
+    context = {
+        'form': form, 
+        'vehicle': vehicle
+    }
+    return render(request, 'fleetApp/vehicle/allocate_vehicle.html', context)
 
 # Return a Vehicle View 
 def return_vehicle(request, vehicle_id):
     vehicle = get_object_or_404(Vehicle, id=vehicle_id)
     vehicle.status = 'Available'  # Update the vehicle status to "Available"
-    
     # Get the driver associated with the vehicle (if any)
     driver = Driver.objects.filter(vehicle=vehicle).first()  # Find the driver with the given vehicle
-
     if driver:
         driver.vehicle = None  # Clear the vehicle assignment for the driver
         driver.save()  # Save the driver with the updated vehicle assignment
-    
     vehicle.save()  # Save the vehicle status
-    
     return redirect('vehicle')
-
-
-
 
 ######################################## This Section for Driver Views #######################################################
 
 # Driver List View 
 def drivers_list(request):
     drivers = Driver.objects.select_related('vehicle').all()  # Get drivers with their associated vehicles
-    
     # Loop through drivers to ensure "Unassigned" is shown if no vehicle is assigned
     for driver in drivers:
         if not driver.vehicle:
             driver.vehicle_plate = "Unassigned"  # Set the vehicle_plate to "Unassigned" if no vehicle is assigned
         else:
             driver.vehicle_plate = driver.vehicle.vehicle_plate  # Otherwise, display the vehicle plate
-
     form = DriverForm()  # Driver form (if needed for adding new drivers)
-    return render(request, 'fleetApp/driver/drivers.html', {'drivers': drivers, 'form': form})
+    context = {
+        'drivers': drivers,
+        'form': form
+    }
+    return render(request, 'fleetApp/driver/drivers.html', context)
 
 # New Driver View 
-
 def add_driver(request):
     if request.method == 'POST':
         form = DriverForm(request.POST)
@@ -119,11 +127,13 @@ def add_driver(request):
             return redirect('drivers')
     else:
         form = DriverForm()
-    return render(request, 'fleetApp/driver/add_driver.html', {'form': form})
+    context = {
+        'form': form
+    }
+    return render(request, 'fleetApp/driver/add_driver.html', context)
 
 
-# Driver Updtte View 
-
+# Driver Update View 
 def edit_driver(request, driver_id):
     driver = get_object_or_404(Driver, id=driver_id)
     if request.method == 'POST':
@@ -134,7 +144,11 @@ def edit_driver(request, driver_id):
             return redirect('drivers')
     else:
         form = DriverForm(instance=driver)
-    return render(request, 'fleetApp/driver/edit_driver.html', {'form': form, 'driver': driver})
+    context = {
+        'form': form, 
+        'driver': driver
+    }
+    return render(request, 'fleetApp/driver/edit_driver.html', context)
 
 
 # Driver Removing View 
@@ -144,10 +158,18 @@ def delete_driver(request, driver_id):
     if request.method == 'POST':
         driver.delete()
         return redirect('drivers')
-    return render(request, 'fleetApp/driver/driver_delete.html', {'drivers': driver})
+    context =  {
+        'drivers': driver
+    }
+    return render(request, 'fleetApp/driver/driver_delete.html', context)
 
 
 ######################################## This Section for Requisition Views #######################################################
+
+
+
+######################################## This Section for Service Views #######################################################
+
 
 
 

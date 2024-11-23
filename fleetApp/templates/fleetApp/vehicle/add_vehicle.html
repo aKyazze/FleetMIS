@@ -1,17 +1,14 @@
 {% extends "main.html" %}
-
 {% block title %}VehiclesAdd{% endblock %}
-
 {% block header %}Add New Vehicle{% endblock %}
-
 {% block content %}
     <div class="form-container">
-    <h1>Add Vehicle</h1>
-    <form method="POST">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Add Vehicle</button>
-        <a href="{% url 'vehicle' %}" class="btn btn-primary">Cancel</a>
-    </form>
+        <h1>Add Vehicle</h1>
+        <form method="POST">
+            {% csrf_token %}
+            {{ form|crispy }}
+            <button type="submit" class="btn btn-success">Add Vehicle</button>
+            <a href="{% url 'vehicle' %}" class="btn btn-primary">Cancel</a>
+        </form>
     </div>
 {% endblock %}

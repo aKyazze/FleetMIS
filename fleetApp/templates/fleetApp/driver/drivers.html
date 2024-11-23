@@ -1,16 +1,13 @@
 {% extends "main.html" %}
 {% block title %}Drivers{% endblock %}
-
+{% load crispy_forms_tags %}
 {% block header %}Manage Drivers{% endblock %}
-
 {% block content %}
 <div class="containers">
-    
     <!-- Add Driver Button -->
     <button type="button" class="btn btn-primary my-3" data-bs-toggle="modal" data-bs-target="#addDriverModal">
         Add Driver
     </button>
-    
     <!-- Drivers Table -->
     <table class="table table-striped">
         <thead>
@@ -39,19 +36,15 @@
                         {{ driver.vehicle_plate }}
                     {% endif %}
                 </td>
-                
                 <td>
                     <a href="{% url 'edit_driver' driver.id %}" class="btn btn-sm btn-warning">Edit</a>
-
                     <a href="{% url 'delete_driver' driver.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sureyou want to delete this Driver?');">Delete</a>
                 </td>
-                
             </tr>
             {% endfor %}
         </tbody>
     </table>
 </div>
-
 <!-- Add Driver Modal -->
 <div class="modal fade" id="addDriverModal" tabindex="-1" aria-labelledby="addDriverModalLabel" aria-hidden="true">
     <div class="modal-dialog">

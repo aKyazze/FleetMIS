@@ -1,15 +1,13 @@
 {% extends "main.html" %}
-
+{% load crispy_forms_tags %}
 {% block title %}AllocateVehicle{% endblock %}
-
 {% block header %}Allocate Vehicle to Driver{% endblock %}
-
 {% block content %}
 <div class="form-container">
     <h1>Allocate Vehicle: {{ vehicle.vehicle_plate }}</h1>
     <form method="POST">
         {% csrf_token %}
-        {{ form.as_p }}
+        {{ form|crispy}}
         <button type="submit" class="btn btn-success">Allocate</button>
         <a href="{% url 'vehicle' %}" class="btn btn-secondary">Cancel</a>
     </form>

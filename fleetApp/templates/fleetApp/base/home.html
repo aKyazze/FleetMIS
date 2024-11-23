@@ -1,16 +1,11 @@
 {% extends "main.html" %}
-
+{% load crispy_forms_tags %}
 {% block title %} Fleet Management{% endblock %}
-
 {% block header %}Welcome to UTCL Fleet Management System{% endblock %}
-
 {% block content %}
 <div class="text-center">
-    
     <p>This system allows you to manage vehicles, drivers, requisitions, and service records for UTCL.</p>
-
     <a href="{% url 'vehicle' %}" class="btn btn-primary">Manage Vehicles</a>
     <a href="{% url 'drivers' %}" class="btn btn-primary">Manage Drivers</a>
-
 </div>
 {% endblock %}

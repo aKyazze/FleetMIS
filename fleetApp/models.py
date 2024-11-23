@@ -1,7 +1,6 @@
 from django.db import models
 
 # Create your models here.
-
 # Vehicle Entity:
 class Vehicle(models.Model):
   ENGIN = [
@@ -27,7 +26,6 @@ class Vehicle(models.Model):
   def return_vehicle(self):
       self.status = 'Available'
       self.save()
-
   
 #Driver Entity:
 class Driver(models.Model):
@@ -54,7 +52,6 @@ class Requisition(models.Model):
     ("O", "Open"),
     ("C", "Closed")
   ]
-  
   request_date = models.DateField(auto_now=False)
   applicant_name = models.CharField(max_length=50)
   applicant_contact = models.CharField(max_length=20)
@@ -83,7 +80,6 @@ def __str__(self):
   return f"{self.service_provider_name}"
 
 #Service Entity:
-
 class Service(models.Model):
     #service_id = models.AutoField(primary_key=True)
     particular = models.CharField(max_length=100)

@@ -1,15 +1,13 @@
 {% extends "main.html" %}
-
+{% load crispy_forms_tags %}
 {% block title %}VehiclesEdit{% endblock %}
-
 {% block header %}Update Vehicle{% endblock %}
-
 {% block content %}
 <div class="form-container">
   <h1>Update Vehicle</h1>
   <form method="POST">
     {% csrf_token %}
-    {{ form.as_p }}
+    {{ form|crispy }}
     <button type="submit">Update Vehicle</button>
     <a href="{% url 'vehicle' %}" class="btn btn-primary">Cancel</a>
   </form>

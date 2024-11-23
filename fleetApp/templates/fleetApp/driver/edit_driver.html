@@ -1,15 +1,13 @@
 {% extends "main.html" %}
-
+{% load crispy_forms_tags %}
 {% block title %}DriversEdit{% endblock %}
-
 {% block header %}Update Driver {% endblock %}
-
 {% block content %}
 <div class="form-container">
   <h1>Update Driver</h1>
   <form method="POST">
     {% csrf_token %}
-    {{ form.as_p }}
+    {{ form|crispy }}
     <button type="submit">Update Driver</button>
     <a href="{% url 'drivers' %}" class="btn btn-primary">Cancel</a>
   </form>

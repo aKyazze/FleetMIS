@@ -1,0 +1,122 @@
+{% extends "main.html" %}
+{% load crispy_forms_tags %}
+{% block title %}Fleet Management | Requisitions{% endblock %}
+{% block header %}Requisitions{% endblock %}
+{% block content %}
+<div class="containers">
+    <!-- Add Requisition Button -->
+    <button type="button" class="btn btn-primary my-3" data-bs-toggle="modal" data-bs-target="#addRequisitionModal">
+        Add Requisition
+    </button>
+    <!-- Requisitions Table -->
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Request Date</th>
+                <th>Applicant Name</th>
+                <th>Email</th>
+                <th>Current Location</th>
+                <th>Destination</th>
+                <th>Status</th>
+                <th>Vehicle</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for requisition in requisitions %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ requisition.request_date }}</td>
+                <td>{{ requisition.applicant_name }}</td>
+                <td>{{ requisition.applicant_email }}</td>
+                <td>{{ requisition.current_location }}</td>
+                <td>{{ requisition.destination }}</td>
+                <td>{{ requisition.request_status }}</td>
+                <td>{% if requisition.vehicle %}{{ requisition.vehicle.vehicle_plate }}{% else %}Unassigned{% endif %}</td>
+                <td>
+                    <div class="btn-group" role="group" aria-label="Actions">
+                        <a href="{% url 'edit_requisition' requisition.id %}" class="btn btn-sm btn-warning">Edit</a>
+                        <a href="{% url 'delete_requisition' requisition.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this requisition?');">Delete</a>
+                        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#allocateRequisitionModal{{ requisition.id }}">
+                            Allocate
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            <!-- Allocate Modal -->
+            <div class="modal fade" id="allocateRequisitionModal{{ requisition.id }}" tabindex="-1" aria-labelledby="allocateRequisitionModalLabel{{ requisition.id }}" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <form method="POST" action="{% url 'allocate_requisition' requisition.id %}">
+                            {% csrf_token %}
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="allocateRequisitionModalLabel{{ requisition.id }}">Allocate Vehicle</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label for="timeOfAllocation{{ requisition.id }}" class="form-label">Time of Allocation</label>
+                                    <input type="time" class="form-control" id="timeOfAllocation{{ requisition.id }}" name="time_of_allocation" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="requisitionStatus{{ requisition.id }}" class="form-label">Status</label>
+                                    <select class="form-select" id="requisitionStatus{{ requisition.id }}" name="requisition_status" required>
+                                        <option value="Open">Open</option>
+                                        <option value="OnHold">On Hold</option>
+                                        <option value="Closed">Closed</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="mileageAtAssignment{{ requisition.id }}" class="form-label">Mileage at Assignment</label>
+                                    <input type="number" class="form-control" id="mileageAtAssignment{{ requisition.id }}" name="mileage_at_assignment" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="mileageAtReturn{{ requisition.id }}" class="form-label">Mileage at Return</label>
+                                    <input type="number" class="form-control" id="mileageAtReturn{{ requisition.id }}" name="mileage_at_return">
+                                </div>
+                                <div class="mb-3">
+                                  <label for="vehicle{{ requisition.id }}" class="form-label">Select Vehicle</label>
+                                  <select class="form-select" id="vehicle{{ requisition.id }}" name="vehicle" required>
+                                      {% for vehicle in vehicles %}
+                                      <option value="{{ vehicle.id }}">
+                                          {{ vehicle.vehicle_plate }}
+                                      </option>
+                                      {% endfor %}
+                                  </select>
+                              </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-success">Allocate</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<!-- Add Requisition Modal -->
+<div class="modal fade" id="addRequisitionModal" tabindex="-1" aria-labelledby="addRequisitionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{% url 'add_requisition' %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addRequisitionModalLabel">Add New Requisition</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    {{ form.as_p }}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-success">Save Requisition</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
