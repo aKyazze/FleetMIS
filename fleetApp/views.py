@@ -6,19 +6,20 @@ from .forms import VehicleForm, VehicleAllocationForm, DriverForm
 # Create your views here.
 
 #This is the Main view
-
 def main_view(request):
     return render(request, 'main.html')
 
 #This is Home View
 def home_view(request):
-    
     return render(request, 'fleetApp/base/home.html')
 
 ################################### This Section for Vehicle Views ######################################################
 def vehicle_view(request):
     vehicles = Vehicle.objects.all()
-    return render(request, 'fleetApp/vehicle/vehicles.html', {'vehicles': vehicles})
+    context = {
+        'vehicles': vehicles
+    }
+    return render(request, 'fleetApp/vehicle/vehicles.html', context)
 
 # Create or Add a New Vehicle View
 def add_vehicle(request):
@@ -49,7 +50,6 @@ def vehicle_update(request, vehicle_id):
         'vehicle': vehicle
     }
     return render(request, 'fleetApp/vehicle/edit_vehicle.html', context)
-
 
 # Delete Vehicle View 
 def vehicle_delete(request, vehicle_id):
@@ -140,19 +140,17 @@ def edit_driver(request, driver_id):
         form = DriverForm(request.POST, instance=driver)
         if form.is_valid():
             form.save()
-            messages.success(request, "Driver updated successfully!")
             return redirect('drivers')
     else:
         form = DriverForm(instance=driver)
     context = {
         'form': form, 
-        'driver': driver
+        'driver': driver,
     }
     return render(request, 'fleetApp/driver/edit_driver.html', context)
 
 
 # Driver Removing View 
-
 def delete_driver(request, driver_id):
     driver = get_object_or_404(Driver, id=driver_id)
     if request.method == 'POST':

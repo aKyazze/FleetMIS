@@ -21,3 +21,5 @@ class DriverForm(forms.ModelForm):
         fields = ['driver_name', 'gender', 'contact', 'email_address']
         
 
+        
+
