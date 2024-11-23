@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from .models import Vehicle, Driver
-from .forms import VehicleForm, VehicleAllocationForm, DriverForm
+from .models import Vehicle, Driver, ServiceProvider, Service
+from .forms import VehicleForm, VehicleAllocationForm, DriverForm, ServiceProviderForm, ServiceForm
 
 # Create your views here.
 
@@ -166,8 +166,98 @@ def delete_driver(request, driver_id):
 
 
 
-######################################## This Section for Service Views #######################################################
+######################################## This Section for Service Provider Views #######################################################
 
+# ServiceProvider Views
+def service_provider_list(request):
+    providers = ServiceProvider.objects.all()
+    context = {'providers': providers}
+    return render(request, 'fleetApp/serviceProvider/service_providers.html', context)
+
+def add_service_provider(request):
+    if request.method == 'POST':
+        form = ServiceProviderForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('service_provider_list')
+    else:
+        form = ServiceProviderForm()
+    context = {
+        'form': form
+    }
+    return render(request, 'fleetApp/serviceProvider/add_service_provider.html', context)
+
+def edit_service_provider(request, provider_id):
+    provider = get_object_or_404(ServiceProvider, id=provider_id)
+    if request.method == 'POST':
+        form = ServiceProviderForm(request.POST, instance=provider)
+        if form.is_valid():
+            form.save()
+            return redirect('service_provider_list')
+    else:
+        form = ServiceProviderForm(instance=provider)
+    context = {
+        'form': form, 
+        'provider': provider
+    }
+    return render(request, 'fleetApp/serviceProvider/edit_service_provider.html', context)
+
+def delete_service_provider(request, provider_id):
+    provider = get_object_or_404(ServiceProvider, id=provider_id)
+    if request.method == 'POST':
+        provider.delete()
+        return redirect('service_provider_list')
+    context = {
+        'provider': provider
+    }
+    return render(request, 'fleetApp/serviceProvider/delete_service_provider.html', context)
+
+
+######################################## This Section for Service Views #######################################################
+def service_list(request):
+    services = Service.objects.select_related('vehicle', 'service_provider').all()
+    context = {
+        'services': services
+    }
+    return render(request, 'fleetApp/service/services.html', context)
+
+def add_service(request):
+    if request.method == 'POST':
+        form = ServiceForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('service_list')
+    else:
+        form = ServiceForm()
+    context = {
+        'form': form
+    }
+    return render(request, 'fleetApp/service/add_service.html', context)
+
+def edit_service(request, service_id):
+    service = get_object_or_404(Service, id=service_id)
+    if request.method == 'POST':
+        form = ServiceForm(request.POST, instance=service)
+        if form.is_valid():
+            form.save()
+            return redirect('service_list')
+    else:
+        form = ServiceForm(instance=service)
+    context = {
+        'form': form, 
+        'service': service
+    }
+    return render(request, 'fleetApp/service/edit_service.html', context)
+
+def delete_service(request, service_id):
+    service = get_object_or_404(Service, id=service_id)
+    if request.method == 'POST':
+        service.delete()
+        return redirect('service_list')
+    context = {
+        'service': service
+    }
+    return render(request, 'fleetApp/service/delete_service.html', context)
 
 
 

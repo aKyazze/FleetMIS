@@ -71,17 +71,15 @@ class Requisition(models.Model):
 
 #Service Provider Entity:
 class ServiceProvider(models.Model):
-    #service_provider_id = models.AutoField(primary_key=True)
     service_provider_name = models.CharField(max_length=100)
     address = models.TextField()
     contact = models.CharField(max_length=15)
     email_address = models.EmailField()
-def __str__(self):
-  return f"{self.service_provider_name}"
 
+    def __str__(self):
+        return self.service_provider_name
 #Service Entity:
 class Service(models.Model):
-    #service_id = models.AutoField(primary_key=True)
     particular = models.CharField(max_length=100)
     quantity = models.PositiveIntegerField()
     cost = models.DecimalField(max_digits=10, decimal_places=2)
@@ -89,6 +87,9 @@ class Service(models.Model):
     vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE)
     
     def __str__(self):
-      return f"Total Pay {self.quantity}*{self.cost}"
+        return f"{self.particular} for {self.vehicle.vehicle_plate}"
+    
+    def calculate_total(self):
+        return self.quantity * self.cost
     
     

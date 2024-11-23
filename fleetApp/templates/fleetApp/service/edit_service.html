@@ -1,0 +1,17 @@
+{% extends "main.html" %}
+{% load crispy_forms_tags %}
+{% block title %}ServiceEdit{% endblock %}
+{% block header %}Update Service Records {% endblock %}
+{% block content %}
+<div class="form-container">
+  <h1>Update</h1>
+  <form method="POST">
+    {% csrf_token %}
+    {{ form|crispy }}
+    <button type="submit">Update Records</button>
+    <a href="{% url 'service_list' %}" class="btn btn-primary">Cancel</a>
+  </form>
+</div>
+{% endblock %}
+
+

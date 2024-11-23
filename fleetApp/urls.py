@@ -22,4 +22,16 @@ urlpatterns = [
      path('drivers/add/', views.add_driver, name='add_driver'),
      path('drivers/edit/<int:driver_id>/', views.edit_driver, name='edit_driver'),
      path('drivers/delete/<int:driver_id>/', views.delete_driver, name='delete_driver'),
+     
+################################################################### Service Provider urls
+     path('service-providers/', views.service_provider_list, name='service_provider_list'),
+     path('service-providers/add/', views.add_service_provider, name='add_service_provider'),
+     path('service-providers/edit/<int:provider_id>/', views.edit_service_provider, name='edit_service_provider'),
+     path('service-providers/delete/<int:provider_id>/', views.delete_service_provider, name='delete_service_provider'),
+     
+ #################################################################### Service URLs
+     path('services/', views.service_list, name='service_list'),
+     path('services/add/', views.add_service, name='add_service'),
+     path('services/edit/<int:service_id>/', views.edit_service, name='edit_service'),
+     path('services/delete/<int:service_id>/', views.delete_service, name='delete_service'),
 ]

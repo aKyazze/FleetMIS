@@ -1,0 +1,37 @@
+{% extends "main.html" %}
+{% block title %}Services{% endblock %}
+{% block header %}Manage Services{% endblock %}
+{% block content %}
+<a href="{% url 'add_service' %}" class="btn btn-primary">Add Service</a>
+<table class="table table-striped mt-3">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Particular</th>
+            <th>Quantity</th>
+            <th>Cost</th>
+            <th>Vehicle</th>
+            <th>Provider</th>
+            <th>Total</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for service in services %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ service.particular }}</td>
+            <td>{{ service.quantity }}</td>
+            <td>{{ service.cost }}</td>
+            <td>{{ service.vehicle.vehicle_plate }}</td>
+            <td>{{ service.service_provider.service_provider_name }}</td>
+            <td>{{ service.calculate_total|floatformat:2 }}</td>
+            <td>
+                <a href="{% url 'edit_service' service.id %}" class="btn btn-warning btn-sm">Edit</a>
+                <a href="{% url 'delete_service' service.id %}" class="btn btn-danger btn-sm">Delete</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends "main.html" %}
+{% load crispy_forms_tags %}
+{% block title %}ServiceDelete {% endblock %}
+{% block header %}Delete a Service {% endblock %}
+{% block content %}
+<div class="form-container">
+    <h1>Confirm Deletion</h1>
+    <p>Are you sure you want to delete the Service {{ service_list }}?</p>
+    <form method="POST">
+      {% csrf_token %}
+      <button type="submit">Yes, Delete</button>
+      <a href="{% url 'service_list' %}" class="btn btn-primary">Cancel</a>
+    </form>
+  </div>
+  {% endblock %}

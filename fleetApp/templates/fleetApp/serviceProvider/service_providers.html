@@ -1,0 +1,31 @@
+{% extends "main.html" %}
+{% block title %}Service Providers{% endblock %}
+{% block header %}Manage Service Providers{% endblock %}
+{% block content %}
+<a href="{% url 'add_service_provider' %}" class="btn btn-primary">Add Provider</a>
+<table class="table table-striped mt-3">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Contact</th>
+            <th>Email</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for provider in providers %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ provider.service_provider_name }}</td>
+            <td>{{ provider.contact }}</td>
+            <td>{{ provider.email_address }}</td>
+            <td>
+                <a href="{% url 'edit_service_provider' provider.id %}" class="btn btn-warning btn-sm">Edit</a>
+                <a href="{% url 'delete_service_provider' provider.id %}" class="btn btn-danger btn-sm">Delete</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
