@@ -1,0 +1,38 @@
+{% extends "main.html" %}
+{% block title %}Requests{% endblock %}
+{% block content %}
+<table class="table">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Requestor</th>
+            <th>Current Location</th>
+            <th>Destination</th>
+            <th>Vehicle</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for request in requests %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ request.requestor.name }}</td>
+            <td>{{ request.current_location }}</td>
+            <td>{{ request.destination }}</td>
+            <td>
+                {% if request.vehicle %}
+                    {{ request.vehicle.vehicle_plate }}
+                {% else %}
+                    <span class="badge bg-secondary">Unassigned</span>
+                {% endif %}
+            </td>
+            <td>{{ request.get_request_status_display }}</td>
+            <td>
+                <a href="{% url 'approve_request' request.id %}" class="btn btn-sm btn-success">Approve</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

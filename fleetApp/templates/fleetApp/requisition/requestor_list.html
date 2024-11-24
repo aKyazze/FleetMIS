@@ -1,0 +1,29 @@
+{% extends "main.html" %}
+{% block title %}Requestors{% endblock %}
+{% block content %}
+<a href="{% url 'add_requestor' %}" class="btn btn-primary">Add Requestor</a>
+<table class="table">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Contact</th>
+            <th>Email</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for requestor in requestors %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ requestor.name }}</td>
+            <td>{{ requestor.contact }}</td>
+            <td>{{ requestor.email_address }}</td>
+            <td>
+                <a href="{% url 'add_request' requestor.id %}" class="btn btn-primary btn-sm">New Request</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

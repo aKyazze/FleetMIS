@@ -34,4 +34,18 @@ urlpatterns = [
      path('services/add/', views.add_service, name='add_service'),
      path('services/edit/<int:service_id>/', views.edit_service, name='edit_service'),
      path('services/delete/<int:service_id>/', views.delete_service, name='delete_service'),
+
+# Requestor URLs
+    path('requestors/', views.requestor_list, name='requestor_list'),
+    path('requestors/add/', views.add_requestor, name='add_requestor'),
+    path('requestors/edit/<int:requestor_id>/', views.edit_requestor, name='edit_requestor'),
+    path('requestors/delete/<int:requestor_id>/', views.delete_requestor, name='delete_requestor'),
+
+    # Request URLs
+    path('requisitions/', views.fleet_management_view, name='requisitions'),
+    path('requests/', views.request_list, name='request_list'),
+    path('requests/add/<int:requestor_id>/', views.add_request, name='add_request'),
+    path('requests/edit/<int:request_id>/', views.edit_request, name='edit_request'),
+    path('requests/approve/<int:request_id>/', views.approve_request, name='approve_request'),
+    path('requests/delete/<int:request_id>/', views.delete_request, name='delete_request'),
 ]

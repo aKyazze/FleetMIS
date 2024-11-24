@@ -1,0 +1,12 @@
+{% extends "main.html" %}
+{% block title %}Add Request{% endblock %}
+{% block header %}Add Request{% endblock %}
+{% block content %}
+<h4>Requestor: {{ requestor.name }}</h4>
+<form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-success">Save</button>
+    <a href="{% url 'request_list' %}" class="btn btn-secondary">Cancel</a>
+</form>
+{% endblock %}

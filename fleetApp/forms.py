@@ -1,5 +1,5 @@
 from django import forms
-from .models import Vehicle, Driver, ServiceProvider, Service
+from .models import Vehicle, Driver, Requestor, Request, ServiceProvider, Service
 
 
 class VehicleForm(forms.ModelForm):
@@ -20,6 +20,30 @@ class DriverForm(forms.ModelForm):
         model = Driver
         fields = ['driver_name', 'gender', 'contact', 'email_address']
         
+class RequestorForm(forms.ModelForm):
+    class Meta:
+        model = Requestor
+        fields = ['name', 'contact', 'email_address']
+
+class RequestForm(forms.ModelForm):
+    class Meta:
+        model = Request
+        fields = [
+            'current_location',
+            'destination',
+            'purpose',
+        ]
+        
+class RequestApprovalForm(forms.ModelForm):
+    class Meta:
+        model = Request
+        fields = ['vehicle']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Filter to show only allocated vehicles with drivers
+        self.fields['vehicle'].queryset = Vehicle.objects.filter(status="Allocated", driver__isnull=False)
+
 class ServiceProviderForm(forms.ModelForm):
     class Meta:
         model = ServiceProvider

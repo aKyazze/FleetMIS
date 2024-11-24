@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from .models import Vehicle, Driver, ServiceProvider, Service
-from .forms import VehicleForm, VehicleAllocationForm, DriverForm, ServiceProviderForm, ServiceForm
+from .models import Vehicle, Driver, Requestor, Request, ServiceProvider, Service
+from .forms import VehicleForm, VehicleAllocationForm, DriverForm, ServiceProviderForm, ServiceForm, RequestorForm, RequestForm, RequestApprovalForm
 
 # Create your views here.
 
@@ -164,7 +164,116 @@ def delete_driver(request, driver_id):
 
 ######################################## This Section for Requisition Views #######################################################
 
+# List all requestors
+def requestor_list(request):
+    requestors = Requestor.objects.all()
+    return render(request, 'fleetApp/requisition/requestor_list.html', {'requestors': requestors})
 
+# Add a requestor
+def add_requestor(request):
+    if request.method == 'POST':
+        form = RequestorForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Requestor added successfully!")
+            return redirect('requestor_list')
+    else:
+        form = RequestorForm()
+    return render(request, 'fleetApp/requisition/add_requestor.html', {'form': form})
+
+def edit_requestor(request, requestor_id):
+    requestor = get_object_or_404(Requestor, id=requestor_id)
+    if request.method == 'POST':
+        form = RequestorForm(request.POST, instance=requestor)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Requestor updated successfully!")
+            return redirect('requestor_list')
+    else:
+        form = RequestorForm(instance=requestor)
+    return render(request, 'fleetApp/requisition/edit_requestor.html', {'form': form, 'requestor': requestor})
+
+def delete_requestor(request, requestor_id):
+    requestor = get_object_or_404(Requestor, id=requestor_id)
+    if request.method == 'POST':
+        requestor.delete()
+        messages.success(request, "Requestor deleted successfully!")
+        return redirect('requestor_list')
+    return render(request, 'fleetApp/requisition/delete_requestor.html', {'requestor': requestor})
+
+def edit_request(request, request_id):
+    req = get_object_or_404(Request, id=request_id)
+    if request.method == 'POST':
+        form = RequestForm(request.POST, instance=req)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Request updated successfully!")
+            return redirect('request_list')
+    else:
+        form = RequestForm(instance=req)
+    return render(request, 'fleetApp/requisition/edit_request.html', {'form': form, 'request': req})
+
+def delete_request(request, request_id):
+    req = get_object_or_404(Request, id=request_id)
+    if request.method == 'POST':
+        req.delete()
+        messages.success(request, "Request deleted successfully!")
+        return redirect('request_list')
+    return render(request, 'fleetApp/requisition/delete_request.html', {'request': req})
+
+# List all requests
+def request_list(request):
+    requests = Request.objects.select_related('requestor', 'vehicle').all()
+    return render(request, 'fleetApp/requisition/request_list.html', {'requests': requests})
+
+# Add a new request
+def add_request(request, requestor_id):
+    requestor = get_object_or_404(Requestor, id=requestor_id)
+    if request.method == 'POST':
+        form = RequestForm(request.POST)
+        if form.is_valid():
+            new_request = form.save(commit=False)
+            new_request.requestor = requestor
+            new_request.save()
+            messages.success(request, "Request added successfully!")
+            return redirect('request_list')
+    else:
+        form = RequestForm()
+    return render(request, 'fleetApp/requisition/add_request.html', {'form': form, 'requestor': requestor})
+
+# Approve a request
+def approve_request(request, request_id):
+    request_obj = get_object_or_404(Request, id=request_id)
+    if request.method == 'POST':
+        selected_vehicle_id = request.POST.get('vehicle')
+        selected_vehicle = get_object_or_404(Vehicle, id=selected_vehicle_id)
+
+        # Assign the vehicle and update the request
+        request_obj.vehicle = selected_vehicle
+        request_obj.request_status = "O"  # Open (Allocated)
+        request_obj.time_of_allocation
+        request_obj.save()
+
+        # Update the vehicle status
+        selected_vehicle.status = "Al"  # Allocated
+        selected_vehicle.save()
+
+        messages.success(request, "Request approved successfully!")
+        return redirect('requisitions')  # Redirect to the fleet management view
+    return redirect('requisitions')
+
+def fleet_management_view(request):
+    requestors = Requestor.objects.all()
+    requests = Request.objects.select_related('requestor', 'vehicle').all()
+    vehicles = Vehicle.objects.filter(status="Allocated")  # Only allocated vehicles
+    requestor_form = RequestorForm()
+    context = {
+        'requestors': requestors,
+        'requests': requests,
+        'vehicles': vehicles,
+        'requestor_form': requestor_form,
+    }
+    return render(request, 'fleetApp/requisition/requisitions.html', context)
 
 ######################################## This Section for Service Provider Views #######################################################
 
