@@ -1,10 +1,11 @@
 {% extends "main.html" %}
+{% load crispy_forms_tags %}
 {% block title %}Edit Request{% endblock %}
 {% block header %}Edit Request{% endblock %}
 {% block content %}
 <form method="POST">
     {% csrf_token %}
-    {{ form.as_p }}
+    {{ form|crispy}}
     <button type="submit" class="btn btn-success">Update</button>
     <a href="{% url 'request_list' %}" class="btn btn-secondary">Cancel</a>
 </form>

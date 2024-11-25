@@ -1,11 +1,12 @@
 {% extends "main.html" %}
+{% load crispy_forms_tags %}
 {% block title %}Return Vehicle{% endblock %}
 {% block content %}
 <h2>Return Vehicle: {{ vehicle.vehicle_plate }}</h2>
 <form method="POST" action="{% url 'return_vehicle' vehicle.id %}">
   {% csrf_token %}
   <p>Current Mileage: {{ vehicle.mileage }}</p>
-  {{ form.as_p }}
+  {{ form|crispy}}
   <button type="submit" class="btn btn-success">Return Vehicle</button>
   <a href="{% url 'vehicle' %}" class="btn btn-primary">Cancel</a>
 

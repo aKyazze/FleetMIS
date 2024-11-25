@@ -1,11 +1,12 @@
 {% extends "main.html" %}
+{% load crispy_forms_tags %}
 {% block title %}Approve Request{% endblock %}
 {% block header %}Approve Request{% endblock %}
 {% block content %}
 <h4>Approve Request for: {{ request.requestor.name }}</h4>
 <form method="POST">
     {% csrf_token %}
-    {{ form.as_p }}
+    {{ form|crispy}}
     <button type="submit" class="btn btn-success">Approve</button>
     <a href="{% url 'request_list' %}" class="btn btn-secondary">Cancel</a>
 </form>
