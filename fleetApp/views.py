@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.db.models import F, ExpressionWrapper, IntegerField
 from django.contrib import messages
 from .models import Vehicle, Driver, Requestor, Request, ServiceProvider, Service
 from .forms import VehicleForm, VehicleAllocationForm, DriverForm, ServiceProviderForm, ServiceForm, RequestorForm, RequestForm, RequestApprovalForm, VehicleReturnForm
@@ -14,12 +15,24 @@ def home_view(request):
     return render(request, 'fleetApp/base/home.html')
 
 ################################### This Section for Vehicle Views ######################################################
+
 def vehicle_view(request):
+    # Get all vehicles
     vehicles = Vehicle.objects.all()
+    # Get all closed requests and annotate usage
+    requests = Request.objects.filter(request_status="C").annotate(
+        usage_summary=ExpressionWrapper(
+            F('mileage_at_return') - F('mileage_at_assignment'), 
+            output_field=IntegerField()
+        )
+    )
+    
     context = {
-        'vehicles': vehicles
+        'vehicles': vehicles,
+        'requests': requests,
     }
     return render(request, 'fleetApp/vehicle/vehicles.html', context)
+
 
 # Create or Add a New Vehicle View
 def add_vehicle(request):
@@ -182,7 +195,10 @@ def delete_driver(request, driver_id):
 # List all requestors
 def requestor_list(request):
     requestors = Requestor.objects.all()
-    return render(request, 'fleetApp/requisition/requestor_list.html', {'requestors': requestors})
+    context = {
+        'requestors': requestors
+    }
+    return render(request, 'fleetApp/requisition/requestor_list.html', context)
 
 # Add a requestor
 def add_requestor(request):
@@ -194,7 +210,10 @@ def add_requestor(request):
             return redirect('requestor_list')
     else:
         form = RequestorForm()
-    return render(request, 'fleetApp/requisition/add_requestor.html', {'form': form})
+    context = {
+        'form': form
+    }
+    return render(request, 'fleetApp/requisition/add_requestor.html', context)
 
 def edit_requestor(request, requestor_id):
     requestor = get_object_or_404(Requestor, id=requestor_id)
@@ -206,7 +225,11 @@ def edit_requestor(request, requestor_id):
             return redirect('requestor_list')
     else:
         form = RequestorForm(instance=requestor)
-    return render(request, 'fleetApp/requisition/edit_requestor.html', {'form': form, 'requestor': requestor})
+    context = {
+        'form': form, 
+        'requestor': requestor
+    }
+    return render(request, 'fleetApp/requisition/edit_requestor.html', context)
 
 def delete_requestor(request, requestor_id):
     requestor = get_object_or_404(Requestor, id=requestor_id)
@@ -214,7 +237,10 @@ def delete_requestor(request, requestor_id):
         requestor.delete()
         messages.success(request, "Requestor deleted successfully!")
         return redirect('requestor_list')
-    return render(request, 'fleetApp/requisition/delete_requestor.html', {'requestor': requestor})
+    context = {
+        'requestor': requestor
+    }
+    return render(request, 'fleetApp/requisition/delete_requestor.html', context)
 
 def edit_request(request, request_id):
     req = get_object_or_404(Request, id=request_id)
@@ -226,7 +252,11 @@ def edit_request(request, request_id):
             return redirect('request_list')
     else:
         form = RequestForm(instance=req)
-    return render(request, 'fleetApp/requisition/edit_request.html', {'form': form, 'request': req})
+    context = {
+        'form': form, 
+        'request': req
+    }
+    return render(request, 'fleetApp/requisition/edit_request.html', context)
 
 def delete_request(request, request_id):
     req = get_object_or_404(Request, id=request_id)
@@ -234,12 +264,18 @@ def delete_request(request, request_id):
         req.delete()
         messages.success(request, "Request deleted successfully!")
         return redirect('request_list')
-    return render(request, 'fleetApp/requisition/delete_request.html', {'request': req})
+    context = {
+        'request': req
+    }
+    return render(request, 'fleetApp/requisition/delete_request.html', context)
 
 # List all requests
 def request_list(request):
     requests = Request.objects.select_related('requestor', 'vehicle').all()
-    return render(request, 'fleetApp/requisition/request_list.html', {'requests': requests})
+    context = {
+        'requests': requests
+    }
+    return render(request, 'fleetApp/requisition/request_list.html', context)
 
 # Add a new request
 def add_request(request, requestor_id):
@@ -254,7 +290,11 @@ def add_request(request, requestor_id):
             return redirect('request_list')
     else:
         form = RequestForm()
-    return render(request, 'fleetApp/requisition/add_request.html', {'form': form, 'requestor': requestor})
+    context = {
+        'form': form, 
+        'requestor': requestor
+    }
+    return render(request, 'fleetApp/requisition/add_request.html', context)
 
 # Approve a request
 def approve_request(request, request_id):

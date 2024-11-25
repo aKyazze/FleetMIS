@@ -49,4 +49,28 @@
     </tbody>
 </table>
 <a href="{% url 'add_vehicle' %}" class="btn btn-primary">Add Vehicle</a>
+
+<h2 class="text-secondary">Trip Summery</h2>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Requestor</th>
+            <th>Vehicle</th>
+            <th>Mileage at Assignment</th>
+            <th>Mileage at Return</th>
+            <th>Usage</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for request in requests %}
+        <tr>
+            <td>{{ request.requestor.name }}</td>
+            <td>{{ request.vehicle.vehicle_plate }}</td>
+            <td>{{ request.mileage_at_assignment }}</td>
+            <td>{{ request.mileage_at_return }}</td>
+            <td>{{ request.usage_summary }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 {% endblock %}
