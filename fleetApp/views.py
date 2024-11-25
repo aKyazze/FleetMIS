@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from .models import Vehicle, Driver, Requestor, Request, ServiceProvider, Service
-from .forms import VehicleForm, VehicleAllocationForm, DriverForm, ServiceProviderForm, ServiceForm, RequestorForm, RequestForm, RequestApprovalForm
+from .forms import VehicleForm, VehicleAllocationForm, DriverForm, ServiceProviderForm, ServiceForm, RequestorForm, RequestForm, RequestApprovalForm, VehicleReturnForm
 
 # Create your views here.
 
@@ -88,16 +88,31 @@ def allocate_vehicle(request, vehicle_id):
     return render(request, 'fleetApp/vehicle/allocate_vehicle.html', context)
 
 # Return a Vehicle View 
+
 def return_vehicle(request, vehicle_id):
     vehicle = get_object_or_404(Vehicle, id=vehicle_id)
-    vehicle.status = 'Available'  # Update the vehicle status to "Available"
-    # Get the driver associated with the vehicle (if any)
-    driver = Driver.objects.filter(vehicle=vehicle).first()  # Find the driver with the given vehicle
-    if driver:
-        driver.vehicle = None  # Clear the vehicle assignment for the driver
-        driver.save()  # Save the driver with the updated vehicle assignment
-    vehicle.save()  # Save the vehicle status
-    return redirect('vehicle')
+    if request.method == "POST":
+        form = VehicleReturnForm(request.POST)
+        if form.is_valid():
+            mileage_at_return = form.cleaned_data['mileage_at_return']
+            
+            # Update the vehicle and request status
+            vehicle.status = 'Available'
+            driver = Driver.objects.filter(vehicle=vehicle).first()
+            if driver:
+                driver.vehicle = None
+                driver.save()
+
+            request_obj = Request.objects.filter(vehicle=vehicle, request_status="O").first()
+            if request_obj:
+                request_obj.close_request(mileage_at_return)
+
+            vehicle.save()
+            return redirect('vehicle')
+    else:
+        form = VehicleReturnForm()
+
+    return render(request, 'fleetApp/vehicle/return_vehicle.html', {'vehicle': vehicle, 'form': form})
 
 ######################################## This Section for Driver Views #######################################################
 

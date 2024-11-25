@@ -55,3 +55,9 @@ class ServiceForm(forms.ModelForm):
         fields = ['particular', 'quantity', 'cost', 'service_provider', 'vehicle']
 
 
+class VehicleReturnForm(forms.Form):
+    mileage_at_return = forms.IntegerField(
+        label="Mileage at Return",
+        required=True,
+        min_value=0,
+    )

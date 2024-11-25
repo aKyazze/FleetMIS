@@ -62,7 +62,6 @@ class Request(models.Model):
         ("O", "Open"),
         ("C", "Closed"),
     ]
-
     requestor = models.ForeignKey(Requestor, on_delete=models.CASCADE, related_name="requests")
     request_date = models.DateField(auto_now_add=True)
     current_location = models.CharField(max_length=50)
@@ -78,17 +77,25 @@ class Request(models.Model):
         return f"Request by {self.requestor.name} on {self.request_date}"
 
     def allocate_vehicle(self, vehicle):
-        """Assign a vehicle and update the status."""
+        """Assign a vehicle and record mileage at assignment."""
         self.vehicle = vehicle
+        self.mileage_at_assignment = vehicle.mileage  # Capture mileage
         self.request_status = "O"  # Set status to Open
         self.time_of_allocation = timezone.now()
         self.save()
 
     def close_request(self, mileage_at_return):
-        """Mark the request as closed."""
+        """Mark the request as closed and calculate usage."""
         self.mileage_at_return = mileage_at_return
         self.request_status = "C"
+        self.vehicle = None  # Unassign vehicle
         self.save()
+
+    def usage_summary(self):
+        """Calculate the usage of the vehicle."""
+        if self.mileage_at_assignment and self.mileage_at_return:
+            return self.mileage_at_return - self.mileage_at_assignment
+        return None
 
 
 #Service Provider Entity:
