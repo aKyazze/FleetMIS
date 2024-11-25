@@ -8,12 +8,10 @@ class VehicleForm(forms.ModelForm):
         fields = ['vehicle_plate', 'vehicle_type', 'engine_type', 'mileage']
         
 
-
+    
 class VehicleAllocationForm(forms.Form):
-    driver = forms.ModelChoiceField(
-        queryset=Driver.objects.all(),
-        empty_label="Select a Driver"
-    )
+    driver = forms.ModelChoiceField(queryset=Driver.objects.filter(vehicle__isnull=True))
+    request = forms.ModelChoiceField(queryset=Request.objects.filter(request_status="P"))  # Pending requests only
 
 class DriverForm(forms.ModelForm):
     class Meta:

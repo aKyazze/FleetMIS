@@ -1,0 +1,22 @@
+<table>
+  <thead>
+    <tr>
+      <th>Requestor</th>
+      <th>Vehicle</th>
+      <th>Mileage at Assignment</th>
+      <th>Mileage at Return</th>
+      <th>Usage</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for request in requests %}
+    <tr>
+      <td>{{ request.requestor.name }}</td>
+      <td>{{ request.vehicle.vehicle_plate if request.vehicle else "None" }}</td>
+      <td>{{ request.mileage_at_assignment|default:"None" }}</td>
+      <td>{{ request.mileage_at_return|default:"None" }}</td>
+      <td>{{ request.usage_summary }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>

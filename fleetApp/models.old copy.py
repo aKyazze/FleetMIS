@@ -89,14 +89,15 @@ class Request(models.Model):
         """Mark the request as closed and calculate usage."""
         self.mileage_at_return = mileage_at_return
         self.request_status = "C"
-       # self.vehicle = None  # Unassign vehicle
+        self.vehicle = None  # Unassign vehicle
         self.save()
 
     def usage_summary(self):
         """Calculate the usage of the vehicle."""
-        if self.mileage_at_assignment is not None and self.mileage_at_return is not None:
+        if self.mileage_at_assignment and self.mileage_at_return:
             return self.mileage_at_return - self.mileage_at_assignment
-        return "N/A"
+        return None
+
 
 #Service Provider Entity:
 class ServiceProvider(models.Model):

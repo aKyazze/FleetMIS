@@ -43,6 +43,7 @@ urlpatterns = [
 
     # Request URLs
     path('requisitions/', views.fleet_management_view, name='requisitions'),
+    path('requestSummary/', views.request_summary, name='requestSummary'),
     path('requests/', views.request_list, name='request_list'),
     path('requests/add/<int:requestor_id>/', views.add_request, name='add_request'),
     path('requests/edit/<int:request_id>/', views.edit_request, name='edit_request'),

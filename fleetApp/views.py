@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.utils.timezone import now
 from django.db.models import F, ExpressionWrapper, IntegerField
 from django.contrib import messages
 from .models import Vehicle, Driver, Requestor, Request, ServiceProvider, Service
@@ -83,24 +84,32 @@ def allocate_vehicle(request, vehicle_id):
         form = VehicleAllocationForm(request.POST)
         if form.is_valid():
             driver = form.cleaned_data['driver']
+            request_instance = form.cleaned_data['request']  # Ensure the request instance is passed
+
             # Allocate the vehicle to the selected driver
             driver.vehicle = vehicle
             driver.save()
+
             # Update vehicle status
             vehicle.status = "Allocated"
             vehicle.save()
 
-            return redirect('vehicle') 
+            # Update request instance with mileage at assignment and allocation time
+            request_instance.vehicle = vehicle
+            request_instance.mileage_at_assignment = vehicle.mileage  # Capture mileage
+            request_instance.time_of_allocation = now()
+            request_instance.request_status = "O"  # Mark request as Open
+            request_instance.save()
+
+            return redirect('vehicle')
     else:
         form = VehicleAllocationForm()
-        
+
     context = {
-        'form': form, 
+        'form': form,
         'vehicle': vehicle
     }
     return render(request, 'fleetApp/vehicle/allocate_vehicle.html', context)
-
-# Return a Vehicle View 
 
 def return_vehicle(request, vehicle_id):
     vehicle = get_object_or_404(Vehicle, id=vehicle_id)
@@ -329,6 +338,12 @@ def fleet_management_view(request):
         'requestor_form': requestor_form,
     }
     return render(request, 'fleetApp/requisition/requisitions.html', context)
+
+def request_summary(request):
+    # Fetch all requests
+    requests = Request.objects.all()
+    # Pass to the template
+    return render(request, "fleetApp/requisition/request_summary.html", {"requests": requests})
 
 ######################################## This Section for Service Provider Views #######################################################
 

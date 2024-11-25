@@ -53,24 +53,31 @@
 <h2 class="text-secondary">Trip Summery</h2>
 <table class="table table-striped">
     <thead>
-        <tr>
-            <th>Requestor</th>
-            <th>Vehicle</th>
-            <th>Mileage at Assignment</th>
-            <th>Mileage at Return</th>
-            <th>Usage</th>
-        </tr>
+      <tr>
+        <th>Requestor</th>
+        <th>Vehicle</th>
+        <th>Mileage at Assignment</th>
+        <th>Covered/Used Mileage</th>
+        <th>Current Mileage</th>
+      </tr>
     </thead>
     <tbody>
-        {% for request in requests %}
-        <tr>
-            <td>{{ request.requestor.name }}</td>
-            <td>{{ request.vehicle.vehicle_plate }}</td>
-            <td>{{ request.mileage_at_assignment }}</td>
-            <td>{{ request.mileage_at_return }}</td>
-            <td>{{ request.usage_summary }}</td>
-        </tr>
-        {% endfor %}
+      {% for request in requests %}
+      <tr>
+        <td>{{ request.requestor.name }}</td>
+        <td>{% if request.vehicle %}{{ request.vehicle.vehicle_plate }}{% else %}None{% endif %}</td>
+        <td>{% if request.mileage_at_assignment %}{{ request.mileage_at_assignment }}{% else %}None{% endif %}</td>
+        <td>{% if request.mileage_at_return %}{{ request.mileage_at_return }}{% else %}None{% endif %}</td>
+        <td>
+          {% if request.mileage_at_assignment and request.mileage_at_return %}
+            {{ request.mileage_at_return|add:request.mileage_at_assignment|floatformat:2 }}
+          {% else %}
+            N/A
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
     </tbody>
-</table>
+  </table>
+  
 {% endblock %}
