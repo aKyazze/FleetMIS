@@ -2,21 +2,26 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.timezone import now
 from django.db.models import F, ExpressionWrapper, IntegerField
 from django.contrib import messages
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.decorators import login_required
 from .models import Vehicle, Driver, Requestor, Request, ServiceProvider, Service
 from .forms import VehicleForm, VehicleAllocationForm, DriverForm, ServiceProviderForm, ServiceForm, RequestorForm, RequestForm, RequestApprovalForm, VehicleReturnForm
 
 # Create your views here.
 
 #This is the Main view
+@login_required
 def main_view(request):
     return render(request, 'main.html')
 
 #This is Home View
+@login_required
 def home_view(request):
     return render(request, 'fleetApp/base/home.html')
 
 ################################### This Section for Vehicle Views ######################################################
 
+@login_required
 def vehicle_view(request):
     # Get all vehicles
     vehicles = Vehicle.objects.all()
@@ -36,6 +41,7 @@ def vehicle_view(request):
 
 
 # Create or Add a New Vehicle View
+@login_required
 def add_vehicle(request):
     if request.method == 'POST':
         form = VehicleForm(request.POST)
@@ -50,6 +56,7 @@ def add_vehicle(request):
     return render(request, 'fleetApp/vehicle/add_vehicle.html', context)
 
 # Update or Edit Vehicle View
+@login_required
 def vehicle_update(request, vehicle_id):
     vehicle = get_object_or_404(Vehicle, id=vehicle_id)
     if request.method == 'POST':
@@ -66,6 +73,7 @@ def vehicle_update(request, vehicle_id):
     return render(request, 'fleetApp/vehicle/edit_vehicle.html', context)
 
 # Delete Vehicle View 
+@login_required
 def vehicle_delete(request, vehicle_id):
     vehicle = get_object_or_404(Vehicle, id=vehicle_id)
     if request.method == 'POST':
@@ -77,6 +85,7 @@ def vehicle_delete(request, vehicle_id):
     return render(request, 'fleetApp/vehicle/vehicle_confirm_delete.html', context)
 
 # Assign or Allocate a Vehicle View 
+@login_required
 def allocate_vehicle(request, vehicle_id):
     vehicle = get_object_or_404(Vehicle, id=vehicle_id)
 
@@ -111,6 +120,7 @@ def allocate_vehicle(request, vehicle_id):
     }
     return render(request, 'fleetApp/vehicle/allocate_vehicle.html', context)
 
+@login_required
 def return_vehicle(request, vehicle_id):
     vehicle = get_object_or_404(Vehicle, id=vehicle_id)
     if request.method == "POST":
@@ -139,6 +149,7 @@ def return_vehicle(request, vehicle_id):
 ######################################## This Section for Driver Views #######################################################
 
 # Driver List View 
+@login_required
 def drivers_list(request):
     drivers = Driver.objects.select_related('vehicle').all()  # Get drivers with their associated vehicles
     # Loop through drivers to ensure "Unassigned" is shown if no vehicle is assigned
@@ -155,6 +166,7 @@ def drivers_list(request):
     return render(request, 'fleetApp/driver/drivers.html', context)
 
 # New Driver View 
+@login_required
 def add_driver(request):
     if request.method == 'POST':
         form = DriverForm(request.POST)
@@ -171,6 +183,7 @@ def add_driver(request):
 
 
 # Driver Update View 
+@login_required
 def edit_driver(request, driver_id):
     driver = get_object_or_404(Driver, id=driver_id)
     if request.method == 'POST':
@@ -188,6 +201,7 @@ def edit_driver(request, driver_id):
 
 
 # Driver Removing View 
+@login_required
 def delete_driver(request, driver_id):
     driver = get_object_or_404(Driver, id=driver_id)
     if request.method == 'POST':
@@ -202,6 +216,7 @@ def delete_driver(request, driver_id):
 ######################################## This Section for Requisition Views #######################################################
 
 # List all requestors
+@login_required
 def requestor_list(request):
     requestors = Requestor.objects.all()
     context = {
@@ -210,6 +225,7 @@ def requestor_list(request):
     return render(request, 'fleetApp/requisition/requestor_list.html', context)
 
 # Add a requestor
+@login_required
 def add_requestor(request):
     if request.method == 'POST':
         form = RequestorForm(request.POST)
@@ -224,6 +240,7 @@ def add_requestor(request):
     }
     return render(request, 'fleetApp/requisition/add_requestor.html', context)
 
+@login_required
 def edit_requestor(request, requestor_id):
     requestor = get_object_or_404(Requestor, id=requestor_id)
     if request.method == 'POST':
@@ -240,6 +257,7 @@ def edit_requestor(request, requestor_id):
     }
     return render(request, 'fleetApp/requisition/edit_requestor.html', context)
 
+@login_required
 def delete_requestor(request, requestor_id):
     requestor = get_object_or_404(Requestor, id=requestor_id)
     if request.method == 'POST':
@@ -251,6 +269,7 @@ def delete_requestor(request, requestor_id):
     }
     return render(request, 'fleetApp/requisition/delete_requestor.html', context)
 
+@login_required
 def edit_request(request, request_id):
     req = get_object_or_404(Request, id=request_id)
     if request.method == 'POST':
@@ -267,6 +286,7 @@ def edit_request(request, request_id):
     }
     return render(request, 'fleetApp/requisition/edit_request.html', context)
 
+@login_required
 def delete_request(request, request_id):
     req = get_object_or_404(Request, id=request_id)
     if request.method == 'POST':
@@ -279,6 +299,7 @@ def delete_request(request, request_id):
     return render(request, 'fleetApp/requisition/delete_request.html', context)
 
 # List all requests
+@login_required
 def request_list(request):
     requests = Request.objects.select_related('requestor', 'vehicle').all()
     context = {
@@ -287,6 +308,7 @@ def request_list(request):
     return render(request, 'fleetApp/requisition/request_list.html', context)
 
 # Add a new request
+@login_required
 def add_request(request, requestor_id):
     requestor = get_object_or_404(Requestor, id=requestor_id)
     if request.method == 'POST':
@@ -306,6 +328,7 @@ def add_request(request, requestor_id):
     return render(request, 'fleetApp/requisition/add_request.html', context)
 
 # Approve a request
+@login_required
 def approve_request(request, request_id):
     request_obj = get_object_or_404(Request, id=request_id)
     if request.method == 'POST':
@@ -326,6 +349,7 @@ def approve_request(request, request_id):
         return redirect('requisitions')  # Redirect to the fleet management view
     return redirect('requisitions')
 
+@login_required
 def fleet_management_view(request):
     requestors = Requestor.objects.all()
     requests = Request.objects.select_related('requestor', 'vehicle').all()
@@ -339,6 +363,7 @@ def fleet_management_view(request):
     }
     return render(request, 'fleetApp/requisition/requisitions.html', context)
 
+@login_required
 def request_summary(request):
     # Fetch all requests
     requests = Request.objects.all()
@@ -348,11 +373,13 @@ def request_summary(request):
 ######################################## This Section for Service Provider Views #######################################################
 
 # ServiceProvider Views
+@login_required
 def service_provider_list(request):
     providers = ServiceProvider.objects.all()
     context = {'providers': providers}
     return render(request, 'fleetApp/serviceProvider/service_providers.html', context)
 
+@login_required
 def add_service_provider(request):
     if request.method == 'POST':
         form = ServiceProviderForm(request.POST)
@@ -366,6 +393,7 @@ def add_service_provider(request):
     }
     return render(request, 'fleetApp/serviceProvider/add_service_provider.html', context)
 
+@login_required
 def edit_service_provider(request, provider_id):
     provider = get_object_or_404(ServiceProvider, id=provider_id)
     if request.method == 'POST':
@@ -381,6 +409,7 @@ def edit_service_provider(request, provider_id):
     }
     return render(request, 'fleetApp/serviceProvider/edit_service_provider.html', context)
 
+@login_required
 def delete_service_provider(request, provider_id):
     provider = get_object_or_404(ServiceProvider, id=provider_id)
     if request.method == 'POST':
@@ -393,6 +422,7 @@ def delete_service_provider(request, provider_id):
 
 
 ######################################## This Section for Service Views #######################################################
+@login_required
 def service_list(request):
     services = Service.objects.select_related('vehicle', 'service_provider').all()
     context = {
@@ -400,6 +430,7 @@ def service_list(request):
     }
     return render(request, 'fleetApp/service/services.html', context)
 
+@login_required
 def add_service(request):
     if request.method == 'POST':
         form = ServiceForm(request.POST)
@@ -413,6 +444,7 @@ def add_service(request):
     }
     return render(request, 'fleetApp/service/add_service.html', context)
 
+@login_required
 def edit_service(request, service_id):
     service = get_object_or_404(Service, id=service_id)
     if request.method == 'POST':
@@ -428,6 +460,7 @@ def edit_service(request, service_id):
     }
     return render(request, 'fleetApp/service/edit_service.html', context)
 
+@login_required
 def delete_service(request, service_id):
     service = get_object_or_404(Service, id=service_id)
     if request.method == 'POST':
@@ -437,6 +470,25 @@ def delete_service(request, service_id):
         'service': service
     }
     return render(request, 'fleetApp/service/delete_service.html', context)
+
+######################################## This Section for Registration Views #######################################################
+
+def sign_up_view(request):
+    if request.method == "POST":
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            message = "User signed up Successfuly"
+        else:
+            message = "SignUp Error"
+    else:
+        form = UserCreationForm
+    context = {
+        'form': form,
+    }
+    return render(request, 'registration/sign_up.html', context)   
+
+
 
 
 

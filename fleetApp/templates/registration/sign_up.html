@@ -1,0 +1,15 @@
+{% extends "main.html" %}
+{% load crispy_forms_tags %}
+{% block title %}Sign Up{% endblock %}
+{% block header %}Sign Up Form{% endblock %}
+{% block content %}
+    <div class="form-container">
+        <h1>Registration Form</h1>
+        <form method="POST">
+            {% csrf_token %}
+            {{ form|crispy }}
+            <button type="submit" class="btn btn-success">Sign Up</button>
+            <a href="{% url 'home' %}" class="btn btn-primary">Cancel</a>
+        </form>
+    </div>
+{% endblock %}
