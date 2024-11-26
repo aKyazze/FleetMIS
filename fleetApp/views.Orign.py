@@ -16,23 +16,7 @@ def main_view(request):
 #This is Home View
 @login_required
 def home_view(request):
-    # Get statistics for the dashboard
-    total_vehicles = Vehicle.objects.count()
-    total_drivers = Driver.objects.count()
-    total_pending_requests = Request.objects.filter(request_status="Pending").count()
-    total_completed_requests = Request.objects.filter(request_status="Completed").count()
-    total_services = Service.objects.count()
-    total_requestors = Requestor.objects.count()
-
-    context = {
-        'total_vehicles': total_vehicles,
-        'total_drivers': total_drivers,
-        'total_pending_requests': total_pending_requests,
-        'total_completed_requests': total_completed_requests,
-        'total_services': total_services,
-        'total_requestors': total_requestors,
-    }
-    return render(request, 'fleetApp/base/home.html', context)
+    return render(request, 'fleetApp/base/home.html')
 
 ################################### This Section for Vehicle Views ######################################################
 @login_required
