@@ -8,14 +8,13 @@ urlpatterns = [
          # Home urls
     path('home/', views.home_view, name='home'),
     
-         ############################################################################# Vehicle urls ###########################
+############################################################################# Vehicle urls ###########################
     path('vehicles/', views.vehicle_view, name='vehicle'),
     path('add-vehicle/', views.add_vehicle, name='add_vehicle'), 
     path('edit-vehicle/<int:vehicle_id>/', views.vehicle_update, name='edit_vehicle'),
     path('delete-vehicle/<int:vehicle_id>/', views.vehicle_delete, name='delete_vehicle'),
     path('allocate-vehicle/<int:vehicle_id>/', views.allocate_vehicle, name='allocate_vehicle'),
     path('return_vehicle/<int:vehicle_id>/', views.return_vehicle, name='return_vehicle'),
-
 
 #################################################################### Driver urls
      path('drivers/', views.drivers_list, name='drivers'),
@@ -50,12 +49,9 @@ urlpatterns = [
     path('requests/approve/<int:request_id>/', views.approve_request, name='approve_request'),
     path('requests/delete/<int:request_id>/', views.delete_request, name='delete_request'),
     
-    
   #################################################################### Registration URLs
    
   path('signUp/', views.sign_up_view, name='registration'),
-  
-    
 ]
 
 

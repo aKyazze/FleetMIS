@@ -1,6 +1,5 @@
 from django.db import models
 from django.utils import timezone 
-
 # Create your models here.
 # Vehicle Entity:
 class Vehicle(models.Model):
@@ -41,7 +40,6 @@ class Driver(models.Model):
   email_address = models.EmailField()
   vehicle = models.ForeignKey(Vehicle, on_delete=models.SET_NULL, null=True)
   
-  
   def __str__(self):
       return f"{self.driver_name} {self.contact} {self.vehicle}"
     
@@ -54,7 +52,6 @@ class Requestor(models.Model):
 
     def __str__(self):
         return self.name
-
 
 # Request Model
 class Request(models.Model):
@@ -120,5 +117,3 @@ class Service(models.Model):
     
     def calculate_total(self):
         return self.quantity * self.cost
-    
-    
