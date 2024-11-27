@@ -8,7 +8,16 @@
         <link rel="stylesheet" href="{% static 'css_old/styles.css' %}">
         <div class="main">
             <div class="content">
-                <h2>Login to Your Account</h2>
+                <div>
+                    <img class="logImage" src="{% static 'images/log.jpeg' %}" 
+                         style="width: 100px; 
+                                height: 100px; 
+                                margin: 0 auto 20px auto; 
+                                display: block; 
+                                border-radius: 50%; 
+                                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);" 
+                         alt="Login Image">
+                </div>
                 <form method="POST" id="login-form">
                     {% csrf_token %}
                     <div class="form-row">
@@ -21,7 +30,6 @@
                     </div>
                     <div class="submit-row">
                         <button type="submit" class="btn btn-primary">Login</button>
-                        <a href="{% url 'home' %}" class="btn btn-secondary">Cancel</a>
                     </div>
                 </form>
             </div>

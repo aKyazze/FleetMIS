@@ -1,64 +1,94 @@
 {% extends "main.html" %}
 {% load crispy_forms_tags %}
 {% block title %}Dashboard | Fleet Management{% endblock %}
-
 {% block content %}
 <div class="layout-wrapper">
-    <!-- Sidebar -->
-    <aside class="layout-sidebar">
-        <div class="sidebar-header">
-            <h3>UTCL Fleet Management</h3>
-        </div>
-        <ul class="sidebar-menu">
-            <li><a href="{% url 'vehicle' %}"><i class="fas fa-car"></i> Vehicles</a></li>
-            <li><a href="{% url 'drivers' %}"><i class="fas fa-user"></i> Drivers</a></li>
-            <li><a href="{% url 'requisitions' %}"><i class="fas fa-tasks"></i> Requests</a></li>
-            <li><a href="{% url 'service_list' %}"><i class="fas fa-tools"></i> Services</a></li>
-            <li><a href="{% url 'service_provider_list' %}"><i class="fas fa-building"></i> Service Providers</a></li>
-        </ul>
-    </aside>
-
     <!-- Main Content -->
     <div class="layout-main">
         <!-- Header -->
         <header class="layout-header">
             <h1 class="dashboard-title">Dashboard Overview</h1>
-            <p>Welcome, {{ user.get_full_name }}</p>
         </header>
 
         <!-- Metrics Cards -->
         <div class="dashboard-cards row">
+            <!-- Total Vehicles -->
             <div class="col-lg-3 col-md-6 mb-4">
                 <div class="card shadow-sm bg-primary text-white">
                     <div class="card-body">
                         <h5>Total Vehicles</h5>
                         <h2>{{ total_vehicles }}</h2>
                     </div>
+                    <a href="{% url 'vehicle' %}" class="btn btn-secondary">Vehicles</a>
                 </div>
             </div>
+
+            <!-- Total Drivers -->
             <div class="col-lg-3 col-md-6 mb-4">
                 <div class="card shadow-sm bg-success text-white">
                     <div class="card-body">
                         <h5>Total Drivers</h5>
                         <h2>{{ total_drivers }}</h2>
                     </div>
+                    <a href="{% url 'drivers' %}" class="btn btn-secondary">Drivers</a>
                 </div>
             </div>
+
+            <!-- Total Requestors -->
             <div class="col-lg-3 col-md-6 mb-4">
                 <div class="card shadow-sm bg-warning text-white">
                     <div class="card-body">
                         <h5>Total Requestors</h5>
                         <h2>{{ total_requestors }}</h2>
                     </div>
+                    <a href="{% url 'requisitions' %}" class="btn btn-secondary">Requestors</a>
                 </div>
             </div>
+
+            <!-- Total Service Providers -->
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card shadow-sm bg-secondary text-white">
+                    <div class="card-body">
+                        <h5>Total Service Providers</h5>
+                        <h2>{{ total_service_providers }}</h2>
+                    </div>
+                    <a href="{% url 'service_provider_list' %}" class="btn btn-secondary">Service Providers</a>
+                </div>
+            </div>
+
+            <!-- Total Services -->
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card shadow-sm bg-dark text-white">
+                    <div class="card-body">
+                        <h5>Total Services</h5>
+                        <h2>{{ total_services }}</h2>
+                    </div>
+                    <a href="{% url 'service_list' %}" class="btn btn-secondary">Serviced Vehicles</a>
+                </div>
+            </div>
+
+            <!-- Pending Requests -->
             <div class="col-lg-3 col-md-6 mb-4">
                 <div class="card shadow-sm bg-info text-white">
                     <div class="card-body">
                         <h5>Pending Requests</h5>
                         <h2>{{ total_pending_requests }}</h2>
                     </div>
+                    <a href="{% url 'request_list' %}?status=pending" class="btn btn-secondary">View Pending</a>
+                </div>
+            </div>
+
+            <!-- Completed Requests -->
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card shadow-sm bg-success text-white">
+                    <div class="card-body">
+                        <h5>Completed Requests</h5>
+                        <h2>{{ total_completed_requests }}</h2>
+                    </div>
+                    <a href="{% url 'request_list' %}?status=closed" class="btn btn-secondary">View Closed</a>
                 </div>
             </div>
         </div>
+    </div>
+</div>
 {% endblock %}

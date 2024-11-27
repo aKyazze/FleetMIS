@@ -1,6 +1,7 @@
 {% extends "main.html" %}
 {% load crispy_forms_tags %}
 {% block title %}Requests{% endblock %}
+{% block header %}Detail of Raised Requests{% endblock %}
 {% block content %}
 <table class="table">
     <thead>
@@ -11,7 +12,6 @@
             <th>Destination</th>
             <th>Vehicle</th>
             <th>Status</th>
-            <th>Actions</th>
         </tr>
     </thead>
     <tbody>
@@ -29,9 +29,6 @@
                 {% endif %}
             </td>
             <td>{{ request.get_request_status_display }}</td>
-            <td>
-                <a href="{% url 'approve_request' request.id %}" class="btn btn-sm btn-success">Approve</a>
-            </td>
         </tr>
         {% endfor %}
     </tbody>

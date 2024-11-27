@@ -19,10 +19,11 @@ def home_view(request):
     # Get statistics for the dashboard
     total_vehicles = Vehicle.objects.count()
     total_drivers = Driver.objects.count()
-    total_pending_requests = Request.objects.filter(request_status="Pending").count()
-    total_completed_requests = Request.objects.filter(request_status="Completed").count()
+    total_pending_requests = Request.objects.filter(request_status="P").count()
+    total_completed_requests = Request.objects.filter(request_status="C").count()
     total_services = Service.objects.count()
     total_requestors = Requestor.objects.count()
+    total_service_providers = ServiceProvider.objects.count()
 
     context = {
         'total_vehicles': total_vehicles,
@@ -31,6 +32,7 @@ def home_view(request):
         'total_completed_requests': total_completed_requests,
         'total_services': total_services,
         'total_requestors': total_requestors,
+        'total_service_providers': total_service_providers, 
     }
     return render(request, 'fleetApp/base/home.html', context)
 
@@ -271,7 +273,7 @@ def delete_requestor(request, requestor_id):
     if request.method == 'POST':
         requestor.delete()
         messages.success(request, "Requestor deleted successfully!")
-        return redirect('requestor_list')
+        return redirect('requisitions')
     context = {
         'requestor': requestor
     }
@@ -285,7 +287,7 @@ def edit_request(request, request_id):
         if form.is_valid():
             form.save()
             messages.success(request, "Request updated successfully!")
-            return redirect('request_list')
+            return redirect('requisitions')
     else:
         form = RequestForm(instance=req)
     context = {
@@ -300,7 +302,7 @@ def delete_request(request, request_id):
     if request.method == 'POST':
         req.delete()
         messages.success(request, "Request deleted successfully!")
-        return redirect('request_list')
+        return redirect('requisitions')
     context = {
         'request': req
     }
@@ -309,11 +311,20 @@ def delete_request(request, request_id):
 # List all requests
 @login_required
 def request_list(request):
-    requests = Request.objects.select_related('requestor', 'vehicle').all()
+    # Get the status filter from the query parameters
+    status_filter = request.GET.get('status')
+    if status_filter == 'pending':
+        requests = Request.objects.filter(request_status='P')  # 'P' for Pending
+    elif status_filter == 'closed':
+        requests = Request.objects.filter(request_status='C')  # 'C' for Closed
+    else:
+        requests = Request.objects.all()  # Default: show all requests
+
     context = {
         'requests': requests
     }
     return render(request, 'fleetApp/requisition/request_list.html', context)
+
 
 # Add a new request
 @login_required
@@ -326,7 +337,7 @@ def add_request(request, requestor_id):
             new_request.requestor = requestor
             new_request.save()
             messages.success(request, "Request added successfully!")
-            return redirect('request_list')
+            return redirect('requisitions')
     else:
         form = RequestForm()
     context = {
