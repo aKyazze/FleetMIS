@@ -3,7 +3,13 @@
 {% block title %}Service Providers{% endblock %}
 {% block header %}Manage Service Providers{% endblock %}
 {% block content %}
-<a href="{% url 'add_service_provider' %}" class="btn btn-primary">Add Provider</a>
+
+<!-- Add Service Provider Button -->
+<a href="{% url 'add_service_provider' %}" class="btn btn-primary my-3">
+    <i class="bi bi-person-plus"></i> Add Provider
+</a>
+
+<!-- Service Providers Table -->
 <table class="table table-striped mt-3">
     <thead>
         <tr>
@@ -22,11 +28,18 @@
             <td>{{ provider.contact }}</td>
             <td>{{ provider.email_address }}</td>
             <td>
-                <a href="{% url 'edit_service_provider' provider.id %}" class="btn btn-warning btn-sm">Edit</a>
-                <a href="{% url 'delete_service_provider' provider.id %}" class="btn btn-danger btn-sm">Delete</a>
+                <!-- Edit Button -->
+                <a href="{% url 'edit_service_provider' provider.id %}" class="btn btn-warning btn-sm">
+                    <i class="bi bi-pencil-square"></i> <!-- Edit Icon -->
+                </a>
+                <!-- Delete Button -->
+                <a href="{% url 'delete_service_provider' provider.id %}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this provider?');">
+                    <i class="bi bi-trash"></i> <!-- Delete Icon -->
+                </a>
             </td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
+
 {% endblock %}

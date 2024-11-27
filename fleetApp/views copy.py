@@ -7,13 +7,6 @@ from django.contrib.auth.decorators import login_required
 from .models import Vehicle, Driver, Requestor, Request, ServiceProvider, Service
 from .forms import VehicleForm, VehicleAllocationForm, DriverForm, ServiceProviderForm, ServiceForm, RequestorForm, RequestForm, RequestApprovalForm, VehicleReturnForm
 
-MESSAGE_TAGS = {
-    messages.DEBUG: 'debug',
-    messages.INFO: 'info',
-    messages.SUCCESS: 'success',
-    messages.WARNING: 'warning',
-    messages.ERROR: 'danger',
-}
 # Create your views here.
 #This is the Main view
 @login_required
@@ -69,10 +62,6 @@ def add_vehicle(request):
         form = VehicleForm(request.POST)
         if form.is_valid():
             form.save()
-            messages.success(request, "Vehicle added successfully!")
-            return redirect('home')
-        else:
-            messages.error(request, "Failed to add vehicle. Please check the form.")
             return redirect('vehicle')
     else:
         form = VehicleForm()
@@ -89,10 +78,6 @@ def vehicle_update(request, vehicle_id):
         form = VehicleForm(request.POST, instance=vehicle)
         if form.is_valid():
             form.save()
-            messages.success(request, "Vehicle Updated successfully!")
-            return redirect('home')
-        else:
-            messages.error(request, "Failed to Update vehicle. Please check the form.")
             return redirect('vehicle')
     else:
         form = VehicleForm(instance=vehicle)
@@ -108,11 +93,12 @@ def vehicle_delete(request, vehicle_id):
     vehicle = get_object_or_404(Vehicle, id=vehicle_id)
     if request.method == 'POST':
         vehicle.delete()
-        messages.success(request, "Vehicle deleted successfully!")
-        return redirect('home')
-    else:
-        context = {'vehicle': vehicle}
-        return render(request, 'fleetApp/vehicle/vehicle_confirm_delete.html', context)
+        return redirect('vehicle')
+    context = {
+        'vehicle': vehicle
+    }
+    return render(request, 'fleetApp/vehicle/vehicle_confirm_delete.html', context)
+
 # Assign or Allocate a Vehicle View 
 @login_required
 def allocate_vehicle(request, vehicle_id):
@@ -139,10 +125,7 @@ def allocate_vehicle(request, vehicle_id):
             request_instance.request_status = "O"  # Mark request as Open
             request_instance.save()
 
-            messages.success(request, "Vehicle allocated successfully!")
-            return redirect('home')
-        else:
-            messages.error(request, "Failed to allocate vehicle. Please check the form.")
+            return redirect('vehicle')
     else:
         form = VehicleAllocationForm()
 
@@ -152,8 +135,6 @@ def allocate_vehicle(request, vehicle_id):
     }
     return render(request, 'fleetApp/vehicle/allocate_vehicle.html', context)
 
-
-# Return Vehicle View 
 @login_required
 def return_vehicle(request, vehicle_id):
     vehicle = get_object_or_404(Vehicle, id=vehicle_id)
@@ -174,19 +155,13 @@ def return_vehicle(request, vehicle_id):
                 request_obj.close_request(mileage_at_return)
 
             vehicle.save()
-
-            messages.success(request, "Vehicle returned successfully!")
-            return redirect('home')
-        else:
-            messages.error(request, "Failed to return vehicle. Please check the form.")
+            return redirect('vehicle')
     else:
         form = VehicleReturnForm()
 
     return render(request, 'fleetApp/vehicle/return_vehicle.html', {'vehicle': vehicle, 'form': form})
 
-
-######################################## Driver Views #######################################################
-
+######################################## This Section for Driver Views #######################################################
 # Driver List View 
 @login_required
 def drivers_list(request):
@@ -204,7 +179,6 @@ def drivers_list(request):
     }
     return render(request, 'fleetApp/driver/drivers.html', context)
 
-
 # New Driver View 
 @login_required
 def add_driver(request):
@@ -213,16 +187,13 @@ def add_driver(request):
         if form.is_valid():
             form.save()
             messages.success(request, "Driver added successfully!")
-            return redirect('home')
-        else:
-            messages.error(request, "Failed to add driver. Please check the form.")
+            return redirect('drivers')
     else:
         form = DriverForm()
     context = {
         'form': form
     }
     return render(request, 'fleetApp/driver/add_driver.html', context)
-
 
 # Driver Update View 
 @login_required
@@ -232,10 +203,7 @@ def edit_driver(request, driver_id):
         form = DriverForm(request.POST, instance=driver)
         if form.is_valid():
             form.save()
-            messages.success(request, "Driver updated successfully!")
-            return redirect('home')
-        else:
-            messages.error(request, "Failed to update driver. Please check the form.")
+            return redirect('drivers')
     else:
         form = DriverForm(instance=driver)
     context = {
@@ -244,25 +212,19 @@ def edit_driver(request, driver_id):
     }
     return render(request, 'fleetApp/driver/edit_driver.html', context)
 
-
 # Driver Removing View 
 @login_required
 def delete_driver(request, driver_id):
     driver = get_object_or_404(Driver, id=driver_id)
     if request.method == 'POST':
         driver.delete()
-        messages.success(request, "Driver deleted successfully!")
-        return redirect('home')
-    else:
-        messages.error(request, "Failed to delete driver. Please try again.")
-    context = {
-        'driver': driver
+        return redirect('drivers')
+    context =  {
+        'drivers': driver
     }
     return render(request, 'fleetApp/driver/driver_delete.html', context)
 
-
-######################################## Requisition Views #######################################################
-
+######################################## This Section for Requisition Views #######################################################
 # List all requestors
 @login_required
 def requestor_list(request):
@@ -272,7 +234,6 @@ def requestor_list(request):
     }
     return render(request, 'fleetApp/requisition/requestor_list.html', context)
 
-
 # Add a requestor
 @login_required
 def add_requestor(request):
@@ -281,9 +242,7 @@ def add_requestor(request):
         if form.is_valid():
             form.save()
             messages.success(request, "Requestor added successfully!")
-            return redirect('home')
-        else:
-            messages.error(request, "Failed to add requestor. Please check the form.")
+            return redirect('requestor_list')
     else:
         form = RequestorForm()
     context = {
@@ -291,8 +250,6 @@ def add_requestor(request):
     }
     return render(request, 'fleetApp/requisition/add_requestor.html', context)
 
-
-# Update Requestor
 @login_required
 def edit_requestor(request, requestor_id):
     requestor = get_object_or_404(Requestor, id=requestor_id)
@@ -301,9 +258,7 @@ def edit_requestor(request, requestor_id):
         if form.is_valid():
             form.save()
             messages.success(request, "Requestor updated successfully!")
-            return redirect('home')
-        else:
-            messages.error(request, "Failed to update requestor. Please check the form.")
+            return redirect('requestor_list')
     else:
         form = RequestorForm(instance=requestor)
     context = {
@@ -318,7 +273,7 @@ def delete_requestor(request, requestor_id):
     if request.method == 'POST':
         requestor.delete()
         messages.success(request, "Requestor deleted successfully!")
-        return redirect('home')
+        return redirect('requisitions')
     context = {
         'requestor': requestor
     }
@@ -332,7 +287,7 @@ def edit_request(request, request_id):
         if form.is_valid():
             form.save()
             messages.success(request, "Request updated successfully!")
-            return redirect('home')
+            return redirect('requisitions')
     else:
         form = RequestForm(instance=req)
     context = {
@@ -347,7 +302,7 @@ def delete_request(request, request_id):
     if request.method == 'POST':
         req.delete()
         messages.success(request, "Request deleted successfully!")
-        return redirect('home')
+        return redirect('requisitions')
     context = {
         'request': req
     }
@@ -382,7 +337,7 @@ def add_request(request, requestor_id):
             new_request.requestor = requestor
             new_request.save()
             messages.success(request, "Request added successfully!")
-            return redirect('home')
+            return redirect('requisitions')
     else:
         form = RequestForm()
     context = {
@@ -410,7 +365,7 @@ def approve_request(request, request_id):
         selected_vehicle.save()
 
         messages.success(request, "Request approved successfully!")
-        return redirect('home')  # Redirect to the fleet management view
+        return redirect('requisitions')  # Redirect to the fleet management view
     return redirect('requisitions')
 
 @login_required
@@ -448,17 +403,13 @@ def add_service_provider(request):
         form = ServiceProviderForm(request.POST)
         if form.is_valid():
             form.save()
-            messages.success(request, "Service provider added successfully!")
-            return redirect('home')
-        else:
-            messages.error(request, "Failed to add service provider. Please check the form.")
+            return redirect('service_provider_list')
     else:
         form = ServiceProviderForm()
     context = {
         'form': form
     }
     return render(request, 'fleetApp/serviceProvider/add_service_provider.html', context)
-
 
 @login_required
 def edit_service_provider(request, provider_id):
@@ -467,10 +418,7 @@ def edit_service_provider(request, provider_id):
         form = ServiceProviderForm(request.POST, instance=provider)
         if form.is_valid():
             form.save()
-            messages.success(request, "Service provider updated successfully!")
-            return redirect('home')
-        else:
-            messages.error(request, "Failed to update service provider. Please check the form.")
+            return redirect('service_provider_list')
     else:
         form = ServiceProviderForm(instance=provider)
     context = {
@@ -479,24 +427,18 @@ def edit_service_provider(request, provider_id):
     }
     return render(request, 'fleetApp/serviceProvider/edit_service_provider.html', context)
 
-
 @login_required
 def delete_service_provider(request, provider_id):
     provider = get_object_or_404(ServiceProvider, id=provider_id)
     if request.method == 'POST':
         provider.delete()
-        messages.success(request, "Service provider deleted successfully!")
-        return redirect('home')
-    #else:
-     #   messages.error(request, "Failed to delete service provider. Please try again.")
+        return redirect('service_provider_list')
     context = {
         'provider': provider
     }
     return render(request, 'fleetApp/serviceProvider/delete_service_provider.html', context)
 
-
-######################################## Service Views #######################################################
-
+######################################## This Section for Service Views #######################################################
 @login_required
 def service_list(request):
     services = Service.objects.select_related('vehicle', 'service_provider').all()
@@ -505,24 +447,19 @@ def service_list(request):
     }
     return render(request, 'fleetApp/service/services.html', context)
 
-
 @login_required
 def add_service(request):
     if request.method == 'POST':
         form = ServiceForm(request.POST)
         if form.is_valid():
             form.save()
-            messages.success(request, "Service added successfully!")
-            return redirect('home')
-        else:
-            messages.error(request, "Failed to add service. Please check the form.")
+            return redirect('service_list')
     else:
         form = ServiceForm()
     context = {
         'form': form
     }
     return render(request, 'fleetApp/service/add_service.html', context)
-
 
 @login_required
 def edit_service(request, service_id):
@@ -531,10 +468,7 @@ def edit_service(request, service_id):
         form = ServiceForm(request.POST, instance=service)
         if form.is_valid():
             form.save()
-            messages.success(request, "Service updated successfully!")
-            return redirect('home')
-        else:
-            messages.error(request, "Failed to update service. Please check the form.")
+            return redirect('service_list')
     else:
         form = ServiceForm(instance=service)
     context = {
@@ -543,36 +477,36 @@ def edit_service(request, service_id):
     }
     return render(request, 'fleetApp/service/edit_service.html', context)
 
-
 @login_required
 def delete_service(request, service_id):
     service = get_object_or_404(Service, id=service_id)
     if request.method == 'POST':
         service.delete()
-        messages.success(request, "Service deleted successfully!")
-        return redirect('home')
-    #else:
-        #messages.error(request, "Failed to delete service. Please try again.")
+        return redirect('service_list')
     context = {
         'service': service
     }
     return render(request, 'fleetApp/service/delete_service.html', context)
 
-
-######################################## Registration Views #######################################################
-
+######################################## This Section for Registration Views #######################################################
 def sign_up_view(request):
     if request.method == "POST":
         form = UserCreationForm(request.POST)
         if form.is_valid():
             form.save()
-            messages.success(request, "User signed up successfully!")
-            return redirect('login')
+            message = "User signed up Successfuly"
+            return redirect('home')
         else:
-            messages.error(request, "Sign up failed. Please check the form.")
+            message = "SignUp Error"
     else:
-        form = UserCreationForm()
+        form = UserCreationForm
     context = {
         'form': form,
     }
-    return render(request, 'registration/sign_up.html', context)
+    return render(request, 'registration/sign_up.html', context)   
+
+
+
+
+
+

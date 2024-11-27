@@ -23,7 +23,7 @@
         <!-- Requestors Tab -->
         <div class="tab-pane fade show active" id="requestors" role="tabpanel" aria-labelledby="requestors-tab">
             <button type="button" class="btn btn-primary my-3" data-bs-toggle="modal" data-bs-target="#addRequestorModal">
-                Add Requestor
+                <i class="bi bi-person-plus"></i> Add Requestor
             </button>
             <table class="table table-striped">
                 <thead>
@@ -43,9 +43,15 @@
                         <td>{{ requestor.contact }}</td>
                         <td>{{ requestor.email_address }}</td>
                         <td>
-                            <a href="{% url 'edit_requestor' requestor.id %}" class="btn btn-sm btn-warning">Edit</a>
-                            <a href="{% url 'delete_requestor' requestor.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this requestor?');">Delete</a>
-                            <a href="{% url 'add_request' requestor.id %}" class="btn btn-sm btn-primary">Add Request</a>
+                            <a href="{% url 'edit_requestor' requestor.id %}" class="btn btn-sm btn-warning">
+                                <i class="bi bi-pencil-square"></i> <!-- Edit Icon -->
+                            </a>
+                            <a href="{% url 'delete_requestor' requestor.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this requestor?');">
+                                <i class="bi bi-trash"></i> <!-- Delete Icon -->
+                            </a>
+                            <a href="{% url 'add_request' requestor.id %}" class="btn btn-sm btn-primary">
+                                <i class="bi bi-plus-circle"></i> <!-- Add Request Icon -->
+                            </a>
                         </td>
                     </tr>
                     {% endfor %}
@@ -90,40 +96,14 @@
                             {% endif %}
                         </td>
                         <td>
-                            <a href="{% url 'edit_request' request.id %}" class="btn btn-sm btn-warning">Edit</a>
-                            <a href="{% url 'delete_request' request.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this request?');">Delete</a>
-                           
+                            <a href="{% url 'edit_request' request.id %}" class="btn btn-sm btn-warning">
+                                <i class="bi bi-pencil-square"></i> <!-- Edit Icon -->
+                            </a>
+                            <a href="{% url 'delete_request' request.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this request?');">
+                                <i class="bi bi-trash"></i> <!-- Delete Icon -->
+                            </a>
                         </td>
                     </tr>
-
-                    <!-- Approve Request Modal -->
-                    <div class="modal fade" id="approveRequestModal{{ request.id }}" tabindex="-1" aria-labelledby="approveRequestModalLabel{{ request.id }}" aria-hidden="true">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <form method="POST" action="{% url 'approve_request' request.id %}">
-                                    {% csrf_token %}
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="approveRequestModalLabel{{ request.id }}">Assign Vehicle to Requestor</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <div class="mb-3">
-                                            <label for="vehicle{{ request.id }}" class="form-label">Select Vehicle</label>
-                                            <select class="form-select" id="vehicle{{ request.id }}" name="vehicle" required>
-                                                {% for vehicle in vehicles %}
-                                                <option value="{{ vehicle.id }}">{{ vehicle.vehicle_plate }}</option>
-                                                {% endfor %}
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                        <button type="submit" class="btn btn-success">Assign</button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
                     {% endfor %}
                 </tbody>
             </table>
@@ -146,7 +126,9 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-success">Save Requestor</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-save"></i> Save Requestor
+                    </button>
                 </div>
             </form>
         </div>
