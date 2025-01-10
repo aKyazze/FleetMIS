@@ -60,7 +60,7 @@
         </div>
 
         <!-- Requests Tab -->
-        <div class="tab-pane fade" id="requests" role="tabpanel" aria-labelledby="requests-tab">
+        <div class="tab-pane fade" id="requests" role="tabanel" aria-labelledby="requests-tb">
             <table class="table table-striped">
                 <thead>
                     <tr>
@@ -119,7 +119,6 @@
                 {% csrf_token %}
                 <div class="modal-header">
                     <h5 class="modal-title" id="addRequestorModalLabel">Add New Requestor</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     {{ requestor_form.as_p }}
