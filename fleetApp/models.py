@@ -1,6 +1,8 @@
 from django.db import models
+from django.contrib.auth.models import User
 from django.utils import timezone 
 # Create your models here.
+
 # Vehicle Entity:
 class Vehicle(models.Model):
   ENGIN = [
@@ -11,14 +13,14 @@ class Vehicle(models.Model):
   ]
   STATUS = [
     ("Av", "Available"), 
-    ("Al", "Allocated")
+    ("Allocated", "Allocated")
   ]
  # vehicle_id = models.AutoField(primary_key=True)
   vehicle_plate = models.CharField(max_length=20)
   vehicle_type = models.CharField(max_length=50)
   mileage = models.PositiveIntegerField()
   engine_type = models.CharField(max_length=4, choices=ENGIN)
-  status = models.CharField(max_length=2, choices=STATUS, default="Available")
+  status = models.CharField(max_length=9, choices=STATUS, default="Available")
   
   def __str__(self):
       return f"{self.vehicle_plate} {self.vehicle_type} ({self.mileage})- {self.status}"
@@ -26,7 +28,8 @@ class Vehicle(models.Model):
   def return_vehicle(self):
       self.status = 'Available'
       self.save()
-  
+      
+
 #Driver Entity:
 class Driver(models.Model):
   GENDER_OPTION = [
@@ -46,6 +49,7 @@ class Driver(models.Model):
 #Requisition Entities:
 # Requestor Model
 class Requestor(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=50)
     contact = models.CharField(max_length=20)
     email_address = models.EmailField()
@@ -60,7 +64,8 @@ class Request(models.Model):
         ("O", "Open"),
         ("C", "Closed"),
     ]
-    requestor = models.ForeignKey(Requestor, on_delete=models.CASCADE, related_name="requests")
+    requestor = models.ForeignKey(User, on_delete=models.CASCADE, related_name="requests")
+    #requestor = models.ForeignKey(Requestor, on_delete=models.CASCADE, related_name="requests")
     request_date = models.DateField(auto_now_add=True)
     current_location = models.CharField(max_length=50)
     destination = models.CharField(max_length=50)

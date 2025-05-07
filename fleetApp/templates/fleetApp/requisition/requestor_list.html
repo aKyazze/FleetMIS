@@ -1,6 +1,6 @@
 {% extends "main.html" %}
 {% load crispy_forms_tags %}
-{% block title %}Requestors{% endblock %}
+{% block title %}Staff{% endblock %}
 {% block content %}
 <a href="{% url 'add_requestor' %}" class="btn btn-primary">Add Requestor</a>
 <table class="table">
@@ -10,7 +10,6 @@
             <th>Name</th>
             <th>Contact</th>
             <th>Email</th>
-            <th>Actions</th>
         </tr>
     </thead>
     <tbody>
@@ -20,9 +19,6 @@
             <td>{{ requestor.name }}</td>
             <td>{{ requestor.contact }}</td>
             <td>{{ requestor.email_address }}</td>
-            <td>
-                <a href="{% url 'add_request' requestor.id %}" class="btn btn-primary btn-sm">New Request</a>
-            </td>
         </tr>
         {% endfor %}
     </tbody>

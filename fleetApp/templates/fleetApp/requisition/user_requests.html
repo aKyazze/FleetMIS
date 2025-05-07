@@ -1,0 +1,26 @@
+{% extends "main.html" %}
+{% block content %}
+<h3 class="text-white">My Vehicle Requests</h3>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Vehicle</th>
+            <th>Status</th>
+            <th>Date Requested</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for req in requests %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ req.vehicle }}</td>
+            <td>{{ req.request_status }}</td>
+            <td>{{ req.request_date }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4">No requests found.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

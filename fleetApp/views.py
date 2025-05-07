@@ -1,11 +1,19 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.utils.timezone import now
+#from django.utils.timezone import now
+from django.utils import timezone 
 from django.db.models import F, ExpressionWrapper, IntegerField
 from django.contrib import messages
 from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import Group
+from django.contrib.auth.decorators import login_required, user_passes_test
 from .models import Vehicle, Driver, Requestor, Request, ServiceProvider, Service
 from .forms import VehicleForm, VehicleAllocationForm, DriverForm, ServiceProviderForm, ServiceForm, RequestorForm, RequestForm, RequestApprovalForm, VehicleReturnForm
+
+
+#Updated imports
+#from .models import Staff, FleetManager, Vehicle, Driver, ServiceProvider, Service, GSMsensorData, Alert
+#from .forms import StaffForm, FleetManagerForm, VehicleForm, VehicleAllocationForm, DriverForm, ServiceProviderForm, ServiceForm, RequestApprovalForm, VehicleReturnForm, SensorDataForm, AlertForm
+
 
 MESSAGE_TAGS = {
     messages.DEBUG: 'debug',
@@ -15,6 +23,93 @@ MESSAGE_TAGS = {
     messages.ERROR: 'danger',
 }
 # Create your views here.
+############################################################################################
+######################### LOGIN VIEWSS #####################################################
+@login_required
+def login_redirect_view(request):
+    user = request.user
+    if user.groups.filter(name='Admins').exists():
+        return redirect('admin_dashboard')
+    elif user.groups.filter(name='FleetManagers').exists():
+        return redirect('fleet_manager_dashboard')
+    elif user.groups.filter(name='FleetUsers').exists():
+        return redirect('fleet_user_dashboard')
+    else:
+        return redirect('default_dashboard')  # Optional fallback
+    
+
+def is_admin(user):
+    return user.groups.filter(name='Admins').exists()
+
+@user_passes_test(is_admin)
+def admin_dashboard(request):
+    ...
+
+def is_fleet_manager(user):
+    return user.groups.filter(name='FleetManagers').exists()
+
+@user_passes_test(is_fleet_manager)
+def fleet_dashboard(request):
+    ...
+
+@login_required
+def user_requests(request):
+    # Get filter from query string (?status=pending or ?status=closed)
+    status_filter = request.GET.get('status')
+
+    # Apply filter logic
+    if status_filter == 'pending':
+        requests = Request.objects.filter(requestor=request.user, request_status='P')
+    elif status_filter == 'closed':
+        requests = Request.objects.filter(requestor=request.user, request_status='C')
+    else:
+        requests = Request.objects.filter(requestor=request.user)
+
+    # Pass selected status for template use (e.g., UI highlighting)
+    context = {
+        'requests': requests,
+        'selected_status': status_filter
+    }
+
+    return render(request, 'fleetApp/requisition/user_requests.html', context)
+
+################################################################################################################
+######################################## SECTION FOR Registration Views ########################################
+
+def sign_up_view(request):
+    if request.method == "POST":
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "User signed up successfully!")
+            return redirect('login')
+        else:
+            messages.error(request, "Sign up failed. Please check the form.")
+    else:
+        form = UserCreationForm()
+    context = {
+        'form': form,
+    }
+    return render(request, 'registration/sign_up.html', context)
+
+@login_required
+def register_user(request):
+    if request.method == "POST":
+        form = CustomUserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            fleet_users_group = Group.objects.get(name="FleetUsers")
+            user.groups.add(fleet_users_group)
+
+            # Create a corresponding Requestor profile
+            Requestor.objects.get_or_create(user=user)
+            
+            messages.success(request, "User registered and added to staff list.")
+            return redirect("requestor_list")
+
+####################################################################################################
+##################################### MAIN & HOME SECTION ##########################################
+
 #This is the Main view
 @login_required
 def main_view(request):
@@ -43,25 +138,84 @@ def home_view(request):
     }
     return render(request, 'fleetApp/base/home.html', context)
 
-################################### This Section for Vehicle Views ######################################################
+####################################################################################################
+##################################### STAFF VIEWS SECTION ##########################################
+# Staff
 @login_required
-def vehicle_view(request):
-    # Get all vehicles
-    vehicles = Vehicle.objects.all()
-    # Get all closed requests and annotate usage
-    requests = Request.objects.filter(request_status="C").annotate(
-        usage_summary=ExpressionWrapper(
-            F('mileage_at_return') - F('mileage_at_assignment'), 
-            output_field=IntegerField()
-        )
-    )
-    
-    context = {
-        'vehicles': vehicles,
-        'requests': requests,
-    }
-    return render(request, 'fleetApp/vehicle/vehicles.html', context)
+def add_staff(request):
+    if request.method == 'POST':
+        form = StaffForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('staff_list')
+    else:
+        form = StaffForm()
+    return render(request, 'fleetmisApp/staff_form.html', {'form': form})
 
+@login_required
+def staff_list(request):
+    staff = Staff.objects.all()
+    return render(request, 'fleetmisApp/staff_list.html', {'staff': staff})
+
+@login_required
+def edit_staff(request, staff_id):
+    staff = get_object_or_404(Staff, id=staff_id)
+    if request.method == 'POST':
+        form = StaffForm(request.POST, instance=staff)
+        if form.is_valid():
+            form.save()
+            return redirect('staff_list')
+    else:
+        form = StaffForm(instance=staff)
+    return render(request, 'fleetmisApp/staff_form.html', {'form': form})
+
+@login_required
+def delete_staff(request, staff_id):
+    staff = get_object_or_404(Staff, id=staff_id)
+    if request.method == 'POST':
+        staff.delete()
+        return redirect('staff_list')
+    return render(request, 'fleetmisApp/staff_confirm_delete.html', {'staff': staff})
+
+
+############################################################################################################
+##################################### FLEET MANAGER VIEWS SECTION ##########################################
+
+@login_required
+def fleet_management_view(request):
+    requestors = Requestor.objects.all()
+    requests = Request.objects.select_related('requestor', 'vehicle').all()
+    vehicles = Vehicle.objects.filter(status="Allocated")  # Only allocated vehicles
+    requestor_form = RequestorForm()
+    context = {
+        'requestors': requestors,
+        'requests': requests,
+        'vehicles': vehicles,
+        'requestor_form': requestor_form,
+    }
+    return render(request, 'fleetApp/requisition/requisitions.html', context)
+
+
+# Fleet Manager
+@login_required
+def fleet_manager_list(request):
+    managers = FleetManager.objects.all()
+    return render(request, 'fleetmisApp/fleet_manager_list.html', {'managers': managers})
+
+@login_required
+def add_fleet_manager(request):
+    if request.method == 'POST':
+        form = FleetManagerForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('fleet_manager_list')
+    else:
+        form = FleetManagerForm()
+    return render(request, 'fleetmisApp/fleet_manager_form.html', {'form': form})
+
+
+############################################################################################
+################################### This Section for Vehicle Views #########################
 # Create or Add a New Vehicle View
 @login_required
 def add_vehicle(request):
@@ -80,6 +234,26 @@ def add_vehicle(request):
         'form': form
     }
     return render(request, 'fleetApp/vehicle/add_vehicle.html', context)
+
+#Vehicle List
+@login_required
+def vehicle_view(request):
+    # Get all vehicles
+    vehicles = Vehicle.objects.all()
+    # Get all closed requests and annotate usage
+    requests = Request.objects.filter(request_status="C").annotate(
+        usage_summary=ExpressionWrapper(
+            F('mileage_at_return') - F('mileage_at_assignment'), 
+            output_field=IntegerField()
+        )
+    )
+    
+    context = {
+        'vehicles': vehicles,
+        'requests': requests,
+    }
+    return render(request, 'fleetApp/vehicle/vehicles.html', context)
+
 
 # Update or Edit Vehicle View
 @login_required
@@ -113,6 +287,7 @@ def vehicle_delete(request, vehicle_id):
     else:
         context = {'vehicle': vehicle}
         return render(request, 'fleetApp/vehicle/vehicle_confirm_delete.html', context)
+
 # Assign or Allocate a Vehicle View 
 @login_required
 def allocate_vehicle(request, vehicle_id):
@@ -122,7 +297,7 @@ def allocate_vehicle(request, vehicle_id):
         form = VehicleAllocationForm(request.POST)
         if form.is_valid():
             driver = form.cleaned_data['driver']
-            request_instance = form.cleaned_data['request']  # Ensure the request instance is passed
+           # request_instance = form.cleaned_data['request']  # Ensure the request instance is passed
 
             # Allocate the vehicle to the selected driver
             driver.vehicle = vehicle
@@ -133,11 +308,11 @@ def allocate_vehicle(request, vehicle_id):
             vehicle.save()
 
             # Update request instance with mileage at assignment and allocation time
-            request_instance.vehicle = vehicle
-            request_instance.mileage_at_assignment = vehicle.mileage  # Capture mileage
-            request_instance.time_of_allocation = now()
-            request_instance.request_status = "O"  # Mark request as Open
-            request_instance.save()
+            #request_instance.vehicle = vehicle
+           # request_instance.mileage_at_assignment = vehicle.mileage  # Capture mileage
+            #request_instance.time_of_allocation = now()
+          #  request_instance.request_status = "O"  # Mark request as Open
+           # request_instance.save()
 
             messages.success(request, "Vehicle allocated successfully!")
             return redirect('home')
@@ -164,6 +339,7 @@ def return_vehicle(request, vehicle_id):
             
             # Update the vehicle and request status
             vehicle.status = 'Available'
+            vehicle.mileage = mileage_at_return
             driver = Driver.objects.filter(vehicle=vehicle).first()
             if driver:
                 driver.vehicle = None
@@ -171,7 +347,10 @@ def return_vehicle(request, vehicle_id):
 
             request_obj = Request.objects.filter(vehicle=vehicle, request_status="O").first()
             if request_obj:
-                request_obj.close_request(mileage_at_return)
+                #request_obj.close_request(mileage_at_return)
+                request_obj.mileage_at_return = mileage_at_return
+                request_obj.request_status = "C"
+                request_obj.save()
 
             vehicle.save()
 
@@ -185,25 +364,8 @@ def return_vehicle(request, vehicle_id):
     return render(request, 'fleetApp/vehicle/return_vehicle.html', {'vehicle': vehicle, 'form': form})
 
 
-######################################## Driver Views #######################################################
-
-# Driver List View 
-@login_required
-def drivers_list(request):
-    drivers = Driver.objects.select_related('vehicle').all()  # Get drivers with their associated vehicles
-    # Loop through drivers to ensure "Unassigned" is shown if no vehicle is assigned
-    for driver in drivers:
-        if not driver.vehicle:
-            driver.vehicle_plate = "Unassigned"  # Set the vehicle_plate to "Unassigned" if no vehicle is assigned
-        else:
-            driver.vehicle_plate = driver.vehicle.vehicle_plate  # Otherwise, display the vehicle plate
-    form = DriverForm()  # Driver form (if needed for adding new drivers)
-    context = {
-        'drivers': drivers,
-        'form': form
-    }
-    return render(request, 'fleetApp/driver/drivers.html', context)
-
+#############################################################################################################
+######################################## SECTION FOR Driver Views ###########################################
 
 # New Driver View 
 @login_required
@@ -222,6 +384,24 @@ def add_driver(request):
         'form': form
     }
     return render(request, 'fleetApp/driver/add_driver.html', context)
+
+
+# Driver List View 
+@login_required
+def drivers_list(request):
+    drivers = Driver.objects.select_related('vehicle').all()  # Get drivers with their associated vehicles
+    # Loop through drivers to ensure "Unassigned" is shown if no vehicle is assigned
+    for driver in drivers:
+        if not driver.vehicle:
+            driver.vehicle_plate = "Unassigned"  # Set the vehicle_plate to "Unassigned" if no vehicle is assigned
+        else:
+            driver.vehicle_plate = driver.vehicle.vehicle_plate  # Otherwise, display the vehicle plate
+    form = DriverForm()  # Driver form (if needed for adding new drivers)
+    context = {
+        'drivers': drivers,
+        'form': form
+    }
+    return render(request, 'fleetApp/driver/drivers.html', context)
 
 
 # Driver Update View 
@@ -261,17 +441,8 @@ def delete_driver(request, driver_id):
     return render(request, 'fleetApp/driver/driver_delete.html', context)
 
 
-######################################## Requisition Views #######################################################
-
-# List all requestors
-@login_required
-def requestor_list(request):
-    requestors = Requestor.objects.all()
-    context = {
-        'requestors': requestors
-    }
-    return render(request, 'fleetApp/requisition/requestor_list.html', context)
-
+###############################################################################################################
+######################################## SECTION FOR Requisition Views ########################################
 
 # Add a requestor
 @login_required
@@ -291,6 +462,14 @@ def add_requestor(request):
     }
     return render(request, 'fleetApp/requisition/add_requestor.html', context)
 
+# List all requestors
+@login_required
+def requestor_list(request):
+    requestors = Requestor.objects.all()
+    context = {
+        'requestors': requestors
+    }
+    return render(request, 'fleetApp/requisition/requestor_list.html', context)
 
 # Update Requestor
 @login_required
@@ -323,6 +502,35 @@ def delete_requestor(request, requestor_id):
         'requestor': requestor
     }
     return render(request, 'fleetApp/requisition/delete_requestor.html', context)
+
+
+##################################################################################################################
+################################################## SECTION FOR Requests ##########################################
+@login_required
+def add_request(request):
+    try:
+        requestor = request.user.requestor  # Assumes OneToOne relation
+    except Requestor.DoesNotExist:
+        messages.error(request, "No requestor profile found for this user.")
+        return redirect('home')
+
+    if request.method == 'POST':
+        form = RequestForm(request.POST)
+        if form.is_valid():
+            new_request = form.save(commit=False)
+            #new_request.requestor = requestor
+            new_request.requestor = request.user
+            new_request.save()
+            messages.success(request, "Request added successfully!")
+            return redirect('user_requests')
+    else:
+        form = RequestForm()
+    
+    context = {
+        'form': form,
+        'requestor': requestor
+    }
+    return render(request, 'fleetApp/requisition/add_request.html', context)
 
 @login_required
 def edit_request(request, request_id):
@@ -371,26 +579,6 @@ def request_list(request):
     return render(request, 'fleetApp/requisition/request_list.html', context)
 
 
-# Add a new request
-@login_required
-def add_request(request, requestor_id):
-    requestor = get_object_or_404(Requestor, id=requestor_id)
-    if request.method == 'POST':
-        form = RequestForm(request.POST)
-        if form.is_valid():
-            new_request = form.save(commit=False)
-            new_request.requestor = requestor
-            new_request.save()
-            messages.success(request, "Request added successfully!")
-            return redirect('home')
-    else:
-        form = RequestForm()
-    context = {
-        'form': form, 
-        'requestor': requestor
-    }
-    return render(request, 'fleetApp/requisition/add_request.html', context)
-
 # Approve a request
 @login_required
 def approve_request(request, request_id):
@@ -399,48 +587,40 @@ def approve_request(request, request_id):
         selected_vehicle_id = request.POST.get('vehicle')
         selected_vehicle = get_object_or_404(Vehicle, id=selected_vehicle_id)
 
-        # Assign the vehicle and update the request
         request_obj.vehicle = selected_vehicle
         request_obj.request_status = "O"  # Open (Allocated)
-        request_obj.time_of_allocation
+        request_obj.time_of_allocation = timezone.now()
         request_obj.save()
 
-        # Update the vehicle status
         selected_vehicle.status = "Al"  # Allocated
         selected_vehicle.save()
 
         messages.success(request, "Request approved successfully!")
-        return redirect('home')  # Redirect to the fleet management view
+        return redirect('requisitions')  # or 'home' as you prefer
     return redirect('requisitions')
-
-@login_required
-def fleet_management_view(request):
-    requestors = Requestor.objects.all()
-    requests = Request.objects.select_related('requestor', 'vehicle').all()
-    vehicles = Vehicle.objects.filter(status="Allocated")  # Only allocated vehicles
-    requestor_form = RequestorForm()
-    context = {
-        'requestors': requestors,
-        'requests': requests,
-        'vehicles': vehicles,
-        'requestor_form': requestor_form,
-    }
-    return render(request, 'fleetApp/requisition/requisitions.html', context)
 
 @login_required
 def request_summary(request):
     # Fetch all requests
     requests = Request.objects.all()
-    # Pass to the template
-    return render(request, "fleetApp/requisition/request_summary.html", {"requests": requests})
+    vehicles = Vehicle.objects.filter(status='Av')  # Only show available vehicles
 
+    # Add covered_mileage attribute to each request
+    for req in requests:
+        if req.mileage_at_assignment is not None and req.mileage_at_return is not None:
+            req.covered_mileage = req.mileage_at_return - req.mileage_at_assignment
+        else:
+            req.covered_mileage = None
+
+    # Pass to template
+    return render(request, "fleetApp/requisition/requisitions.html", {
+        "requests": requests,
+        "vehicles": vehicles
+    })
+
+
+#######################################################################################################################################
 ######################################## This Section for Service Provider Views #######################################################
-# ServiceProvider Views
-@login_required
-def service_provider_list(request):
-    providers = ServiceProvider.objects.all()
-    context = {'providers': providers}
-    return render(request, 'fleetApp/serviceProvider/service_providers.html', context)
 
 @login_required
 def add_service_provider(request):
@@ -458,6 +638,13 @@ def add_service_provider(request):
         'form': form
     }
     return render(request, 'fleetApp/serviceProvider/add_service_provider.html', context)
+
+# ServiceProvider Views
+@login_required
+def service_provider_list(request):
+    providers = ServiceProvider.objects.all()
+    context = {'providers': providers}
+    return render(request, 'fleetApp/serviceProvider/service_providers.html', context)
 
 
 @login_required
@@ -495,16 +682,8 @@ def delete_service_provider(request, provider_id):
     return render(request, 'fleetApp/serviceProvider/delete_service_provider.html', context)
 
 
-######################################## Service Views #######################################################
-
-@login_required
-def service_list(request):
-    services = Service.objects.select_related('vehicle', 'service_provider').all()
-    context = {
-        'services': services
-    }
-    return render(request, 'fleetApp/service/services.html', context)
-
+#####################################################################################################################
+######################################## SECTION FOR Service Views ##################################################
 
 @login_required
 def add_service(request):
@@ -522,6 +701,15 @@ def add_service(request):
         'form': form
     }
     return render(request, 'fleetApp/service/add_service.html', context)
+
+
+@login_required
+def service_list(request):
+    services = Service.objects.select_related('vehicle', 'service_provider').all()
+    context = {
+        'services': services
+    }
+    return render(request, 'fleetApp/service/services.html', context)
 
 
 @login_required
@@ -559,20 +747,18 @@ def delete_service(request, service_id):
     return render(request, 'fleetApp/service/delete_service.html', context)
 
 
-######################################## Registration Views #######################################################
+####################################################################################################
+##################################### GSM & ALERT VIEW SECTION ##########################################
 
-def sign_up_view(request):
-    if request.method == "POST":
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "User signed up successfully!")
-            return redirect('login')
-        else:
-            messages.error(request, "Sign up failed. Please check the form.")
-    else:
-        form = UserCreationForm()
-    context = {
-        'form': form,
-    }
-    return render(request, 'registration/sign_up.html', context)
+# GSM Sensor Data
+
+def sensor_data_list(request):
+    data = GSMsensorData.objects.all()
+    return render(request, 'fleetmisApp/sensor_data_list.html', {'data': data})
+
+# Alerts
+
+def alert_list(request):
+    alerts = Alert.objects.all()
+    return render(request, 'fleetmisApp/alert_list.html', {'alerts': alerts})
+

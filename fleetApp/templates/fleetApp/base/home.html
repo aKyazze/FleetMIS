@@ -1,105 +1,130 @@
 {% extends "main.html" %}
+{% load group_tags %}
 {% load crispy_forms_tags %}
+
 {% block title %}Dashboard | Fleet Management{% endblock %}
+
 {% block content %}
-<div class="layout-wrapper">
-    <!-- Main Content -->
-    <div class="layout-main">
-        <!-- Header -->
-        {% if messages %}
-        <div class="container mt-3">
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+<div class="container-fluid py-4">
+
+    <!-- Flash Messages 
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+            -->
+    <!-- Header -->
+    <div class="mb-4">
+        <h1 class="fw-bold text-dark">Dashboard Overview</h1>
+        <p class="text-muted">Quick summary of current fleet operations and requisitions.</p>
+    </div>
+
+    {% if user|has_group:"FleetUsers" %}
+    <!-- Fleet User View -->
+    <div class="row g-4">
+        <!-- Pending Requests -->
+        <div class="col-lg-6 col-md-12">
+            <div class="card bg-info text-white shadow-sm h-100 d-flex flex-column justify-content-between">
+                <div class="card-body">
+                    <h5>Pending Requests</h5>
+                    <h2 class="fw-bold">{{ total_pending_requests }}</h2>
+                    <a href="{% url 'user_requests' %}?status=pending" class="btn btn-outline-light mt-3 w-100">View my Pending</a>
                 </div>
-            {% endfor %}
+            </div>
         </div>
-        {% endif %}
 
-        <header class="layout-header">
-            <h1 class="dashboard-title">Dashboard Overview</h1>
-        </header>
-
-        <!-- Metrics Cards -->
-        <div class="dashboard-cards row">
-            <!-- Total Vehicles -->
-            <div class="col-lg-3 col-md-6 mb-4">
-                <div class="card shadow-sm bg-primary text-white">
-                    <div class="card-body">
-                        <h5>Total Vehicles</h5>
-                        <h2>{{ total_vehicles }}</h2>
-                    </div>
-                    <a href="{% url 'vehicle' %}" class="btn btn-secondary">Vehicles</a>
-                </div>
-            </div>
-
-            <!-- Total Drivers -->
-            <div class="col-lg-3 col-md-6 mb-4">
-                <div class="card shadow-sm bg-success text-white">
-                    <div class="card-body">
-                        <h5>Total Drivers</h5>
-                        <h2>{{ total_drivers }}</h2>
-                    </div>
-                    <a href="{% url 'drivers' %}" class="btn btn-secondary">Drivers</a>
-                </div>
-            </div>
-
-            <!-- Total Requestors -->
-            <div class="col-lg-3 col-md-6 mb-4">
-                <div class="card shadow-sm bg-warning text-white">
-                    <div class="card-body">
-                        <h5>Total Requestors</h5>
-                        <h2>{{ total_requestors }}</h2>
-                    </div>
-                    <a href="{% url 'requisitions' %}" class="btn btn-secondary">Requestors</a>
-                </div>
-            </div>
-
-            <!-- Total Service Providers -->
-            <div class="col-lg-3 col-md-6 mb-4">
-                <div class="card shadow-sm bg-secondary text-white">
-                    <div class="card-body">
-                        <h5>Total Service Providers</h5>
-                        <h2>{{ total_service_providers }}</h2>
-                    </div>
-                    <a href="{% url 'service_provider_list' %}" class="btn btn-secondary">Service Providers</a>
-                </div>
-            </div>
-
-            <!-- Total Services -->
-            <div class="col-lg-3 col-md-6 mb-4">
-                <div class="card shadow-sm bg-dark text-white">
-                    <div class="card-body">
-                        <h5>Total Services</h5>
-                        <h2>{{ total_services }}</h2>
-                    </div>
-                    <a href="{% url 'service_list' %}" class="btn btn-secondary">Serviced Vehicles</a>
-                </div>
-            </div>
-
-            <!-- Pending Requests -->
-            <div class="col-lg-3 col-md-6 mb-4">
-                <div class="card shadow-sm bg-info text-white">
-                    <div class="card-body">
-                        <h5>Pending Requests</h5>
-                        <h2>{{ total_pending_requests }}</h2>
-                    </div>
-                    <a href="{% url 'request_list' %}?status=pending" class="btn btn-secondary">View Pending</a>
-                </div>
-            </div>
-
-            <!-- Completed Requests -->
-            <div class="col-lg-3 col-md-6 mb-4">
-                <div class="card shadow-sm bg-success text-white">
-                    <div class="card-body">
-                        <h5>Completed Requests</h5>
-                        <h2>{{ total_completed_requests }}</h2>
-                    </div>
-                    <a href="{% url 'request_list' %}?status=closed" class="btn btn-secondary">View Closed</a>
+        <!-- Completed Requests -->
+        <div class="col-lg-6 col-md-12">
+            <div class="card bg-success text-white shadow-sm h-100 d-flex flex-column justify-content-between">
+                <div class="card-body">
+                    <h5>Completed Requests</h5>
+                    <h2 class="fw-bold">{{ total_completed_requests }}</h2>
+                    <a href="{% url 'user_requests' %}?status=closed" class="btn btn-outline-light mt-3 w-100">View my Closed</a>
                 </div>
             </div>
         </div>
     </div>
+    {% elif user|has_group:"FleetManagers" or user.is_superuser %}
+        <!-- Fleet Manager or Admin View -->
+        <div class="row g-4">
+            <!-- Vehicles -->
+            <div class="col-lg-3 col-md-6">
+                <div class="card bg-primary text-white shadow-sm h-100">
+                    <div class="card-body">
+                        <h5>Total Vehicles</h5>
+                        <h2 class="fw-bold">{{ total_vehicles }}</h2>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Drivers -->
+            <div class="col-lg-3 col-md-6">
+                <div class="card bg-success text-white shadow-sm h-100">
+                    <div class="card-body">
+                        <h5>Total Drivers</h5>
+                        <h2 class="fw-bold">{{ total_drivers }}</h2>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Requestors -->
+            <div class="col-lg-3 col-md-6">
+                <div class="card bg-warning text-white shadow-sm h-100">
+                    <div class="card-body">
+                        <h5>Total Requestors</h5>
+                        <h2 class="fw-bold">{{ total_requestors }}</h2>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Service Providers -->
+            <div class="col-lg-3 col-md-6">
+                <div class="card bg-secondary text-white shadow-sm h-100">
+                    <div class="card-body">
+                        <h5>Service Providers</h5>
+                        <h2 class="fw-bold">{{ total_service_providers }}</h2>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Services -->
+            <div class="col-lg-3 col-md-6">
+                <div class="card bg-dark text-white shadow-sm h-100">
+                    <div class="card-body">
+                        <h5>Total Services</h5>
+                        <h2 class="fw-bold">{{ total_services }}</h2>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pending Requests -->
+            <div class="col-lg-3 col-md-6">
+                <div class="card bg-info text-white shadow-sm h-100 d-flex flex-column justify-content-between">
+                    <div class="card-body">
+                        <h5>Pending Requests</h5>
+                        <h2 class="fw-bold">{{ total_pending_requests }}</h2>
+                        <a href="{% url 'request_list' %}?status=pending" class="btn btn-outline-light mt-3 w-100">View Pending</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Completed Requests -->
+            <div class="col-lg-3 col-md-6">
+                <div class="card bg-success text-white shadow-sm h-100 d-flex flex-column justify-content-between">
+                    <div class="card-body">
+                        <h5>Completed Requests</h5>
+                        <h2 class="fw-bold">{{ total_completed_requests }}</h2>
+                        <a href="{% url 'request_list' %}?status=closed" class="btn btn-outline-light mt-3 w-100">View Closed</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <p class="text-danger">You do not have access to any dashboard features. Please contact admin.</p>
+    {% endif %}
 </div>
 {% endblock %}

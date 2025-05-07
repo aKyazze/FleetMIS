@@ -15,7 +15,7 @@
       <td>{{ request.vehicle.vehicle_plate if request.vehicle else "None" }}</td>
       <td>{{ request.mileage_at_assignment|default:"None" }}</td>
       <td>{{ request.mileage_at_return|default:"None" }}</td>
-      <td>{{ request.usage_summary }}</td>
+      <td>{{ request.request_summary }}</td>
     </tr>
     {% endfor %}
   </tbody>

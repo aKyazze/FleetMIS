@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+     'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -42,6 +43,7 @@ INSTALLED_APPS = [
     'fleetApp', 
     'crispy_forms',
      'crispy_bootstrap4',
+   
 ]
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
@@ -134,6 +136,18 @@ STATICFILES_DIRS = [
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+LOGIN_REDIRECT_URL = '/redirect-after-login/'  # Pointing to login_redirect_view
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'login'
 
+JAZZMIN_SETTINGS = {
+    "site_title": "Fleet MIS",
+      "copyright": "UTCL",
+      
+      "topmenu_links": [
+        {"app": "fleetApp"},
+    ],
+ "show_ui_builder": True,
+
+    
+}

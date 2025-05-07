@@ -1,3 +1,6 @@
+
+# This is the old Version
+
 from django import forms
 from .models import Vehicle, Driver, Requestor, Request, ServiceProvider, Service
 
@@ -11,7 +14,7 @@ class VehicleForm(forms.ModelForm):
     
 class VehicleAllocationForm(forms.Form):
     driver = forms.ModelChoiceField(queryset=Driver.objects.filter(vehicle__isnull=True))
-    request = forms.ModelChoiceField(queryset=Request.objects.filter(request_status="P"))  # Pending requests only
+   # request = forms.ModelChoiceField(queryset=Request.objects.filter(request_status="P"))  # Pending requests only
 
 class DriverForm(forms.ModelForm):
     class Meta:
@@ -21,7 +24,7 @@ class DriverForm(forms.ModelForm):
 class RequestorForm(forms.ModelForm):
     class Meta:
         model = Requestor
-        fields = ['name', 'contact', 'email_address']
+        fields = ['user','name', 'contact', 'email_address']
 
 class RequestForm(forms.ModelForm):
     class Meta:
@@ -59,3 +62,30 @@ class VehicleReturnForm(forms.Form):
         required=True,
         min_value=0,
     )
+'''
+
+class StaffForm(forms.ModelForm):
+    class Meta:
+        model = Staff
+        fields = ['name', 'contact', 'email_address']
+
+class StaffRequestForm(forms.Form):
+    current_location = forms.CharField(max_length=100)
+    destination = forms.CharField(max_length=100)
+    purpose = forms.CharField(widget=forms.Textarea)
+
+class FleetManagerForm(forms.ModelForm):
+    class Meta:
+        model = FleetManager
+        fields = ['manager_name', 'contact', 'email_address']
+
+class GSMsensorDataForm(forms.ModelForm):
+    class Meta:
+        model = GSMsensorData
+        fields = ['vehicle', 'sensor_type', 'data_value', 'timestamp', 'transmission_mode']
+
+class AlertForm(forms.ModelForm):
+    class Meta:
+        model = Alert
+        fields = ['vehicle', 'sensor', 'alert_type', 'alert_message', 'trigger_source', 'priority_level', 'recipient_role', 'timestamp']
+'''

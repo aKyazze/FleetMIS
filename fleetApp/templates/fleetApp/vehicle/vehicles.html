@@ -94,7 +94,7 @@
                 <tbody>
                     {% for request in requests %}
                     <tr>
-                        <td>{{ request.requestor.name }}</td>
+                        <td>{{ request.requestor.username }}</td>
                         <td>{% if request.vehicle %}{{ request.vehicle.vehicle_plate }}{% else %}None{% endif %}</td>
                         <td>{% if request.mileage_at_assignment %}{{ request.mileage_at_assignment }}{% else %}None{% endif %}</td>
                         <td>{% if request.mileage_at_return %}{{ request.mileage_at_return }}{% else %}None{% endif %}</td>

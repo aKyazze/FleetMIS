@@ -1,50 +1,188 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    {% load group_tags %}
     {% load static %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Fleet Management System{% endblock %}</title>
+
+    <!-- Bootstrap & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <link rel="stylesheet" href="{% static 'css/demo.css' %}">
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+
+    <style>
+        body {
+            margin: auto;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        #sidebar-wrapper {
+            width: 220px;
+            background-color: #001f3f;
+            color: white;
+            height: 100vh;
+            overflow-y: auto;
+            position: fixed;
+        }
+
+        .sidebar-link {
+            padding: 10px 1.2rem;
+            display: flex;
+            align-items: center;
+            font-size: 0.95rem;
+            gap: 0.5rem;
+        }
+
+        .sidebar-link:hover {
+            background-color: #004080;
+            text-decoration: none;
+        }
+
+        .main-content {
+            margin-left: 220px;
+            padding: 1.5rem;
+        }
+
+        .navbar {
+            z-index: 1000;
+        }
+    </style>
 </head>
-<body class="d-flex flex-column min-vh-100">
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg" style="background-color: #001f3f;">
         <div class="container-fluid">
-            <div>
+            <a class="navbar-brand text-white fw-bold" href="">FleetMIS</a>
+
+            <button class="navbar-toggler bg-white" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
                 <ul class="navbar-nav">
-                    {% if user.is_authenticated  %}
-                    <li class="nav-item"><a class="nav-link" href="{% url 'home' %}">Dashboard</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{% url 'logout' %}">Logout</a></li>
+                    {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="{% url 'home' %}">
+                                <i class="bi bi-house-door"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
+                                👤 {{ user.get_full_name|default:user.username }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'password_change' %}">
+                                        <i class="bi bi-key"></i> Change Password
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'logout' %}">
+                                        <i class="bi bi-box-arrow-right"></i> Logout
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
                     {% else %}
-                        <li class="nav-item"><a class="nav-link" href="{% url 'registration' %}">Sign Up</a></li>
-                        <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Login</a></li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="{% url 'registration' %}"><i class="bi bi-person-plus"></i> Register</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="{% url 'login' %}"><i class="bi bi-box-arrow-in-right"></i> Login</a>
+                        </li>
                     {% endif %}
                 </ul>
             </div>
         </div>
     </nav>
-    <header class="bg-primary text-white text-center py-4">
-        <h1>{% block header %}Welcome to UTCL Fleet Management System{% endblock %}</h1>
-    </header>
-    <main class="container my-4">
+
+    {% if user.is_authenticated %}
+        <!-- Sidebar per Group -->
+        {% if user|has_group:"Admins" %}
+            <div id="sidebar-wrapper">
+                <div class="list-group list-group-flush px-2 pt-4">
+                    <a href="/admin/auth/user/" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link" target="_blank">
+                        <i class="bi bi-person-gear"></i> Users
+                    </a>
+                    <a href="/admin/auth/group/" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link" target="_blank">
+                        <i class="bi bi-people-fill"></i> Groups
+                    </a>
+                    <a href="{% url 'vehicle' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
+                        <i class="bi bi-truck"></i> Vehicles
+                    </a>
+                    <a href="{% url 'drivers' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
+                        <i class="bi bi-person-lines-fill"></i> Drivers
+                    </a>
+                    <a href="{% url 'requestor_list' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
+                        <i class="bi bi-people"></i> Requestors
+                    </a>
+                    <a href="{% url 'requisitions' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
+                        <i class="bi bi-journal-check"></i> Requisitions
+                    </a>
+                    <a href="{% url 'add_request' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
+                        <i class="bi bi-send-check"></i> Request Vehicle
+                    </a>
+
+                    <a href="{% url 'service_provider_list' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
+                        <i class="bi bi-building-gear"></i> Service Providers
+                    </a>
+                    <a href="{% url 'service_list' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
+                        <i class="bi bi-wrench-adjustable"></i> Services
+                    </a>
+                    <a href="{% url 'requestSummary' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
+                        <i class="bi bi-bar-chart-line"></i> Reports
+                    </a>
+                </div>
+            </div>
+        {% elif user|has_group:"FleetManagers" %}
+            <div id="sidebar-wrapper">
+                <div class="list-group list-group-flush px-2 pt-4">
+                    <a href="{% url 'vehicle' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
+                        <i class="bi bi-truck"></i> Vehicles
+                    </a>
+                    <a href="{% url 'drivers' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
+                        <i class="bi bi-person-lines-fill"></i> Drivers
+                    </a>
+                    <a href="{% url 'service_list' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
+                        <i class="bi bi-tools"></i> Services
+                    </a>
+                    <a href="{% url 'requisitions' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
+                        <i class="bi bi-clipboard-check"></i> Requisitions
+                    </a>
+                    <a href="{% url 'add_request' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
+                        <i class="bi bi-send-check"></i> Request Vehicle
+                    </a>
+                </div>
+            </div>
+        {% elif user|has_group:"FleetUsers" %}
+            <div id="sidebar-wrapper">
+                <div class="list-group list-group-flush px-2 pt-4">
+                    <a href="{% url 'add_request' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
+                        <i class="bi bi-send-check"></i> Request Vehicle
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    {% endif %}
+
+    <!-- Main Content -->
+    <main class="main-content">
         {% block content %}
-        
+        <!-- Dynamic content goes here -->
         {% endblock %}
     </main>
+
+    <!-- Footer -->
     <footer class="bg-dark text-white text-center py-3 mt-auto">
-        <p>&copy; 2024 UTCL. All Rights Reserved.</p>
+        <p class="mb-0">&copy; 2025 UTCL. All Rights Reserved.</p>
     </footer>
-    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+
+    <!-- Bootstrap Bundle (Ensure dropdown works) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-
-
-<link rel="stylesheet" href=" {% static 'css/' %} ">
-
-{% load static %}
-
-{% csrf_token %}

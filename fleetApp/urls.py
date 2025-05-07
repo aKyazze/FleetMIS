@@ -1,4 +1,5 @@
 from django.urls import path
+from django.contrib.auth import views as auth_views
 from . import views
 
 urlpatterns = [
@@ -46,14 +47,22 @@ urlpatterns = [
     path('requisitions/', views.fleet_management_view, name='requisitions'),
     path('requestSummary/', views.request_summary, name='requestSummary'),
     path('requests/', views.request_list, name='request_list'),
-    path('requests/add/<int:requestor_id>/', views.add_request, name='add_request'),
+   # path('requests/add/<int:requestor_id>/', views.add_request, name='add_request'),
+    path('requests/add/', views.add_request, name='add_request'),
     path('requests/edit/<int:request_id>/', views.edit_request, name='edit_request'),
     path('requests/approve/<int:request_id>/', views.approve_request, name='approve_request'),
     path('requests/delete/<int:request_id>/', views.delete_request, name='delete_request'),
+    path('requests/approve/<int:request_id>/', views.approve_request, name='approve_request'),
+    path('my-requests/', views.user_requests, name='user_requests'),
+    #path('requisitions/', views.requisitions, name='requisitions'),
     
   #################################################################### Registration URLs
    
-  path('signUp/', views.sign_up_view, name='registration'),
+    path('signUp/', views.sign_up_view, name='registration'),
+    path('redirect-after-login/', views.login_redirect_view, name='login_redirect'),
+    path('accounts/password_change/', auth_views.PasswordChangeView.as_view(), name='password_change'),
+    path('accounts/password_change/done/', auth_views.PasswordChangeDoneView.as_view(), name='password_change_done'),
+
 ]
 
 

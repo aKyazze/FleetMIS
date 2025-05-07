@@ -18,7 +18,7 @@
         {% for request in requests %}
         <tr>
             <td>{{ forloop.counter }}</td>
-            <td>{{ request.requestor.name }}</td>
+            <td>{{ request.requestor.username }}</td>
             <td>{{ request.current_location }}</td>
             <td>{{ request.destination }}</td>
             <td>
