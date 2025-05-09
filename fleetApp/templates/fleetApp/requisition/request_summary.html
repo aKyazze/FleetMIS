@@ -6,6 +6,17 @@
 
 {% block content %}
 <div class="containers">
+            <!-- Exports -->
+
+            <div class="d-flex gap-2 mb-3">
+                <a href="{% url 'export_trip_logs_csv' %}" class="btn btn-outline-primary">
+                    <i class="bi bi-file-earmark-spreadsheet"></i> Export CSV
+                </a>
+                <a href="{% url 'export_trip_logs_pdf' %}" class="btn btn-outline-danger">
+                    <i class="bi bi-file-earmark-pdf"></i> Export PDF
+                </a>
+            </div>
+    
     <!-- Tab Navigation -->
     <ul class="nav nav-tabs mb-3" id="fleetTab" role="tablist">
         <li class="nav-item" role="presentation">
@@ -87,7 +98,7 @@
                     {% endfor %}
                 </tbody>
             </table>
-        </div>
+        </div>        
     </div>
 </div>
 {% endblock %}

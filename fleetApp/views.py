@@ -1,15 +1,20 @@
+import csv
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone 
-from django.db.models import F, ExpressionWrapper, IntegerField
+from django.db.models import F, Q, ExpressionWrapper, IntegerField
 from django.contrib import messages
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import Group, User
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.views.decorators.http import require_GET
 from django.contrib.auth.decorators import login_required, user_passes_test
 from fleetApp.utils.email_utils import send_notification
 from .models import Vehicle, Driver, Requestor, Request, ServiceProvider, Service, GSMsensorData, Alert
 from .forms import VehicleForm, VehicleAllocationForm, DriverForm, ServiceProviderForm, ServiceForm, RequestorForm, RequestForm, RequestApprovalForm, VehicleReturnForm, GSMsensorDataForm, AlertForm
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
+
 
 # Create your views here.
 ############################################################################################
@@ -807,3 +812,89 @@ def add_alert(request):
     else:
         form = AlertForm()
     return render(request, 'fleetApp/alerts/add_alert.html', {'form': form})
+
+
+####################################################################################################
+##################################### PDF & CSV EXPORTS VIEW SECTION ##########################################
+
+#PDF Export using ReportLab
+
+@login_required
+def export_trip_logs_pdf(request):
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="trip_logs.pdf"'
+
+    p = canvas.Canvas(response, pagesize=A4)
+    width, height = A4
+    y = height - 40
+    p.setFont("Helvetica-Bold", 14)
+    p.drawString(180, y, "Trip Logs Report")
+    p.setFont("Helvetica", 10)
+    y -= 30
+
+    trips = Request.objects.filter(request_status="C").select_related('vehicle', 'requestor')
+
+    for trip in trips:
+        # If driver is directly linked to request, you can use: trip.driver
+        # If indirectly assigned, fetch via vehicle
+        driver = Driver.objects.filter(vehicle=trip.vehicle).first()
+
+        p.drawString(30, y, f"Requestor: {trip.requestor.username} | Vehicle: {trip.vehicle.vehicle_plate}")
+        y -= 15
+        p.drawString(30, y, f"Driver: {driver.driver_name if driver else 'N/A'} | Destination: {trip.destination}")
+        y -= 15
+        p.drawString(30, y, f"Assigned: {trip.mileage_at_assignment} | Returned: {trip.mileage_at_return}")
+        y -= 15
+        p.drawString(30, y, f"Used: {(trip.mileage_at_return or 0) - (trip.mileage_at_assignment or 0)} km")
+        y -= 15
+
+        alerts = Alert.objects.filter(vehicle=trip.vehicle)
+        for alert in alerts:
+            p.drawString(30, y, f"⚠ Alert: {alert.alert_type} [{alert.priority_level}] → {alert.alert_message}")
+            y -= 15
+
+        y -= 20
+        if y <= 80:
+            p.showPage()
+            y = height - 40
+            p.setFont("Helvetica", 10)
+
+    p.showPage()
+    p.save()
+    return response
+
+# CSV Export: Trip Logs with Alerts
+
+@login_required
+def export_trip_logs_csv(request):
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="trip_logs.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow([
+        'Requestor', 'Vehicle', 'Driver', 'Driver Contact', 'Destination',
+        'Mileage at Assignment', 'Mileage at Return', 'Used Mileage', 'Alerts'
+    ])
+
+    trips = Request.objects.filter(request_status="C").select_related('vehicle', 'requestor')
+
+    for trip in trips:
+        driver = Driver.objects.filter(vehicle=trip.vehicle).first()
+
+        alerts = Alert.objects.filter(vehicle=trip.vehicle)
+
+        alert_summary = ", ".join(set(alert.alert_type for alert in alerts)) or "None"
+
+        writer.writerow([
+            trip.requestor.username,
+            trip.vehicle.vehicle_plate,
+            driver.driver_name if driver else "N/A",
+            driver.contact if driver else "N/A",
+            trip.destination,
+            trip.mileage_at_assignment,
+            trip.mileage_at_return,
+            (trip.mileage_at_return or 0) - (trip.mileage_at_assignment or 0),
+            alert_summary
+        ])
+
+    return response

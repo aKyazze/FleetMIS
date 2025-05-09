@@ -66,6 +66,8 @@ urlpatterns = [
     path('gsm-data/add/', views.add_gsm_data, name='add_gsm_data'),
     path('alerts/', views.alert_list, name='alert_list'),
     path('alerts/add/', views.add_alert, name='add_alert'),
+    path('export/trip-logs/csv/', views.export_trip_logs_csv, name='export_trip_logs_csv'),
+    path('export/trip-logs/pdf/', views.export_trip_logs_pdf, name='export_trip_logs_pdf'),
 ]
 
 

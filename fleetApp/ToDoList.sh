@@ -11,7 +11,7 @@
  * Requestor is notified when a car is allocated for trip etc
  and other required or necessary notifications to respective individuals in the system. 
 
-Export reports all trip logs with alert summaries and all other required info in (CSV, PDF) for Printing reports. 
+✅  Export reports all trip logs with alert summaries and all other required info in (CSV, PDF) for Printing reports. 
 
 
 Chart views (speed trends, fuel drop, etc.)
