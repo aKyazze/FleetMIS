@@ -73,6 +73,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'fleetApp.context_processors.unread_alerts_count',
             ],
         },
     },
@@ -126,7 +127,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = 'static/css/'
 STATICFILES_DIRS = [
    # os.path.join(BASE_DIR, 'static')
 ]
@@ -148,6 +149,21 @@ JAZZMIN_SETTINGS = {
         {"app": "fleetApp"},
     ],
  "show_ui_builder": True,
-
-    
 }
+
+#Security Enhancement Recommendations:
+
+#SECURE_SSL_REDIRECT = True
+#SESSION_COOKIE_SECURE = True
+#CSRF_COOKIE_SECURE = True
+
+
+# Email configurations
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'kyazze85@gmail.com'
+EMAIL_HOST_PASSWORD = 'vcdu gkml itco mgke'  # Use App Password if using Gmail
+DEFAULT_FROM_EMAIL = 'FleetMIS <kyazze85@gmail.com>'

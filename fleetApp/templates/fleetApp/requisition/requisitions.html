@@ -5,18 +5,25 @@
 {% block content %}
 
 <div class="containers">
-    <ul class="nav nav-tabs mb-3" id="fleetTab" role="tablist">
+    <!-- Tab Navigation -->
+    <ul class="nav nav-tabs mb-3" id="requestTabs" role="tablist">
         <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="requests-tab" data-bs-toggle="tab" data-bs-target="#requests" type="button" role="tab" aria-controls="requests" aria-selected="true">
-                Requests
+            <button class="nav-link active" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending" type="button" role="tab" aria-controls="pending" aria-selected="true">
+                Pending & Open Requests
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="approved-tab" data-bs-toggle="tab" data-bs-target="#approved" type="button" role="tab" aria-controls="approved" aria-selected="false">
+                Approved Requests
             </button>
         </li>
     </ul>
 
-    <div class="tab-content" id="fleetTabContent">
-        <div class="tab-pane fade show active" id="requests" role="tabpanel" aria-labelledby="requests-tab">
-
-            <h3>Pending Approval and Open Requests</h3>
+    <!-- Tab Contents -->
+    <div class="tab-content" id="requestTabsContent">
+        <!-- Pending & Open Requests Tab -->
+        <div class="tab-pane fade show active" id="pending" role="tabpanel" aria-labelledby="pending-tab">
+            <h3 class="mt-3">Pending & Open Requests</h3>
             <table class="table table-striped">
                 <thead>
                     <tr>
@@ -71,10 +78,11 @@
                     {% endfor %}
                 </tbody>
             </table>
+        </div>
 
-            <hr class="my-4">
-
-            <h3>Approved Requests</h3>
+        <!-- Approved Requests Tab -->
+        <div class="tab-pane fade" id="approved" role="tabpanel" aria-labelledby="approved-tab">
+            <h3 class="mt-3">Approved Requests</h3>
             <table class="table table-bordered">
                 <thead>
                     <tr>
@@ -93,11 +101,10 @@
                         <td>{{ request.time_of_allocation|date:"Y-m-d H:i" }}</td>
                     </tr>
                     {% empty %}
-                    <tr><td colspan="4">No approved requests.</td></tr>
+                    <tr><td colspan="4">No approved requests found.</td></tr>
                     {% endfor %}
                 </tbody>
             </table>
-
         </div>
     </div>
 </div>

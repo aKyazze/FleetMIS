@@ -1,37 +1,16 @@
-
-
-/* Container for the login form */
-.container {
-  width: 350px;
-  padding: 20px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  border-radius: 10px;
-  background-color: #f9f9f9; /* Light background for the form */
-}
-
-.loginPage{
-  margin: 0;
+/* ====== Base Layout ====== */
+body {
+  margin: auto;
   padding: 0;
-  height: 100%;
+  overflow-x: hidden;
   font-family: Arial, sans-serif;
-  background-color: #fff; /* Primary color: White */
-  color: #001f3f; /* Secondary color: Dark Blue */
-  display: flex;
-  align-items: center;
+  color: #001f3f;
+  background-color: #fff;
 }
 
-/* Grouping the login fields */
-.login-group {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-
-/* Header Styles */
+/* ====== Header ====== */
 header {
-  background-color: #001f3f; /* Secondary color: Dark Blue */
+  background-color: #001f3f;
   color: #fff;
   padding: 20px;
   text-align: center;
@@ -44,24 +23,23 @@ header h1 {
   letter-spacing: 2px;
 }
 
-/* Navigation Styles */
+/* ====== Navigation ====== */
+nav {
+  display: flex;
+  justify-content: center;
+  background-color: #FF851B;
+  padding: 10px 0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
 
 nav ul {
-  list-style-type: none;
+  list-style: none;
   padding: 0;
 }
 
 nav ul li {
   display: inline;
   margin-right: 10px;
-}
-
-nav {
-  display: flex;
-  justify-content: center;
-  background-color: #FF851B; /* Third color: Orange */
-  padding: 10px 0;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 nav a {
@@ -74,116 +52,168 @@ nav a {
 }
 
 nav a:hover {
-  background-color: #001f3f; /* Hover: Dark Blue */
+  background-color: #001f3f;
 }
 
-/* Main Content Styles */
-main {
-  padding: 40px;
-  background-color: #fff; /* Primary color: White */
-  color: #001f3f; /* Secondary color: Dark Blue */
-  max-width: 1200px;
-  margin: auto;
+/* ====== Sidebar ====== */
+#sidebar-wrapper {
+  width: 220px;
+  background-color: #001f3f;
+  color: white;
+  height: 100vh;
+  overflow-y: auto;
+  position: fixed;
 }
 
-h2 {
-  font-size: 2em;
-  color: #FF851B; /* Third color: Orange */
-  border-bottom: 3px solid #001f3f; /* Dark Blue underline */
-  padding-bottom: 10px;
-  margin-bottom: 20px;
-}
-
-p {
-  font-size: 1.1em;
-  line-height: 1.6;
-  margin-bottom: 20px;
-}
-
-/* Input field styles */
-.input-field {
-  width: 100%;
-  margin-bottom: 15px;
+.sidebar-link {
+  padding: 10px 1.2rem;
   display: flex;
   align-items: center;
-  background-color: #e8eaed; /* Light background for input fields */
-  padding: 10px;
-  border-radius: 5px;
+  font-size: 0.95rem;
+  gap: 0.5rem;
 }
 
-.input-field label svg {
-  margin-right: 10px;
-  fill: #001f3f; /* Icon color: Dark Blue */
+.sidebar-link:hover {
+  background-color: #004080;
+  text-decoration: none;
+}
+
+/* ====== Main Content ====== */
+.main-content {
+  margin-left: 220px;
+  padding: 1.5rem;
+}
+
+.navbar {
+  z-index: 1000;
+}
+
+/* ====== Login Page ====== */
+.loginPage {
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+/* ====== Logo/Image ====== */
+.logo-img {
+  height: 60px;
+  width: auto;
+  object-fit: contain;
+}
+
+.logImage {
+  width: 100px;
+  height: 100px;
+  display: block;
+  margin: 0 auto 20px auto;
+  border-radius: 50%;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* ====== Containers ====== */
+.container {
+  width: 350px;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.form-container {
+  width: 400px;
+  padding: 30px;
+  margin: 20px auto;
+  background-color: #f7f7f7;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* ====== Form Styles ====== */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+form h1 {
+  text-align: center;
+  font-size: 24px;
+  color: #001f3f;
+  margin-bottom: 10px;
+}
+
+.input-field {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  background-color: #e8eaed;
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 15px;
 }
 
 .input-field input {
+  width: 100%;
   border: none;
   outline: none;
   background: none;
   font-size: 1em;
-  color: #001f3f; /* Text color: Dark Blue */
-  width: 100%;
+  color: #001f3f;
 }
 
-/* Button styles */
-button {
+.input-field label svg {
+  margin-right: 10px;
+  fill: #001f3f;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="number"],
+select,
+textarea {
   width: 100%;
-  padding: 10px;
-  background-color: #FF851B; /* Third color: Orange */
+  padding: 12px;
+  font-size: 16px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  transition: border-color 0.3s;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: #001f3f;
+  outline: none;
+}
+
+/* ====== Buttons ====== */
+button,
+input[type="submit"] {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
   border: none;
   border-radius: 5px;
-  color: #fff;
-  font-size: 1em;
+  background-color: #FF851B;
+  color: white;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.3s, transform 0.3s;
 }
 
-button:hover {
-  background-color: #001f3f; /* Hover: Dark Blue */
-}
-
-/* Forgot password link styles */
-.submit {
-  text-align: center;
-}
-
-.submit p {
-  margin-top: 15px;
-  color: #001f3f; /* Text color: Dark Blue */
-  font-size: 0.9em;
-}
-
-.submit p .reset-passwrd {
-  color: #FF851B; /* Link color: Orange */
-  cursor: pointer;
-}
-
-.submit p .reset-passwrd:hover {
-  text-decoration: underline;
-}
-
-/* Button Styles */
-button {
-  background-color: #FF851B; /* Third color: Orange */
-  color: #fff;
-  border: none;
-  padding: 15px 30px;
-  font-size: 1em;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.3s ease;
-}
-
-button:hover {
-  background-color: #001f3f; /* Hover: Dark Blue */
+button:hover,
+input[type="submit"]:hover {
+  background-color: #001f3f;
   transform: scale(1.05);
 }
 
-#btn-add-vehicle{
+#btn-add-vehicle {
   width: 15%;
   padding: 10px;
 }
-/* Table Styles */
+
+/* ====== Table ====== */
 table {
   width: 100%;
   border-collapse: collapse;
@@ -203,9 +233,45 @@ th {
   background-color: #f2f2f2;
 }
 
-/* Footer Styles */
+/* ====== Forgot Password / Reset Link ====== */
+.submit {
+  text-align: center;
+}
+
+.submit p {
+  margin-top: 15px;
+  font-size: 0.9em;
+  color: #001f3f;
+}
+
+.reset-passwrd {
+  color: #FF851B;
+  cursor: pointer;
+}
+
+.reset-passwrd:hover {
+  text-decoration: underline;
+}
+
+/* ====== Headings ====== */
+h2 {
+  font-size: 2em;
+  color: #FF851B;
+  border-bottom: 3px solid #001f3f;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+/* ====== Paragraphs ====== */
+p {
+  font-size: 1.1em;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+/* ====== Footer ====== */
 footer {
-  background-color: #001f3f; /* Secondary color: Dark Blue */
+  background-color: #001f3f;
   color: #fff;
   text-align: center;
   padding: 20px;
@@ -219,86 +285,44 @@ footer p {
   font-size: 1em;
 }
 
-/* Responsive Styles */
+/* ====== Responsive Styles ====== */
 @media (max-width: 768px) {
   main {
-      padding: 20px;
+    padding: 20px;
   }
 
   nav {
-      flex-direction: column;
-      align-items: center;
+    flex-direction: column;
+    align-items: center;
   }
 
   nav a {
-      margin: 10px 0;
+    margin: 10px 0;
   }
 
   header h1 {
-      font-size: 2em;
+    font-size: 2em;
   }
 }
 
-/* General container for forms */
-.form-container {
-  width: 400px;
-  padding: 30px;
-  margin: 20px auto;
-  background-color: #f7f7f7;
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+/* ====== CardBoards Styles ====== */
+
+.dashboard-cards .col {
+  margin-bottom: 20px;
 }
 
-/* General form styles */
-form {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-form h1 {
-  text-align: center;
-  font-size: 24px;
-  color: #001f3f;
-  margin-bottom: 10px;
-}
-
-/* Input field styles */
-input[type="text"],
-input[type="password"],
-input[type="email"],
-input[type="number"],
-select,
-textarea {
-  width: 100%;
-  padding: 12px;
-  font-size: 16px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  transition: border-color 0.3s;
-}
-
-input:focus,
-select:focus,
-textarea:focus {
-  border-color: #001f3f; /* Dark Blue for focus */
-  outline: none;
-}
-
-input[type="submit"],
-button {
-  padding: 12px;
-  background-color: #001f3f;
-  color: white;
+.dashboard-cards .card {
+  min-height: 160px;
   border: none;
-  border-radius: 5px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background-color 0.3s;
+  border-radius: 10px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-input[type="submit"]:hover,
-button:hover {
-  background-color: #FF851B; /* Orange hover effect */
+.dashboard-cards .card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
 }
 
+.dashboard-cards .card-body h2 {
+  font-size: 2.5rem;
+}

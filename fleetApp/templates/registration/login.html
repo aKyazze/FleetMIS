@@ -20,14 +20,7 @@
     
                 <div class="content">
                 <div>
-                    <img class="logImage" src="{% static 'images/log.jpeg' %}" 
-                         style="width: 100px; 
-                                height: 100px; 
-                                margin: 0 auto 20px auto; 
-                                display: block; 
-                                border-radius: 50%; 
-                                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);" 
-                         alt="Login Image">
+                    <img class="logImage" src="{% static 'images/log.jpeg' %}" alt="Login Image">
                 </div>
                 <form method="POST" id="login-form">
                     {% csrf_token %}

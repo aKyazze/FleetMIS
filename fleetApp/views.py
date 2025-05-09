@@ -1,5 +1,4 @@
 from django.shortcuts import render, redirect, get_object_or_404
-#from django.utils.timezone import now
 from django.utils import timezone 
 from django.db.models import F, ExpressionWrapper, IntegerField
 from django.contrib import messages
@@ -8,22 +7,13 @@ from django.contrib.auth.models import Group, User
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET
 from django.contrib.auth.decorators import login_required, user_passes_test
-from .models import Vehicle, Driver, Requestor, Request, ServiceProvider, Service
-#, GSMsensorData, Alert
-from .forms import VehicleForm, VehicleAllocationForm, DriverForm, ServiceProviderForm, ServiceForm, RequestorForm, RequestForm, RequestApprovalForm, VehicleReturnForm
-#, SensorDataForm, AlertForm
+from fleetApp.utils.email_utils import send_notification
+from .models import Vehicle, Driver, Requestor, Request, ServiceProvider, Service, GSMsensorData, Alert
+from .forms import VehicleForm, VehicleAllocationForm, DriverForm, ServiceProviderForm, ServiceForm, RequestorForm, RequestForm, RequestApprovalForm, VehicleReturnForm, GSMsensorDataForm, AlertForm
 
-
-MESSAGE_TAGS = {
-    messages.DEBUG: 'debug',
-    messages.INFO: 'info',
-    messages.SUCCESS: 'success',
-    messages.WARNING: 'warning',
-    messages.ERROR: 'danger',
-}
 # Create your views here.
 ############################################################################################
-######################### LOGIN VIEWSS #####################################################
+######################### LOGIN VIEWS #####################################################
 @login_required
 def login_redirect_view(request):
     user = request.user
@@ -152,67 +142,6 @@ def home_view(request):
     }
     return render(request, 'fleetApp/base/home.html', context)
 
-####################################################################################################
-##################################### STAFF VIEWS SECTION ##########################################
-# Staff
-@login_required
-def add_staff(request):
-    if request.method == 'POST':
-        form = StaffForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('staff_list')
-    else:
-        form = StaffForm()
-    return render(request, 'fleetmisApp/staff_form.html', {'form': form})
-
-@login_required
-def staff_list(request):
-    staff = Staff.objects.all()
-    return render(request, 'fleetmisApp/staff_list.html', {'staff': staff})
-
-@login_required
-def edit_staff(request, staff_id):
-    staff = get_object_or_404(Staff, id=staff_id)
-    if request.method == 'POST':
-        form = StaffForm(request.POST, instance=staff)
-        if form.is_valid():
-            form.save()
-            return redirect('staff_list')
-    else:
-        form = StaffForm(instance=staff)
-    return render(request, 'fleetmisApp/staff_form.html', {'form': form})
-
-@login_required
-def delete_staff(request, staff_id):
-    staff = get_object_or_404(Staff, id=staff_id)
-    if request.method == 'POST':
-        staff.delete()
-        return redirect('staff_list')
-    return render(request, 'fleetmisApp/staff_confirm_delete.html', {'staff': staff})
-
-
-############################################################################################################
-##################################### FLEET MANAGER VIEWS SECTION ##########################################
-
-# Fleet Manager
-@login_required
-def fleet_manager_list(request):
-    managers = FleetManager.objects.all()
-    return render(request, 'fleetmisApp/fleet_manager_list.html', {'managers': managers})
-
-@login_required
-def add_fleet_manager(request):
-    if request.method == 'POST':
-        form = FleetManagerForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('fleet_manager_list')
-    else:
-        form = FleetManagerForm()
-    return render(request, 'fleetmisApp/fleet_manager_form.html', {'form': form})
-
-
 ############################################################################################
 ################################### This Section for Vehicle Views #########################
 # Create or Add a New Vehicle View
@@ -328,9 +257,11 @@ def return_vehicle(request, vehicle_id):
         if form.is_valid():
             mileage_at_return = form.cleaned_data['mileage_at_return']
             
-            # Update the vehicle and request status
+            # Update vehicle and related data
             vehicle.status = 'Available'
             vehicle.mileage = mileage_at_return
+            vehicle.save()
+
             driver = Driver.objects.filter(vehicle=vehicle).first()
             if driver:
                 driver.vehicle = None
@@ -338,12 +269,31 @@ def return_vehicle(request, vehicle_id):
 
             request_obj = Request.objects.filter(vehicle=vehicle, request_status="O").first()
             if request_obj:
-                request_obj.close_request(mileage_at_return)
                 request_obj.mileage_at_return = mileage_at_return
                 request_obj.request_status = "C"
                 request_obj.save()
 
-            vehicle.save()
+            # Send notification to all Fleet Managers
+            try:
+                fleet_manager_group = Group.objects.get(name="FleetManagers")
+                managers = fleet_manager_group.user_set.all()
+
+                for manager in managers:
+                    if manager.email:
+                        send_notification(
+                            subject='Vehicle Returned',
+                            template_name='emails/trip_returned_manager.html',
+                            context={
+                                'manager_name': manager.get_full_name() or manager.username,
+                                'vehicle': vehicle.vehicle_plate,
+                                'driver': driver.driver_name if driver else "Unknown",
+                                'mileage': mileage_at_return,
+                                'time': timezone.now().strftime("%H:%M %p"),
+                            },
+                            recipient_email=manager.email
+                        )
+            except Group.DoesNotExist:
+                pass  # Fail silently if group doesn't exist
 
             messages.success(request, "Vehicle returned successfully!")
             return redirect('home')
@@ -353,7 +303,6 @@ def return_vehicle(request, vehicle_id):
         form = VehicleReturnForm()
 
     return render(request, 'fleetApp/vehicle/return_vehicle.html', {'vehicle': vehicle, 'form': form})
-
 
 #############################################################################################################
 ######################################## SECTION FOR Driver Views ###########################################
@@ -518,6 +467,7 @@ def requisitions_view(request):
     return render(request, 'fleetApp/requisition/requisitions.html', context)
 
 
+
 @login_required
 def add_request(request):
     try:
@@ -530,19 +480,44 @@ def add_request(request):
         form = RequestForm(request.POST)
         if form.is_valid():
             new_request = form.save(commit=False)
-            #new_request.requestor = requestor
             new_request.requestor = request.user
+            new_request.request_status = 'P'  # Set as Pending
             new_request.save()
+
+            #Notify Fleet Managers about new request
+            try:
+                fleet_manager_group = Group.objects.get(name='FleetManagers')
+                fleet_managers = fleet_manager_group.user_set.all()
+
+                for manager in fleet_managers:
+                    if manager.email:
+                        send_notification(
+                            subject='New Trip Request Submitted',
+                            template_name='emails/new_request_manager.html',
+                            context={
+                                'manager_name': manager.get_full_name() or manager.username,
+                                'requestor_name': request.user.get_full_name() or request.user.username,
+                                'destination': new_request.destination,
+                                'purpose': new_request.purpose,
+                                'request_date': new_request.request_date,
+                            },
+                            recipient_email=manager.email
+                        )
+            except Group.DoesNotExist:
+                # Skip if group is not found, avoid breaking the request flow
+                pass
+
             messages.success(request, "Request added successfully!")
             return redirect('user_requests')
     else:
         form = RequestForm()
-    
+
     context = {
         'form': form,
         'requestor': requestor
     }
     return render(request, 'fleetApp/requisition/add_request.html', context)
+
 
 @login_required
 def edit_request(request, request_id):
@@ -605,15 +580,45 @@ def approve_request(request, request_id):
         request_obj.mileage_at_assignment = selected_vehicle.mileage
         request_obj.save()
 
+        # Define the driver assigned to the vehicle
+        selected_driver = Driver.objects.filter(vehicle=selected_vehicle).first()
+        
+
+        # Notify Driver
+        if selected_driver:
+            send_notification(
+                subject='Vehicle Assigned for Trip',
+                template_name='emails/trip_assigned_driver.html',
+                context={
+                    'driver_name': selected_driver.driver_name,
+                    'vehicle': selected_vehicle.vehicle_plate,
+                    'destination': request_obj.destination,
+                    'date': request_obj.time_of_allocation.date(),
+                    'time': request_obj.time_of_allocation.time()
+                },
+                recipient_email=selected_driver.email_address
+            )
+
+        # Notify Requestor
+        send_notification(
+            subject='Trip Approved',
+            template_name='emails/trip_approved_requestor.html',
+            context={
+                'requestor_name': request_obj.requestor.username,
+                'vehicle': selected_vehicle.vehicle_plate,
+                'driver': selected_driver.driver_name if selected_driver else "Not Assigned",
+                'driver_contact': selected_driver.contact if selected_driver else "N/A"
+            },
+            recipient_email=request_obj.requestor.email
+        )
+
         selected_vehicle.status = "Al"  # Allocated
         selected_vehicle.save()
 
         messages.success(request, "Request approved successfully!")
-        return redirect('requisitions')  # or 'home' as you prefer
+        return redirect('requisitions')
     return redirect('requisitions')
 
-
-from django.db.models import F, ExpressionWrapper, IntegerField
 
 @login_required
 def request_summary(request):
@@ -766,13 +771,39 @@ def delete_service(request, service_id):
 
 # GSM Sensor Data
 
-def sensor_data_list(request):
-    data = GSMsensorData.objects.all()
-    return render(request, 'fleetmisApp/sensor_data_list.html', {'data': data})
+@login_required
+def gsm_data_list(request):
+    data = GSMsensorData.objects.all().order_by('-timestamp')
+    return render(request, 'fleetApp/gsm/gsm_data_list.html', {'data': data})
+
+@login_required
+def add_gsm_data(request):
+    if request.method == 'POST':
+        form = GSMsensorDataForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Sensor data recorded successfully.')
+            return redirect('gsm_data_list')
+    else:
+        form = GSMsensorDataForm()
+    return render(request, 'fleetApp/gsm/add_gsm_data.html', {'form': form})
+
 
 # Alerts
 
+@login_required
 def alert_list(request):
-    alerts = Alert.objects.all()
-    return render(request, 'fleetmisApp/alert_list.html', {'alerts': alerts})
+    alerts = Alert.objects.all().order_by('-timestamp')
+    return render(request, 'fleetApp/alerts/alert_list.html', {'alerts': alerts})
 
+@login_required
+def add_alert(request):
+    if request.method == 'POST':
+        form = AlertForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Alert added successfully.')
+            return redirect('alert_list')
+    else:
+        form = AlertForm()
+    return render(request, 'fleetApp/alerts/add_alert.html', {'form': form})

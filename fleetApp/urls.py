@@ -60,6 +60,12 @@ urlpatterns = [
     path('accounts/password_change/', auth_views.PasswordChangeView.as_view(), name='password_change'),
     path('accounts/password_change/done/', auth_views.PasswordChangeDoneView.as_view(), name='password_change_done'),
     path('api/user-info/', views.get_user_info, name='get_user_info'),
+
+  #################################################################### GSMSensor & Alerts URLs
+    path('gsm-data/', views.gsm_data_list, name='gsm_data_list'),
+    path('gsm-data/add/', views.add_gsm_data, name='add_gsm_data'),
+    path('alerts/', views.alert_list, name='alert_list'),
+    path('alerts/add/', views.add_alert, name='add_alert'),
 ]
 
 

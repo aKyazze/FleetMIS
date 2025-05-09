@@ -122,3 +122,41 @@ class Service(models.Model):
     
     def calculate_total(self):
         return self.quantity * self.cost
+    
+
+#GSMsensorData Entity: 
+class GSMsensorData(models.Model):
+    SENSOR_TYPES = [
+        ("Speed", "Speed"),
+        ("Location", "Location"),
+        ("Fuel", "Fuel Level"),
+        ("Engine", "Engine Temp"),
+    ]
+    TRANSMISSION = [
+        ("SMS", "SMS"), 
+        ("GPRS", "GPRS"), 
+        ("USSD", "USSD"), 
+        ("Email", "Email"),
+    ]
+    vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE)
+    sensor_type = models.CharField(max_length=20, choices=SENSOR_TYPES)
+    data_value = models.FloatField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+    transmission_mode = models.CharField(max_length=10, choices=TRANSMISSION)
+
+#Alert Entity:
+class Alert(models.Model):
+    ALERT_TYPES = [
+        ("Low Fuel", "Low Fuel"),
+        ("Overspeed", "Overspeeding"),
+        ("High Temp", "Engine Overheat"),
+    ]
+    PRIORITY = [("High", "High"), ("Medium", "Medium"), ("Low", "Low")]
+    vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE)
+    sensor_data = models.ForeignKey(GSMsensorData, on_delete=models.CASCADE)
+    alert_type = models.CharField(max_length=50, choices=ALERT_TYPES)
+    alert_message = models.TextField()
+    trigger_source = models.CharField(max_length=20)  # 'Sensor Data' or 'Manual'
+    priority_level = models.CharField(max_length=10, choices=PRIORITY)
+    recipient_role = models.CharField(max_length=50)  # Fleet Manager / Driver
+    timestamp = models.DateTimeField(auto_now_add=True)

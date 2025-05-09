@@ -11,53 +11,17 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-
-    <style>
-        body {
-            margin: auto;
-            padding: 0;
-            overflow-x: hidden;
-        }
-
-        #sidebar-wrapper {
-            width: 220px;
-            background-color: #001f3f;
-            color: white;
-            height: 100vh;
-            overflow-y: auto;
-            position: fixed;
-        }
-
-        .sidebar-link {
-            padding: 10px 1.2rem;
-            display: flex;
-            align-items: center;
-            font-size: 0.95rem;
-            gap: 0.5rem;
-        }
-
-        .sidebar-link:hover {
-            background-color: #004080;
-            text-decoration: none;
-        }
-
-        .main-content {
-            margin-left: 220px;
-            padding: 1.5rem;
-        }
-
-        .navbar {
-            z-index: 1000;
-        }
-    </style>
 </head>
 
 <body>
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg" style="background-color: #001f3f;">
         <div class="container-fluid">
-            <a class="navbar-brand text-white fw-bold" href="">FleetMIS</a>
-
+                <a class="navbar-brand d-flex align-items-center gap-2 text-white fw-bold" href="#">
+                    <img src="{% static 'images/log.jpeg' %}" alt="Fleet Logo" class="logo-img">
+                    FleetMIS
+                </a>
+                
             <button class="navbar-toggler bg-white" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -137,6 +101,15 @@
                     <a href="{% url 'request_summary' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
                         <i class="bi bi-bar-chart-line"></i> Reports
                     </a>
+                    <a href="{% url 'gsm_data_list' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
+                        <i class="bi bi-broadcast-pin"></i> GSM Sensor Data
+                    </a>
+                    <a href="{% url 'alert_list' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-exclamation-diamond"></i> Alerts</span>
+                        {% if unread_alerts_count > 0 %}
+                            <span class="badge bg-danger rounded-pill">{{ unread_alerts_count }}</span>
+                        {% endif %}
+                    </a>
                 </div>
             </div>
         {% elif user|has_group:"FleetManagers" %}
@@ -156,6 +129,24 @@
                     </a>
                     <a href="{% url 'add_request' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
                         <i class="bi bi-send-check"></i> Request Vehicle
+                    </a>
+                    <a href="{% url 'service_provider_list' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
+                        <i class="bi bi-building-gear"></i> Service Providers
+                    </a>
+                    <a href="{% url 'service_list' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
+                        <i class="bi bi-wrench-adjustable"></i> Services
+                    </a>
+                    <a href="{% url 'request_summary' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
+                        <i class="bi bi-bar-chart-line"></i> Reports
+                    </a>
+                    <a href="{% url 'gsm_data_list' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
+                        <i class="bi bi-broadcast-pin"></i> GSM Sensor Data
+                    </a>
+                    <a href="{% url 'alert_list' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-exclamation-diamond"></i> Alerts</span>
+                        {% if unread_alerts_count > 0 %}
+                            <span class="badge bg-danger rounded-pill">{{ unread_alerts_count }}</span>
+                        {% endif %}
                     </a>
                 </div>
             </div>
