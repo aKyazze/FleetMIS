@@ -8,10 +8,9 @@ urlpatterns = [
     
          # Home urls
     path('', views.home_view, name='home'),
-    #path('home/', views.home_view, name='home'),
 
     
-############################################################################# Vehicle urls ###########################
+############################################################################# Vehicle urls 
     path('vehicles/', views.vehicle_view, name='vehicle'),
     path('add-vehicle/', views.add_vehicle, name='add_vehicle'), 
     path('edit-vehicle/<int:vehicle_id>/', views.vehicle_update, name='edit_vehicle'),
@@ -37,24 +36,22 @@ urlpatterns = [
      path('services/edit/<int:service_id>/', views.edit_service, name='edit_service'),
      path('services/delete/<int:service_id>/', views.delete_service, name='delete_service'),
 
-# Requestor URLs
+##################################################################### Requestor URLs
     path('requestors/', views.requestor_list, name='requestor_list'),
     path('requestors/add/', views.add_requestor, name='add_requestor'),
     path('requestors/edit/<int:requestor_id>/', views.edit_requestor, name='edit_requestor'),
     path('requestors/delete/<int:requestor_id>/', views.delete_requestor, name='delete_requestor'),
 
-    # Request URLs
-    path('requisitions/', views.fleet_management_view, name='requisitions'),
-    path('requestSummary/', views.request_summary, name='requestSummary'),
+    ##################################################################### Request URLs
+    path('requisitions/', views.requisitions_view, name='requisitions'),
+    path('requestSummary/', views.request_summary, name='request_summary'),
     path('requests/', views.request_list, name='request_list'),
-   # path('requests/add/<int:requestor_id>/', views.add_request, name='add_request'),
     path('requests/add/', views.add_request, name='add_request'),
     path('requests/edit/<int:request_id>/', views.edit_request, name='edit_request'),
     path('requests/approve/<int:request_id>/', views.approve_request, name='approve_request'),
     path('requests/delete/<int:request_id>/', views.delete_request, name='delete_request'),
     path('requests/approve/<int:request_id>/', views.approve_request, name='approve_request'),
     path('my-requests/', views.user_requests, name='user_requests'),
-    #path('requisitions/', views.requisitions, name='requisitions'),
     
   #################################################################### Registration URLs
    
@@ -62,7 +59,7 @@ urlpatterns = [
     path('redirect-after-login/', views.login_redirect_view, name='login_redirect'),
     path('accounts/password_change/', auth_views.PasswordChangeView.as_view(), name='password_change'),
     path('accounts/password_change/done/', auth_views.PasswordChangeDoneView.as_view(), name='password_change_done'),
-
+    path('api/user-info/', views.get_user_info, name='get_user_info'),
 ]
 
 

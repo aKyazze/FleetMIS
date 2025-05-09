@@ -30,10 +30,10 @@
                 <td>{{ driver.contact }}</td>
                 <td>{{ driver.email_address }}</td>
                 <td>
-                    {% if driver.vehicle_plate == "Unassigned" %}
-                        <span class="badge bg-secondary">Unassigned</span>
+                    {% if driver.vehicle %}
+                        {{ driver.vehicle.vehicle_plate }}
                     {% else %}
-                        {{ driver.vehicle_plate }}
+                        <span class="badge bg-secondary">Unassigned</span>
                     {% endif %}
                 </td>
                 <td>
@@ -73,4 +73,32 @@
         </div>
     </div>
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const userSelect = document.getElementById('id_user');
+        const nameInput = document.getElementById('id_driver_name');
+        const emailInput = document.getElementById('id_email_address');
+        const contactInput = document.getElementById('id_contact');
+
+        const userMap = {
+            {% for user in form.fields.user.queryset %}
+                "{{ user.id }}": {
+                    "name": "{{ user.get_full_name|escapejs }}",
+                    "email": "{{ user.email|escapejs }}",
+                    "contact": "{{ user.username|escapejs }}"  // Placeholder
+                },
+            {% endfor %}
+        };
+
+        userSelect.addEventListener('change', function () {
+            const userId = this.value;
+            const user = userMap[userId];
+            if (user) {
+                nameInput.value = user.name;
+                emailInput.value = user.email;
+                contactInput.value = user.contact;
+            }
+        });
+    });
+</script>
 {% endblock %}

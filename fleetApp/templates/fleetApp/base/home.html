@@ -1,12 +1,10 @@
 {% extends "main.html" %}
 {% load group_tags %}
 {% load crispy_forms_tags %}
-
 {% block title %}Dashboard | Fleet Management{% endblock %}
-
 {% block content %}
-<div class="container-fluid py-4">
 
+<div class="container-fluid py-4">
     <!-- Flash Messages 
     {% if messages %}
         {% for message in messages %}
@@ -16,7 +14,7 @@
             </div>
         {% endfor %}
     {% endif %}
-            -->
+    -->
     <!-- Header -->
     <div class="mb-4">
         <h1 class="fw-bold text-dark">Dashboard Overview</h1>
@@ -49,80 +47,66 @@
         </div>
     </div>
     {% elif user|has_group:"FleetManagers" or user.is_superuser %}
-        <!-- Fleet Manager or Admin View -->
-        <div class="row g-4">
-            <!-- Vehicles -->
-            <div class="col-lg-3 col-md-6">
-                <div class="card bg-primary text-white shadow-sm h-100">
-                    <div class="card-body">
-                        <h5>Total Vehicles</h5>
-                        <h2 class="fw-bold">{{ total_vehicles }}</h2>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Drivers -->
-            <div class="col-lg-3 col-md-6">
-                <div class="card bg-success text-white shadow-sm h-100">
-                    <div class="card-body">
-                        <h5>Total Drivers</h5>
-                        <h2 class="fw-bold">{{ total_drivers }}</h2>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Requestors -->
-            <div class="col-lg-3 col-md-6">
-                <div class="card bg-warning text-white shadow-sm h-100">
-                    <div class="card-body">
-                        <h5>Total Requestors</h5>
-                        <h2 class="fw-bold">{{ total_requestors }}</h2>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Service Providers -->
-            <div class="col-lg-3 col-md-6">
-                <div class="card bg-secondary text-white shadow-sm h-100">
-                    <div class="card-body">
-                        <h5>Service Providers</h5>
-                        <h2 class="fw-bold">{{ total_service_providers }}</h2>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Services -->
-            <div class="col-lg-3 col-md-6">
-                <div class="card bg-dark text-white shadow-sm h-100">
-                    <div class="card-body">
-                        <h5>Total Services</h5>
-                        <h2 class="fw-bold">{{ total_services }}</h2>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Pending Requests -->
-            <div class="col-lg-3 col-md-6">
-                <div class="card bg-info text-white shadow-sm h-100 d-flex flex-column justify-content-between">
-                    <div class="card-body">
-                        <h5>Pending Requests</h5>
-                        <h2 class="fw-bold">{{ total_pending_requests }}</h2>
-                        <a href="{% url 'request_list' %}?status=pending" class="btn btn-outline-light mt-3 w-100">View Pending</a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Completed Requests -->
-            <div class="col-lg-3 col-md-6">
-                <div class="card bg-success text-white shadow-sm h-100 d-flex flex-column justify-content-between">
-                    <div class="card-body">
-                        <h5>Completed Requests</h5>
-                        <h2 class="fw-bold">{{ total_completed_requests }}</h2>
-                        <a href="{% url 'request_list' %}?status=closed" class="btn btn-outline-light mt-3 w-100">View Closed</a>
-                    </div>
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-3 row-cols-xl-4 g-4">
+        <div class="col">
+            <div class="card bg-primary text-white shadow-sm h-100 p-3">
+                <div class="card-body">
+                    <h5 class="card-title">Total Vehicles</h5>
+                    <h2 class="display-6 fw-bold">{{ total_vehicles }}</h2>
                 </div>
             </div>
         </div>
+        <div class="col">
+            <div class="card bg-success text-white shadow-sm h-100 p-3">
+                <div class="card-body">
+                    <h5 class="card-title">Total Drivers</h5>
+                    <h2 class="display-6 fw-bold">{{ total_drivers }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card bg-warning text-white shadow-sm h-100 p-3">
+                <div class="card-body">
+                    <h5 class="card-title">Total Requestors</h5>
+                    <h2 class="display-6 fw-bold">{{ total_requestors }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card bg-secondary text-white shadow-sm h-100 p-3">
+                <div class="card-body">
+                    <h5 class="card-title">Service Providers</h5>
+                    <h2 class="display-6 fw-bold">{{ total_service_providers }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card bg-dark text-white shadow-sm h-100 p-3">
+                <div class="card-body">
+                    <h5 class="card-title">Total Services</h5>
+                    <h2 class="display-6 fw-bold">{{ total_services }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card bg-info text-white shadow-sm h-100 p-3">
+                <div class="card-body">
+                    <h5 class="card-title">Pending Requests</h5>
+                    <h2 class="display-6 fw-bold">{{ total_pending_requests }}</h2>
+                    <a href="{% url 'request_list' %}?status=pending" class="btn btn-outline-light mt-3 w-100">View Pending</a>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card bg-success text-white shadow-sm h-100 p-3">
+                <div class="card-body">
+                    <h5 class="card-title">Completed Requests</h5>
+                    <h2 class="display-6 fw-bold">{{ total_completed_requests }}</h2>
+                    <a href="{% url 'request_list' %}?status=closed" class="btn btn-outline-light mt-3 w-100">View Closed</a>
+                </div>
+            </div>
+        </div>
+    </div>    
     {% else %}
         <p class="text-danger">You do not have access to any dashboard features. Please contact admin.</p>
     {% endif %}

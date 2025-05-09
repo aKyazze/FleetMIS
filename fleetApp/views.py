@@ -4,15 +4,14 @@ from django.utils import timezone
 from django.db.models import F, ExpressionWrapper, IntegerField
 from django.contrib import messages
 from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.models import Group
+from django.contrib.auth.models import Group, User
+from django.http import JsonResponse
+from django.views.decorators.http import require_GET
 from django.contrib.auth.decorators import login_required, user_passes_test
 from .models import Vehicle, Driver, Requestor, Request, ServiceProvider, Service
+#, GSMsensorData, Alert
 from .forms import VehicleForm, VehicleAllocationForm, DriverForm, ServiceProviderForm, ServiceForm, RequestorForm, RequestForm, RequestApprovalForm, VehicleReturnForm
-
-
-#Updated imports
-#from .models import Staff, FleetManager, Vehicle, Driver, ServiceProvider, Service, GSMsensorData, Alert
-#from .forms import StaffForm, FleetManagerForm, VehicleForm, VehicleAllocationForm, DriverForm, ServiceProviderForm, ServiceForm, RequestApprovalForm, VehicleReturnForm, SensorDataForm, AlertForm
+#, SensorDataForm, AlertForm
 
 
 MESSAGE_TAGS = {
@@ -107,6 +106,21 @@ def register_user(request):
             messages.success(request, "User registered and added to staff list.")
             return redirect("requestor_list")
 
+#This is API endpoint view to return user Details by ID
+@require_GET
+@login_required
+def get_user_info(request):
+    user_id = request.GET.get('user_id')
+    try:
+        user = User.objects.get(id=user_id)
+        return JsonResponse({
+            'name': f"{user.first_name} {user.last_name}".strip(),
+            'email': user.email,
+            # Assume contact is stored in user.profile or skip it if not available
+            'contact': user.profile.contact if hasattr(user, 'profile') else '',
+        })
+    except User.DoesNotExist:
+        return JsonResponse({'error': 'User not found'}, status=404)
 ####################################################################################################
 ##################################### MAIN & HOME SECTION ##########################################
 
@@ -180,21 +194,6 @@ def delete_staff(request, staff_id):
 
 ############################################################################################################
 ##################################### FLEET MANAGER VIEWS SECTION ##########################################
-
-@login_required
-def fleet_management_view(request):
-    requestors = Requestor.objects.all()
-    requests = Request.objects.select_related('requestor', 'vehicle').all()
-    vehicles = Vehicle.objects.filter(status="Allocated")  # Only allocated vehicles
-    requestor_form = RequestorForm()
-    context = {
-        'requestors': requestors,
-        'requests': requests,
-        'vehicles': vehicles,
-        'requestor_form': requestor_form,
-    }
-    return render(request, 'fleetApp/requisition/requisitions.html', context)
-
 
 # Fleet Manager
 @login_required
@@ -297,7 +296,6 @@ def allocate_vehicle(request, vehicle_id):
         form = VehicleAllocationForm(request.POST)
         if form.is_valid():
             driver = form.cleaned_data['driver']
-           # request_instance = form.cleaned_data['request']  # Ensure the request instance is passed
 
             # Allocate the vehicle to the selected driver
             driver.vehicle = vehicle
@@ -306,13 +304,6 @@ def allocate_vehicle(request, vehicle_id):
             # Update vehicle status
             vehicle.status = "Allocated"
             vehicle.save()
-
-            # Update request instance with mileage at assignment and allocation time
-            #request_instance.vehicle = vehicle
-           # request_instance.mileage_at_assignment = vehicle.mileage  # Capture mileage
-            #request_instance.time_of_allocation = now()
-          #  request_instance.request_status = "O"  # Mark request as Open
-           # request_instance.save()
 
             messages.success(request, "Vehicle allocated successfully!")
             return redirect('home')
@@ -347,7 +338,7 @@ def return_vehicle(request, vehicle_id):
 
             request_obj = Request.objects.filter(vehicle=vehicle, request_status="O").first()
             if request_obj:
-                #request_obj.close_request(mileage_at_return)
+                request_obj.close_request(mileage_at_return)
                 request_obj.mileage_at_return = mileage_at_return
                 request_obj.request_status = "C"
                 request_obj.save()
@@ -442,7 +433,7 @@ def delete_driver(request, driver_id):
 
 
 ###############################################################################################################
-######################################## SECTION FOR Requisition Views ########################################
+######################################## SECTION FOR Requestor Views ########################################
 
 # Add a requestor
 @login_required
@@ -505,7 +496,28 @@ def delete_requestor(request, requestor_id):
 
 
 ##################################################################################################################
-################################################## SECTION FOR Requests ##########################################
+################################################## SECTION FOR Requests VIEWS ##########################################
+@login_required
+def requisitions_view(request):
+    requestors = Requestor.objects.all()
+    requests = Request.objects.select_related('requestor', 'vehicle').all()
+    vehicles = Vehicle.objects.filter(status="Allocated")  # Only allocated vehicles
+    approved_requests = Request.objects.filter(request_status="O")
+    pending_requests = Request.objects.filter(request_status="P")
+
+
+    requestor_form = RequestorForm()
+    context = {
+        'requestors': requestors,
+        'requests': requests,
+        'vehicles': vehicles,
+        'approved_requests': approved_requests,
+        "pending_requests": pending_requests,
+        'requestor_form': requestor_form,
+    }
+    return render(request, 'fleetApp/requisition/requisitions.html', context)
+
+
 @login_required
 def add_request(request):
     try:
@@ -590,6 +602,7 @@ def approve_request(request, request_id):
         request_obj.vehicle = selected_vehicle
         request_obj.request_status = "O"  # Open (Allocated)
         request_obj.time_of_allocation = timezone.now()
+        request_obj.mileage_at_assignment = selected_vehicle.mileage
         request_obj.save()
 
         selected_vehicle.status = "Al"  # Allocated
@@ -599,25 +612,26 @@ def approve_request(request, request_id):
         return redirect('requisitions')  # or 'home' as you prefer
     return redirect('requisitions')
 
+
+from django.db.models import F, ExpressionWrapper, IntegerField
+
 @login_required
 def request_summary(request):
-    # Fetch all requests
-    requests = Request.objects.all()
-    vehicles = Vehicle.objects.filter(status='Av')  # Only show available vehicles
+    # All closed requests
+    closed_requests = Request.objects.filter(request_status="C")
 
-    # Add covered_mileage attribute to each request
-    for req in requests:
-        if req.mileage_at_assignment is not None and req.mileage_at_return is not None:
-            req.covered_mileage = req.mileage_at_return - req.mileage_at_assignment
-        else:
-            req.covered_mileage = None
+    # Annotate usage (mileage used) for trip summary
+    trip_summary = closed_requests.annotate(
+        usage_summary=ExpressionWrapper(
+            F('mileage_at_return') - F('mileage_at_assignment'),
+            output_field=IntegerField()
+        )
+    )
 
-    # Pass to template
-    return render(request, "fleetApp/requisition/requisitions.html", {
-        "requests": requests,
-        "vehicles": vehicles
+    return render(request, "fleetApp/requisition/request_summary.html", {
+        "closed_requests": closed_requests,
+        "trip_summary": trip_summary
     })
-
 
 #######################################################################################################################################
 ######################################## This Section for Service Provider Views #######################################################

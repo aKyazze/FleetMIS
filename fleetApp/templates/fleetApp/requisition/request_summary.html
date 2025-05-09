@@ -1,22 +1,93 @@
-<table>
-  <thead>
-    <tr>
-      <th>Requestor</th>
-      <th>Vehicle</th>
-      <th>Mileage at Assignment</th>
-      <th>Mileage at Return</th>
-      <th>Usage</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for request in requests %}
-    <tr>
-      <td>{{ request.requestor.name }}</td>
-      <td>{{ request.vehicle.vehicle_plate if request.vehicle else "None" }}</td>
-      <td>{{ request.mileage_at_assignment|default:"None" }}</td>
-      <td>{{ request.mileage_at_return|default:"None" }}</td>
-      <td>{{ request.request_summary }}</td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+{% extends "main.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Fleet Management | Reports{% endblock %}
+{% block header %}Closed Requests & Trip Summary{% endblock %}
+
+{% block content %}
+<div class="containers">
+    <!-- Tab Navigation -->
+    <ul class="nav nav-tabs mb-3" id="fleetTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="closed-tab" data-bs-toggle="tab" data-bs-target="#closed" type="button" role="tab" aria-controls="closed" aria-selected="true">
+                Closed Requests
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="trip-tab" data-bs-toggle="tab" data-bs-target="#trip" type="button" role="tab" aria-controls="trip" aria-selected="false">
+                Trip Summary
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="fleetTabContent">
+        <!-- Closed Requests Tab -->
+        <div class="tab-pane fade show active" id="closed" role="tabpanel" aria-labelledby="closed-tab">
+            <h3 class="mt-3">All Closed Requests</h3>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Requestor</th>
+                        <th>Current Location</th>
+                        <th>Destination</th>
+                        <th>Vehicle</th>
+                        <th>Current Mileage</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for request in closed_requests %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ request.requestor.username }}</td>
+                        <td>{{ request.current_location }}</td>
+                        <td>{{ request.destination }}</td>
+                        <td>{{ request.vehicle.vehicle_plate }}</td>
+                        <td>{{ request.mileage_at_return }}
+                        </td>
+                        <td>
+                        </a>
+                        <a href="{% url 'delete_request' request.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this request?');">
+                            <i class="bi bi-trash"></i>
+                        </a> 
+                        </td>
+                      </tr>
+                    {% empty %}
+                    <tr><td colspan="6">No closed requests yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Trip Summary Tab -->
+        <div class="tab-pane fade" id="trip" role="tabpanel" aria-labelledby="trip-tab">
+            <h3 class="mt-3">Trip Summary</h3>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Requestor</th>
+                        <th>Vehicle</th>
+                        <th>Mileage at Assignment</th>
+                        <th>Mileage at Return</th>
+                        <th>Used Mileage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for request in trip_summary %}
+                    <tr>
+                        <td>{{ request.requestor.username }}</td>
+                        <td>{{ request.vehicle.vehicle_plate }}</td>
+                        <td>{{ request.mileage_at_assignment }}</td>
+                        <td>{{ request.mileage_at_return }}</td>
+                        <td>{{ request.usage_summary }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5">No trip summary available.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

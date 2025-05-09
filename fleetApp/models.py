@@ -12,7 +12,7 @@ class Vehicle(models.Model):
     ("ELE", "Electric")
   ]
   STATUS = [
-    ("Av", "Available"), 
+    ("Available", "Available"), 
     ("Allocated", "Allocated")
   ]
  # vehicle_id = models.AutoField(primary_key=True)
@@ -36,7 +36,7 @@ class Driver(models.Model):
     ("M", "Male"), 
     ("F", "Female")
   ]
-  #driver_id = models.AutoField(primary_key=True)
+  user = models.OneToOneField(User, on_delete=models.CASCADE)
   driver_name = models.CharField(max_length=50)
   gender = models.CharField(max_length=2, choices=GENDER_OPTION)
   contact = models.CharField(max_length=20)
@@ -77,7 +77,7 @@ class Request(models.Model):
     mileage_at_return = models.IntegerField(null=True, blank=True)
 
     def __str__(self):
-        return f"Request by {self.requestor.name} on {self.request_date}"
+        return f"Request by {self.requestor.username} on {self.request_date}"
 
     def allocate_vehicle(self, vehicle):
         """Assign a vehicle and record mileage at assignment."""
