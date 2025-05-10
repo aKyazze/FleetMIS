@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone 
+from django.conf import settings
+
 # Create your models here.
 
 # Vehicle Entity:
@@ -58,23 +60,27 @@ class Requestor(models.Model):
         return self.name
 
 # Request Model
+
 class Request(models.Model):
     REQUEST_STATE = [
         ("P", "Pending"),
         ("O", "Open"),
         ("C", "Closed"),
     ]
-    requestor = models.ForeignKey(User, on_delete=models.CASCADE, related_name="requests")
-    #requestor = models.ForeignKey(Requestor, on_delete=models.CASCADE, related_name="requests")
+
+    requestor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="requests")
     request_date = models.DateField(auto_now_add=True)
     current_location = models.CharField(max_length=50)
     destination = models.CharField(max_length=50)
     purpose = models.CharField(max_length=100)
     vehicle = models.ForeignKey('Vehicle', on_delete=models.CASCADE, null=True, blank=True)
+    driver = models.ForeignKey('Driver', on_delete=models.SET_NULL, null=True, blank=True, related_name='requests')  
     time_of_allocation = models.DateTimeField(null=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
     request_status = models.CharField(max_length=1, choices=REQUEST_STATE, default="P")
     mileage_at_assignment = models.IntegerField(null=True, blank=True)
     mileage_at_return = models.IntegerField(null=True, blank=True)
+    
 
     def __str__(self):
         return f"Request by {self.requestor.username} on {self.request_date}"

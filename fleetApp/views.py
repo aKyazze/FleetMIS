@@ -1,7 +1,7 @@
 import csv
-
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone 
+from django.utils.dateformat import DateFormat
 from django.db.models import F, Q, ExpressionWrapper, IntegerField
 from django.contrib import messages
 from django.contrib.auth.forms import UserCreationForm
@@ -127,24 +127,51 @@ def main_view(request):
 #This is Home View
 @login_required
 def home_view(request):
-    # Get statistics for the dashboard
-    total_vehicles = Vehicle.objects.count()
-    total_drivers = Driver.objects.count()
-    total_pending_requests = Request.objects.filter(request_status="P").count()
-    total_completed_requests = Request.objects.filter(request_status="C").count()
-    total_services = Service.objects.count()
-    total_requestors = Requestor.objects.count()
-    total_service_providers = ServiceProvider.objects.count()
+    user = request.user
+    context = {}
 
-    context = {
-        'total_vehicles': total_vehicles,
-        'total_drivers': total_drivers,
-        'total_pending_requests': total_pending_requests,
-        'total_completed_requests': total_completed_requests,
-        'total_services': total_services,
-        'total_requestors': total_requestors,
-        'total_service_providers': total_service_providers, 
-    }
+    # FleetUsers - Requestors
+    if user.groups.filter(name="FleetUsers").exists():
+        pending_requests = Request.objects.filter(requestor=user, request_status="P")
+        approved_requests = Request.objects.filter(requestor=user, request_status="O") 
+        completed_requests = Request.objects.filter(requestor=user, request_status="C").select_related('vehicle')
+
+        for req in completed_requests:
+            req.assigned_driver = Driver.objects.filter(vehicle=req.vehicle).first() if req.vehicle else None
+
+        context.update({
+            'pending_requests': pending_requests,
+            'approved_requests': approved_requests,
+            'completed_requests': completed_requests,
+        })
+
+    # FleetDrivers - Assigned Trips
+    elif user.groups.filter(name="FleetDrivers").exists():
+        driver = Driver.objects.filter(email_address=user.email).first()
+        assigned_vehicle = Vehicle.objects.filter(driver=driver).first() if driver else None
+
+        open_trips = Request.objects.filter(driver=driver, request_status="O")
+        past_trips = Request.objects.filter(driver=driver, request_status="C")
+
+        context.update({
+            'driver': driver,
+            'assigned_vehicle': assigned_vehicle,
+            'open_trips': open_trips,
+            'past_trips': past_trips,
+        })
+
+    # Admins / FleetManagers - General dashboard
+    else:
+        context.update({
+            'total_vehicles': Vehicle.objects.count(),
+            'total_drivers': Driver.objects.count(),
+            'total_pending_requests': Request.objects.filter(request_status="P").count(),
+            'total_completed_requests': Request.objects.filter(request_status="C").count(),
+            'total_services': Service.objects.count(),
+            'total_requestors': Requestor.objects.count(),
+            'total_service_providers': ServiceProvider.objects.count(),
+        })
+
     return render(request, 'fleetApp/base/home.html', context)
 
 ############################################################################################
@@ -157,7 +184,7 @@ def add_vehicle(request):
         if form.is_valid():
             form.save()
             messages.success(request, "Vehicle added successfully!")
-            return redirect('home')
+            return redirect('vehicle')
         else:
             messages.error(request, "Failed to add vehicle. Please check the form.")
             return redirect('vehicle')
@@ -197,7 +224,7 @@ def vehicle_update(request, vehicle_id):
         if form.is_valid():
             form.save()
             messages.success(request, "Vehicle Updated successfully!")
-            return redirect('home')
+            return redirect('vehicle')
         else:
             messages.error(request, "Failed to Update vehicle. Please check the form.")
             return redirect('vehicle')
@@ -216,7 +243,7 @@ def vehicle_delete(request, vehicle_id):
     if request.method == 'POST':
         vehicle.delete()
         messages.success(request, "Vehicle deleted successfully!")
-        return redirect('home')
+        return redirect('vehicle')
     else:
         context = {'vehicle': vehicle}
         return render(request, 'fleetApp/vehicle/vehicle_confirm_delete.html', context)
@@ -240,7 +267,7 @@ def allocate_vehicle(request, vehicle_id):
             vehicle.save()
 
             messages.success(request, "Vehicle allocated successfully!")
-            return redirect('home')
+            return redirect('vehicle')
         else:
             messages.error(request, "Failed to allocate vehicle. Please check the form.")
     else:
@@ -301,7 +328,7 @@ def return_vehicle(request, vehicle_id):
                 pass  # Fail silently if group doesn't exist
 
             messages.success(request, "Vehicle returned successfully!")
-            return redirect('home')
+            return redirect('vehicle')
         else:
             messages.error(request, "Failed to return vehicle. Please check the form.")
     else:
@@ -320,7 +347,7 @@ def add_driver(request):
         if form.is_valid():
             form.save()
             messages.success(request, "Driver added successfully!")
-            return redirect('home')
+            return redirect('drivers')
         else:
             messages.error(request, "Failed to add driver. Please check the form.")
     else:
@@ -329,7 +356,6 @@ def add_driver(request):
         'form': form
     }
     return render(request, 'fleetApp/driver/add_driver.html', context)
-
 
 # Driver List View 
 @login_required
@@ -348,7 +374,6 @@ def drivers_list(request):
     }
     return render(request, 'fleetApp/driver/drivers.html', context)
 
-
 # Driver Update View 
 @login_required
 def edit_driver(request, driver_id):
@@ -358,7 +383,7 @@ def edit_driver(request, driver_id):
         if form.is_valid():
             form.save()
             messages.success(request, "Driver updated successfully!")
-            return redirect('home')
+            return redirect('drivers')
         else:
             messages.error(request, "Failed to update driver. Please check the form.")
     else:
@@ -369,7 +394,6 @@ def edit_driver(request, driver_id):
     }
     return render(request, 'fleetApp/driver/edit_driver.html', context)
 
-
 # Driver Removing View 
 @login_required
 def delete_driver(request, driver_id):
@@ -377,14 +401,13 @@ def delete_driver(request, driver_id):
     if request.method == 'POST':
         driver.delete()
         messages.success(request, "Driver deleted successfully!")
-        return redirect('home')
+        return redirect('drivers')
     else:
         messages.error(request, "Failed to delete driver. Please try again.")
     context = {
         'driver': driver
     }
     return render(request, 'fleetApp/driver/driver_delete.html', context)
-
 
 ###############################################################################################################
 ######################################## SECTION FOR Requestor Views ########################################
@@ -397,7 +420,7 @@ def add_requestor(request):
         if form.is_valid():
             form.save()
             messages.success(request, "Requestor added successfully!")
-            return redirect('home')
+            return redirect('requestor_list')
         else:
             messages.error(request, "Failed to add requestor. Please check the form.")
     else:
@@ -425,7 +448,7 @@ def edit_requestor(request, requestor_id):
         if form.is_valid():
             form.save()
             messages.success(request, "Requestor updated successfully!")
-            return redirect('home')
+            return redirect('requestor_list')
         else:
             messages.error(request, "Failed to update requestor. Please check the form.")
     else:
@@ -442,12 +465,11 @@ def delete_requestor(request, requestor_id):
     if request.method == 'POST':
         requestor.delete()
         messages.success(request, "Requestor deleted successfully!")
-        return redirect('home')
+        return redirect('requestor_list')
     context = {
         'requestor': requestor
     }
     return render(request, 'fleetApp/requisition/delete_requestor.html', context)
-
 
 ##################################################################################################################
 ################################################## SECTION FOR Requests VIEWS ##########################################
@@ -459,7 +481,6 @@ def requisitions_view(request):
     approved_requests = Request.objects.filter(request_status="O")
     pending_requests = Request.objects.filter(request_status="P")
 
-
     requestor_form = RequestorForm()
     context = {
         'requestors': requestors,
@@ -470,7 +491,6 @@ def requisitions_view(request):
         'requestor_form': requestor_form,
     }
     return render(request, 'fleetApp/requisition/requisitions.html', context)
-
 
 
 @login_required
@@ -570,7 +590,6 @@ def request_list(request):
     }
     return render(request, 'fleetApp/requisition/request_list.html', context)
 
-
 # Approve a request
 @login_required
 def approve_request(request, request_id):
@@ -587,7 +606,8 @@ def approve_request(request, request_id):
 
         # Define the driver assigned to the vehicle
         selected_driver = Driver.objects.filter(vehicle=selected_vehicle).first()
-        
+        request_obj.driver = selected_driver 
+        request_obj.save()
 
         # Notify Driver
         if selected_driver:
@@ -624,7 +644,6 @@ def approve_request(request, request_id):
         return redirect('requisitions')
     return redirect('requisitions')
 
-
 @login_required
 def request_summary(request):
     # All closed requests
@@ -653,7 +672,7 @@ def add_service_provider(request):
         if form.is_valid():
             form.save()
             messages.success(request, "Service provider added successfully!")
-            return redirect('home')
+            return redirect('service_provider_list')
         else:
             messages.error(request, "Failed to add service provider. Please check the form.")
     else:
@@ -679,7 +698,7 @@ def edit_service_provider(request, provider_id):
         if form.is_valid():
             form.save()
             messages.success(request, "Service provider updated successfully!")
-            return redirect('home')
+            return redirect('service_provider_list')
         else:
             messages.error(request, "Failed to update service provider. Please check the form.")
     else:
@@ -697,14 +716,13 @@ def delete_service_provider(request, provider_id):
     if request.method == 'POST':
         provider.delete()
         messages.success(request, "Service provider deleted successfully!")
-        return redirect('home')
+        return redirect('service_provider_list')
     #else:
      #   messages.error(request, "Failed to delete service provider. Please try again.")
     context = {
         'provider': provider
     }
     return render(request, 'fleetApp/serviceProvider/delete_service_provider.html', context)
-
 
 #####################################################################################################################
 ######################################## SECTION FOR Service Views ##################################################
@@ -716,7 +734,7 @@ def add_service(request):
         if form.is_valid():
             form.save()
             messages.success(request, "Service added successfully!")
-            return redirect('home')
+            return redirect('service_list')
         else:
             messages.error(request, "Failed to add service. Please check the form.")
     else:
@@ -726,7 +744,6 @@ def add_service(request):
     }
     return render(request, 'fleetApp/service/add_service.html', context)
 
-
 @login_required
 def service_list(request):
     services = Service.objects.select_related('vehicle', 'service_provider').all()
@@ -734,7 +751,6 @@ def service_list(request):
         'services': services
     }
     return render(request, 'fleetApp/service/services.html', context)
-
 
 @login_required
 def edit_service(request, service_id):
@@ -744,7 +760,7 @@ def edit_service(request, service_id):
         if form.is_valid():
             form.save()
             messages.success(request, "Service updated successfully!")
-            return redirect('home')
+            return redirect('service_list')
         else:
             messages.error(request, "Failed to update service. Please check the form.")
     else:
@@ -755,14 +771,13 @@ def edit_service(request, service_id):
     }
     return render(request, 'fleetApp/service/edit_service.html', context)
 
-
 @login_required
 def delete_service(request, service_id):
     service = get_object_or_404(Service, id=service_id)
     if request.method == 'POST':
         service.delete()
         messages.success(request, "Service deleted successfully!")
-        return redirect('home')
+        return redirect('service_list')
     #else:
         #messages.error(request, "Failed to delete service. Please try again.")
     context = {
@@ -770,12 +785,10 @@ def delete_service(request, service_id):
     }
     return render(request, 'fleetApp/service/delete_service.html', context)
 
-
 ####################################################################################################
 ##################################### GSM & ALERT VIEW SECTION ##########################################
 
 # GSM Sensor Data
-
 @login_required
 def gsm_data_list(request):
     data = GSMsensorData.objects.all().order_by('-timestamp')
@@ -795,7 +808,6 @@ def add_gsm_data(request):
 
 
 # Alerts
-
 @login_required
 def alert_list(request):
     alerts = Alert.objects.all().order_by('-timestamp')
@@ -813,12 +825,10 @@ def add_alert(request):
         form = AlertForm()
     return render(request, 'fleetApp/alerts/add_alert.html', {'form': form})
 
-
 ####################################################################################################
 ##################################### PDF & CSV EXPORTS VIEW SECTION ##########################################
 
 #PDF Export using ReportLab
-
 @login_required
 def export_trip_logs_pdf(request):
     response = HttpResponse(content_type='application/pdf')
@@ -835,8 +845,6 @@ def export_trip_logs_pdf(request):
     trips = Request.objects.filter(request_status="C").select_related('vehicle', 'requestor')
 
     for trip in trips:
-        # If driver is directly linked to request, you can use: trip.driver
-        # If indirectly assigned, fetch via vehicle
         driver = Driver.objects.filter(vehicle=trip.vehicle).first()
 
         p.drawString(30, y, f"Requestor: {trip.requestor.username} | Vehicle: {trip.vehicle.vehicle_plate}")
@@ -864,7 +872,6 @@ def export_trip_logs_pdf(request):
     return response
 
 # CSV Export: Trip Logs with Alerts
-
 @login_required
 def export_trip_logs_csv(request):
     response = HttpResponse(content_type='text/csv')
@@ -898,3 +905,76 @@ def export_trip_logs_csv(request):
         ])
 
     return response
+
+#Chat View:
+@login_required
+def chart_views(request):
+    vehicle_id = request.GET.get('vehicle_id')
+    sensor_type = request.GET.get('sensor_type')
+
+    labels, values, selected_vehicle_plate = [], [], ""
+    vehicles = Vehicle.objects.all()
+
+    if vehicle_id and sensor_type:
+        data = GSMsensorData.objects.filter(
+            vehicle_id=vehicle_id,
+            sensor_type=sensor_type
+        ).order_by('timestamp')
+
+        labels = [DateFormat(d.timestamp).format('M d H:i') for d in data]
+        values = [d.data_value for d in data]
+        selected_vehicle_plate = Vehicle.objects.get(id=vehicle_id).vehicle_plate
+
+    return render(request, 'fleetApp/charts/chart_views.html', {
+        'vehicles': vehicles,
+        'labels': labels,
+        'values': values,
+        'sensor_type': sensor_type or '',
+        'selected_vehicle_id': int(vehicle_id) if vehicle_id else None,
+        'selected_vehicle_plate': selected_vehicle_plate
+    })
+
+#Trip Views
+@login_required
+def trip_history(request):
+    try:
+        driver = Driver.objects.get(user=request.user)
+    except Driver.DoesNotExist:
+        messages.error(request, "No driver profile found for this user.")
+        return redirect('home')
+
+    trips = Request.objects.filter(
+        driver=driver,
+        request_status='C'
+    ).select_related('vehicle', 'requestor')
+
+    for trip in trips:
+        trip.mileage_used = (
+            (trip.mileage_at_return or 0) - (trip.mileage_at_assignment or 0)
+        )
+
+    return render(request, 'fleetApp/driver/trip_history.html', {'trips': trips})
+
+
+@login_required
+def assigned_trips(request):
+    try:
+        driver = Driver.objects.get(user=request.user)
+    except Driver.DoesNotExist:
+        messages.error(request, "No driver profile found for this user.")
+        return redirect('home')
+
+    # Only get requests that are still open (assigned)
+    trips = Request.objects.filter(
+        vehicle=driver.vehicle,
+        request_status='O'
+    ).select_related('vehicle', 'requestor')
+
+    return render(request, 'fleetApp/driver/assigned_trips.html', {'trips': trips})
+
+@login_required
+def driver_profile_view(request):
+    driver = get_object_or_404(Driver, user=request.user)
+    return render(request, 'fleetApp/driver/driver_profile.html', {
+        'driver': driver
+    })

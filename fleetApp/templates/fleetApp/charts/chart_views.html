@@ -1,0 +1,75 @@
+{% extends "main.html" %}
+{% load static %}
+
+{% block title %}Fleet Analytics Charts{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <h2 class="text-primary">Vehicle Sensor Charts</h2>
+    <form method="GET" class="mb-4">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label for="vehicle_id" class="form-label">Select Vehicle</label>
+                <select name="vehicle_id" class="form-select" required>
+                    <option value="">-- Select Vehicle --</option>
+                    {% for vehicle in vehicles %}
+                        <option value="{{ vehicle.id }}" {% if vehicle.id == selected_vehicle_id %}selected{% endif %}>{{ vehicle.vehicle_plate }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="sensor_type" class="form-label">Sensor Type</label>
+                <select name="sensor_type" class="form-select" required>
+                    <option value="Speed" {% if sensor_type == 'Speed' %}selected{% endif %}>Speed</option>
+                    <option value="Fuel" {% if sensor_type == 'Fuel' %}selected{% endif %}>Fuel Level</option>
+                    <option value="Engine" {% if sensor_type == 'Engine' %}selected{% endif %}>Engine Temp</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <button type="submit" class="btn btn-primary w-100">Generate Chart</button>
+            </div>
+        </div>
+    </form>
+
+    {% if labels and values %}
+        <canvas id="sensorChart" height="120"></canvas>
+    {% else %}
+        <p class="text-muted">Select a vehicle and sensor type to display data.</p>
+    {% endif %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('sensorChart');
+    const chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ labels|safe }},
+            datasets: [{
+                label: '{{ sensor_type }} Data',
+                data: {{ values|safe }},
+                fill: false,
+                borderColor: 'rgba(75, 192, 192, 1)',
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            },
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top'
+                },
+                title: {
+                    display: true,
+                    text: '{{ sensor_type }} Trend for Vehicle {{ selected_vehicle_plate }}'
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

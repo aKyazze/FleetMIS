@@ -1,0 +1,39 @@
+{% extends "main.html" %}
+{% block title %}Assigned Trips{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <h2 class="mb-4 text-primary">Assigned Trips</h2>
+    {% if trips %}
+        <table class="table table-bordered">
+            <thead class="table-light">
+                <tr>
+                    <th>#</th>
+                    <th>Vehicle</th>
+                    <th>Destination</th>
+                    <th>Requestor</th>
+                    <th>Allocation Time</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+              {% for trip in trips %}
+              <tr>
+                  <td>{{ forloop.counter }}</td>
+                  <td>{{ trip.vehicle.vehicle_plate }}</td>
+                  <td>{{ trip.destination }}</td>
+                  <td>{{ trip.requestor.username }}</td>
+                  <td>{{ trip.time_of_allocation|date:"Y-m-d H:i" }}</td>
+                  <td>
+                      <a href="{% url 'return_vehicle' trip.vehicle.id %}" class="btn btn-sm btn-success">
+                          <i class="bi bi-arrow-repeat"></i> Return Vehicle
+                      </a>
+                  </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="alert alert-info">No assigned trips.</div>
+    {% endif %}
+</div>
+{% endblock %}

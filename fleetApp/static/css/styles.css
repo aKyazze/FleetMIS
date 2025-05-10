@@ -66,6 +66,7 @@ nav a:hover {
 }
 
 .sidebar-link {
+  color: white !important;
   padding: 10px 1.2rem;
   display: flex;
   align-items: center;

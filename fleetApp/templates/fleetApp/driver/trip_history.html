@@ -1,0 +1,58 @@
+{% extends "main.html" %}
+{% load static %}
+{% block title %}My Trip History{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <h2 class="mb-4 text-primary">My Completed Trips</h2>
+
+    {% if trips %}
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Vehicle</th>
+                        <th>Requestor</th>
+                        <th>From</th>
+                        <th>To</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Mileage Used</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for trip in trips %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ trip.vehicle.vehicle_plate }}</td>
+                            <td>{{ trip.requestor.username }}</td>
+                            <td>{{ trip.current_location }}</td>
+                            <td>{{ trip.destination }}</td>
+                            <td>{{ trip.time_of_allocation|date:"Y-m-d H:i" }}</td>
+                            <td>
+                                {% if trip.mileage_at_return %}
+                                    {{ trip.updated_at|date:"Y-m-d H:i" }}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if trip.mileage_used is not None %}
+                                    {{ trip.mileage_used|floatformat:1 }} km
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info text-center">
+            <strong>No trips found.</strong> You haven’t completed any vehicle trips yet.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

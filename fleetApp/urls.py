@@ -68,6 +68,11 @@ urlpatterns = [
     path('alerts/add/', views.add_alert, name='add_alert'),
     path('export/trip-logs/csv/', views.export_trip_logs_csv, name='export_trip_logs_csv'),
     path('export/trip-logs/pdf/', views.export_trip_logs_pdf, name='export_trip_logs_pdf'),
+    path('charts/', views.chart_views, name='chart_views'),
+    path('trips/history/', views.trip_history, name='trip_history'),
+    path('trips/assigned/', views.assigned_trips, name='assigned_trips'),
+    path('driver/profile/', views.driver_profile_view, name='driver_profile'),
+    
 ]
 
 
