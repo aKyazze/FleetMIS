@@ -1,58 +1,22 @@
 /* ====== Base Layout ====== */
 body {
-  margin: auto;
+  margin: 0;
   padding: 0;
-  overflow-x: hidden;
   font-family: Arial, sans-serif;
   color: #001f3f;
   background-color: #fff;
-}
-
-/* ====== Header ====== */
-header {
-  background-color: #001f3f;
-  color: #fff;
-  padding: 20px;
-  text-align: center;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-header h1 {
-  margin: 0;
-  font-size: 2.5em;
-  letter-spacing: 2px;
-}
-
-/* ====== Navigation ====== */
-nav {
+  height: 100vh;
+  overflow: hidden;
   display: flex;
-  justify-content: center;
-  background-color: #FF851B;
-  padding: 10px 0;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  flex-direction: column;
 }
 
-nav ul {
-  list-style: none;
-  padding: 0;
-}
-
-nav ul li {
-  display: inline;
-  margin-right: 10px;
-}
-
-nav a {
-  color: #fff;
-  text-decoration: none;
-  margin: 0 15px;
-  padding: 10px 20px;
-  border-radius: 5px;
-  transition: background-color 0.3s ease;
-}
-
-nav a:hover {
-  background-color: #001f3f;
+/* ====== Wrapper to hold sidebar + content ====== */
+.wrapper {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  height: 100%;
 }
 
 /* ====== Sidebar ====== */
@@ -62,7 +26,9 @@ nav a:hover {
   color: white;
   height: 100vh;
   overflow-y: auto;
-  position: fixed;
+  position: relative;
+  flex-shrink: 0;
+  z-index: 100;
 }
 
 .sidebar-link {
@@ -79,21 +45,30 @@ nav a:hover {
   text-decoration: none;
 }
 
-/* ====== Main Content ====== */
-.main-content {
-  margin-left: 220px;
-  padding: 1.5rem;
-}
-
+/* ====== Navbar ====== */
 .navbar {
   z-index: 1000;
 }
 
-/* ====== Login Page ====== */
-.loginPage {
-  height: 100%;
-  display: flex;
-  align-items: center;
+/* ====== Main Content ====== */
+.main-content {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 1.5rem;
+  background-color: #fff;
+  max-height: calc(100vh - 60px); /* Adjust if your navbar height changes */
+  overflow-y: auto; max-height: calc(100vh - 60px);
+}
+
+
+/* ====== Footer ====== */
+footer {
+  background-color: #001f3f;
+  color: #fff;
+  text-align: center;
+  padding: 12px;
+  font-size: 0.9rem;
+  flex-shrink: 0;
 }
 
 /* ====== Logo/Image ====== */
@@ -214,7 +189,7 @@ input[type="submit"]:hover {
   padding: 10px;
 }
 
-/* ====== Table ====== */
+/* ====== Tables ====== */
 table {
   width: 100%;
   border-collapse: collapse;
@@ -234,7 +209,52 @@ th {
   background-color: #f2f2f2;
 }
 
-/* ====== Forgot Password / Reset Link ====== */
+/* ====== Scrollbars ====== */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #888;
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 8px;
+}
+
+.scrollable-content {
+  overflow-y: auto;
+  max-height: calc(100vh - 60px);
+}
+
+body {
+  scrollbar-width: thin;
+  scrollbar-color: #888 #f1f1f1;
+}
+
+/* ====== Headings & Paragraphs ====== */
+h2 {
+  font-size: 2em;
+  color: #FF851B;
+  border-bottom: 3px solid #001f3f;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+p {
+  font-size: 1.1em;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+/* ====== Forgot Password ====== */
 .submit {
   text-align: center;
 }
@@ -254,60 +274,7 @@ th {
   text-decoration: underline;
 }
 
-/* ====== Headings ====== */
-h2 {
-  font-size: 2em;
-  color: #FF851B;
-  border-bottom: 3px solid #001f3f;
-  padding-bottom: 10px;
-  margin-bottom: 20px;
-}
-
-/* ====== Paragraphs ====== */
-p {
-  font-size: 1.1em;
-  line-height: 1.6;
-  margin-bottom: 20px;
-}
-
-/* ====== Footer ====== */
-footer {
-  background-color: #001f3f;
-  color: #fff;
-  text-align: center;
-  padding: 20px;
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-}
-
-footer p {
-  margin: 0;
-  font-size: 1em;
-}
-
-/* ====== Responsive Styles ====== */
-@media (max-width: 768px) {
-  main {
-    padding: 20px;
-  }
-
-  nav {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  nav a {
-    margin: 10px 0;
-  }
-
-  header h1 {
-    font-size: 2em;
-  }
-}
-
-/* ====== CardBoards Styles ====== */
-
+/* ====== Dashboard Cards ====== */
 .dashboard-cards .col {
   margin-bottom: 20px;
 }
@@ -326,4 +293,31 @@ footer p {
 
 .dashboard-cards .card-body h2 {
   font-size: 2.5rem;
+}
+
+/* ====== Responsive Fixes ====== */
+@media (max-width: 768px) {
+  .wrapper {
+    flex-direction: column;
+  }
+
+  #sidebar-wrapper {
+    width: 100%;
+    height: auto;
+    position: relative;
+  }
+
+  .main-content {
+    margin-left: 0;
+    padding: 1rem;
+    max-height: none;
+  }
+
+  nav ul {
+    flex-direction: column;
+  }
+
+  nav a {
+    margin: 10px 0;
+  }
 }

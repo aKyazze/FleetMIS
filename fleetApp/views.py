@@ -186,7 +186,7 @@ def add_vehicle(request):
             messages.success(request, "Vehicle added successfully!")
             return redirect('vehicle')
         else:
-            messages.error(request, "Failed to add vehicle. Please check the form.")
+            messages.error(request, "This vehicle plate number already exists.")
             return redirect('vehicle')
     else:
         form = VehicleForm()
@@ -328,7 +328,7 @@ def return_vehicle(request, vehicle_id):
                 pass  # Fail silently if group doesn't exist
 
             messages.success(request, "Vehicle returned successfully!")
-            return redirect('vehicle')
+            return redirect('trip_history')
         else:
             messages.error(request, "Failed to return vehicle. Please check the form.")
     else:

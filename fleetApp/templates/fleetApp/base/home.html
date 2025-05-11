@@ -2,9 +2,10 @@
 {% load group_tags %}
 {% load crispy_forms_tags %}
 {% block title %}Dashboard | Fleet Management{% endblock %}
-{% block content %}
 
-<div class="container-fluid py-4">
+{% block content %}
+<!-- Scrollable container -->
+<div class="container-fluid py-4" >
     <div class="mb-4">
         <h1 class="fw-bold text-dark">Dashboard Overview</h1>
         <p class="text-muted">Quick summary of current fleet operations and requisitions.</p>
@@ -16,132 +17,127 @@
         <!-- Pending -->
         <div class="col-12">
             <h4 class="text-info">Pending Requests</h4>
-            <table class="table table-striped table-bordered">
-                <thead class="table-light">
-                    <tr>
-                        <th>#</th>
-                        <th>Current Location</th>
-                        <th>Destination</th>
-                        <th>Request Date</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for request in pending_requests %}
-                    <tr>
-                        <td>{{ forloop.counter }}</td>
-                        <td>{{ request.current_location }}</td>
-                        <td>{{ request.destination }}</td>
-                        <td>
-                            {% if request.request_date %}
-                                {{ request.request_date|date:"Y-m-d" }}
-                            {% else %}
-                                N/A
-                            {% endif %}
-                        </td>
-                        <td><span class="badge bg-warning">Pending</span></td>
-                    </tr>
-                    {% empty %}
-                    <tr><td colspan="5" class="text-center">No pending requests</td></tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Current Location</th>
+                            <th>Destination</th>
+                            <th>Request Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for request in pending_requests %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ request.current_location }}</td>
+                            <td>{{ request.destination }}</td>
+                            <td>{{ request.request_date|date:"Y-m-d" }}</td>
+                            <td><span class="badge bg-warning">Pending</span></td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="5" class="text-center">No pending requests</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <!-- Approved -->
         <div class="col-12 mt-4">
             <h4 class="text-primary">Approved Requests</h4>
-            <table class="table table-striped table-bordered">
-                <thead class="table-light">
-                    <tr>
-                        <th>#</th>
-                        <th>Vehicle</th>
-                        <th>Destination</th>
-                        <th>Approved On</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for request in approved_requests %}
-                    <tr>
-                        <td>{{ forloop.counter }}</td>
-                        <td>{{ request.vehicle.vehicle_plate }}</td>
-                        <td>{{ request.destination }}</td>
-                        <td>
-                            {% if request.time_of_allocation %}
-                                {{ request.time_of_allocation|date:"Y-m-d H:i" }}
-                            {% else %}
-                                N/A
-                            {% endif %}
-                        </td>
-                        <td><span class="badge bg-primary">Approved</span></td>
-                    </tr>
-                    {% empty %}
-                    <tr><td colspan="5" class="text-center">No approved requests</td></tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Vehicle</th>
+                            <th>Destination</th>
+                            <th>Approved On</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for request in approved_requests %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ request.vehicle.vehicle_plate }}</td>
+                            <td>{{ request.destination }}</td>
+                            <td>{{ request.time_of_allocation|date:"Y-m-d H:i" }}</td>
+                            <td><span class="badge bg-primary">Approved</span></td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="5" class="text-center">No approved requests</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <!-- Completed -->
         <div class="col-12 mt-4">
             <h4 class="text-success">Completed Requests</h4>
-            <table class="table table-striped table-bordered">
-                <thead class="table-light">
-                    <tr>
-                        <th>#</th>
-                        <th>Vehicle</th>
-                        <th>Driver</th>
-                        <th>Contact</th>
-                        <th>Destination</th>
-                        <th>Date Approved</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for request in completed_requests %}
-                    <tr>
-                        <td>{{ forloop.counter }}</td>
-                        <td>
-                            {% if request.vehicle %}
-                                {{ request.vehicle.vehicle_plate }}
-                            {% else %}
-                                N/A
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if request.assigned_driver %}
-                                {{ request.assigned_driver.driver_name }}
-                            {% else %}
-                                Not Assigned
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if request.assigned_driver %}
-                                {{ request.assigned_driver.contact }}
-                            {% else %}
-                                N/A
-                            {% endif %}
-                        </td>
-                        <td>{{ request.destination }}</td>
-                        <td>
-                            {% if request.time_of_allocation %}
-                                {{ request.time_of_allocation|date:"Y-m-d H:i" }}
-                            {% else %}
-                                N/A
-                            {% endif %}
-                        </td>
-                        <td><span class="badge bg-success">Completed</span></td>
-                    </tr>
-                    {% empty %}
-                    <tr><td colspan="7" class="text-center">No completed requests</td></tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Vehicle</th>
+                            <th>Driver</th>
+                            <th>Contact</th>
+                            <th>Destination</th>
+                            <th>Date Approved</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for request in completed_requests %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>
+                                {% if request.vehicle %}
+                                    {{ request.vehicle.vehicle_plate }}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if request.assigned_driver %}
+                                    {{ request.assigned_driver.driver_name }}
+                                {% else %}
+                                    Not Assigned
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if request.assigned_driver %}
+                                    {{ request.assigned_driver.contact }}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </td>
+                            <td>{{ request.destination }}</td>
+                            <td>
+                                {% if request.time_of_allocation %}
+                                    {{ request.time_of_allocation|date:"Y-m-d H:i" }}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </td>
+                            <td><span class="badge bg-success">Completed</span></td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="7" class="text-center">No completed requests</td></tr>
+                        {% endfor %}
+                    </tbody>
+                    </table>
+            </div>
         </div>
-        
+    </div>
+
     {% elif user|has_group:"FleetManagers" or user.is_superuser %}
-    <!-- Fleet Manager or Admin View -->
+    <!-- Manager/Admin Dashboard -->
     <div class="dashboard-cards row row-cols-1 row-cols-sm-2 row-cols-md-2 row-cols-lg-4 g-4">
         <div class="col">
             <div class="card bg-primary text-white shadow-sm h-100 p-3">
@@ -223,5 +219,4 @@
         <p class="text-danger">You do not have access to any dashboard features. Please contact admin.</p>
     {% endif %}
 </div>
-
 {% endblock %}

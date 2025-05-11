@@ -11,16 +11,48 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+<!--
+    <style>
+        html, body {
+            height: 100%;
+            overflow: auto;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .wrapper {
+            display: flex;
+            flex-grow: 1;
+            overflow: hidden;
+        }
+
+        #sidebar-wrapper {
+            width: 250px;
+            min-height: 100vh;
+            overflow-y: auto;
+            background-color: #001f3f;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            max-height: calc(100vh - 80px); /* Adjust depending on navbar/footer height */
+        }
+    </style>
+-->
 </head>
 <body>
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg" style="background-color: #001f3f;">
         <div class="container-fluid">
-                <a class="navbar-brand d-flex align-items-center gap-2 text-white fw-bold" href="#">
-                    <img src="{% static 'images/log.jpeg' %}" alt="Fleet Logo" class="logo-img">
-                    FleetMIS
-                </a>
-                
+            <a class="navbar-brand d-flex align-items-center gap-2 text-white fw-bold" href="#">
+                <img src="{% static 'images/log.jpeg' %}" alt="Fleet Logo" class="logo-img">
+                FleetMIS
+            </a>
             <button class="navbar-toggler bg-white" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -64,111 +96,117 @@
         </div>
     </nav>
 
-    {% if user.is_authenticated %}
-    <!-- Sidebar per Group -->
-    <div id="sidebar-wrapper" style="background-color: #001f3f;">
-        <div class="list-group list-group-flush px-2 pt-4">
-            {% if user|has_group:"Admins" %}
-                <!-- Admin Links -->
-                <a href="/admin/auth/user/" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link" target="_blank">
-                    <i class="bi bi-person-gear"></i> Staff
-                </a>
-                <a href="/admin/auth/group/" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link" target="_blank">
-                    <i class="bi bi-people-fill"></i> Groups
-                </a>
-                <a href="{% url 'vehicle' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
-                    <i class="bi bi-truck"></i> Vehicles
-                </a>
-                <a href="{% url 'drivers' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
-                    <i class="bi bi-person-lines-fill"></i> Drivers
-                </a>
-                <a href="{% url 'requestor_list' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
-                    <i class="bi bi-people"></i> Requestors
-                </a>
-                <a href="{% url 'requisitions' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
-                    <i class="bi bi-journal-check"></i> Requisitions
-                </a>
-                <a href="{% url 'add_request' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
-                    <i class="bi bi-send-check"></i> Request Vehicle
-                </a>
-                <a href="{% url 'service_provider_list' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
-                    <i class="bi bi-building-gear"></i> Service Providers
-                </a>
-                <a href="{% url 'service_list' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
-                    <i class="bi bi-wrench-adjustable"></i> Services
-                </a>
-                <a href="{% url 'request_summary' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
-                    <i class="bi bi-bar-chart-line"></i> Reports
-                </a>
-                <a href="{% url 'gsm_data_list' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
-                    <i class="bi bi-broadcast-pin"></i> GSM Sensor Data
-                </a>
-                <a href="{% url 'alert_list' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link d-flex justify-content-between align-items-center">
-                    <span><i class="bi bi-exclamation-diamond"></i> Alerts</span>
-                    {% if unread_alerts_count > 0 %}
-                        <span class="badge bg-danger rounded-pill">{{ unread_alerts_count }}</span>
-                    {% endif %}
-                </a>
-            {% elif user|has_group:"FleetManagers" %}
-                <!-- Fleet Manager Links -->
-                <a href="{% url 'vehicle' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
-                    <i class="bi bi-truck"></i> Vehicles
-                </a>
-                <a href="{% url 'drivers' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
-                    <i class="bi bi-person-lines-fill"></i> Drivers
-                </a>
-                <a href="{% url 'requisitions' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
-                    <i class="bi bi-clipboard-check"></i> Requisitions
-                </a>
-                <a href="{% url 'add_request' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
-                    <i class="bi bi-send-check"></i> Request Vehicle
-                </a>
-                <a href="{% url 'service_provider_list' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
-                    <i class="bi bi-building-gear"></i> Service Providers
-                </a>
-                <a href="{% url 'service_list' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
-                    <i class="bi bi-wrench-adjustable"></i> Services
-                </a>
-                <a href="{% url 'request_summary' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
-                    <i class="bi bi-bar-chart-line"></i> Reports
-                </a>
-                <a href="{% url 'gsm_data_list' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
-                    <i class="bi bi-broadcast-pin"></i> GSM Sensor Data
-                </a>
-                <a href="{% url 'alert_list' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link d-flex justify-content-between align-items-center">
-                    <span><i class="bi bi-exclamation-diamond"></i> Alerts</span>
-                    {% if unread_alerts_count > 0 %}
-                        <span class="badge bg-danger rounded-pill">{{ unread_alerts_count }}</span>
-                    {% endif %}
-                </a>
-            {% elif user|has_group:"FleetDrivers" %}
-                <!-- Fleet Driver Links -->
-                <a href="{% url 'assigned_trips' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
-                    <i class="bi bi-truck-front"></i> My Assigned Trips
-                </a>
-                <a href="{% url 'trip_history' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
-                    <i class="bi bi-clock-history"></i> Trip History
-                </a>
-                <a href="{% url 'driver_profile' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
-                    <i class="bi bi-person-circle"></i> My Profile
-                </a>
-
-            {% elif user|has_group:"FleetUsers" %}
-                <!-- Requestor Links -->
-                <a href="{% url 'add_request' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
-                    <i class="bi bi-send-check"></i> Request Vehicle
-                </a>
-            {% endif %}
+    <div class="wrapper">
+        {% if user.is_authenticated %}
+        <!-- Sidebar -->
+        <div id="sidebar-wrapper">
+            <div class="list-group list-group-flush px-2 pt-4">
+                {% if user|has_group:"Admins" %}
+                    <a href="/admin/auth/user/" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link" target="_blank">
+                        <i class="bi bi-person-gear"></i> Staff
+                    </a>
+                    <a href="/admin/auth/group/" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link" target="_blank">
+                        <i class="bi bi-people-fill"></i> Groups
+                    </a>
+                    <a href="{% url 'vehicle' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
+                        <i class="bi bi-truck"></i> Vehicles
+                    </a>
+                    <a href="{% url 'drivers' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
+                        <i class="bi bi-person-lines-fill"></i> Drivers
+                    </a>
+                    <a href="{% url 'requestor_list' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
+                        <i class="bi bi-people"></i> Requestors
+                    </a>
+                    <a href="{% url 'requisitions' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
+                        <i class="bi bi-journal-check"></i> Requisitions
+                    </a>
+                    <a href="{% url 'add_request' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
+                        <i class="bi bi-send-check"></i> Request Vehicle
+                    </a>
+                    <a href="{% url 'service_provider_list' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
+                        <i class="bi bi-building-gear"></i> Service Providers
+                    </a>
+                    <a href="{% url 'service_list' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
+                        <i class="bi bi-wrench-adjustable"></i> Services
+                    </a>
+                    <a href="{% url 'request_summary' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
+                        <i class="bi bi-bar-chart-line"></i> Reports
+                    </a>
+                    <a href="{% url 'gsm_data_list' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
+                        <i class="bi bi-broadcast-pin"></i> GSM Sensor Data
+                    </a>
+                    <a href="{% url 'alert_list' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-exclamation-diamond"></i> Alerts</span>
+                        {% if unread_alerts_count > 0 %}
+                            <span class="badge bg-danger rounded-pill">{{ unread_alerts_count }}</span>
+                        {% endif %}
+                    </a>
+                {% elif user|has_group:"FleetManagers" %}
+                    <!-- Fleet Manager Links -->
+                    <a href="{% url 'vehicle' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
+                        <i class="bi bi-truck"></i> Vehicles
+                    </a>
+                    <a href="{% url 'drivers' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
+                        <i class="bi bi-person-lines-fill"></i> Drivers
+                    </a>
+                    <a href="{% url 'requestor_list' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
+                        <i class="bi bi-people"></i> Requestors
+                    </a>
+                    <a href="{% url 'requisitions' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
+                        <i class="bi bi-clipboard-check"></i> Requisitions
+                    </a>
+                    <a href="{% url 'add_request' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
+                        <i class="bi bi-send-check"></i> Request Vehicle
+                    </a>
+                    <a href="{% url 'service_provider_list' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
+                        <i class="bi bi-building-gear"></i> Service Providers
+                    </a>
+                    <a href="{% url 'service_list' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
+                        <i class="bi bi-wrench-adjustable"></i> Services
+                    </a>
+                    <a href="{% url 'request_summary' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
+                        <i class="bi bi-bar-chart-line"></i> Reports
+                    </a>
+                    <a href="{% url 'gsm_data_list' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
+                        <i class="bi bi-broadcast-pin"></i> GSM Sensor Data
+                    </a>
+                    <a href="{% url 'alert_list' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-exclamation-diamond"></i> Alerts</span>
+                        {% if unread_alerts_count > 0 %}
+                            <span class="badge bg-danger rounded-pill">{{ unread_alerts_count }}</span>
+                        {% endif %}
+                    </a>
+                {% elif user|has_group:"FleetDrivers" %}
+                    <!-- Fleet Driver Links -->
+                    <a href="{% url 'assigned_trips' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
+                        <i class="bi bi-truck-front"></i> My Assigned Trips
+                    </a>
+                    <a href="{% url 'trip_history' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
+                        <i class="bi bi-clock-history"></i> Trip History
+                    </a>
+                    <a href="{% url 'driver_profile' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
+                        <i class="bi bi-person-circle"></i> My Profile
+                    </a>
+                    <a href="{% url 'add_request' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
+                        <i class="bi bi-send-check"></i> Request Vehicle
+                    </a>
+                {% elif user|has_group:"FleetUsers" %}
+                    <!-- Requestor Links -->
+                    <a href="{% url 'add_request' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
+                        <i class="bi bi-send-check"></i> Request Vehicle
+                    </a>
+                {% endif %}
+            </div>
         </div>
-    </div>
-{% endif %}
+        {% endif %}
 
-    <!-- Main Content -->
-    <main class="main-content">
-        {% block content %}
-        <!-- Dynamic content goes here -->
-        {% endblock %}
-    </main>
+        <!-- Main Content -->
+        <main class="main-content scrollable-content">
+            {% block content %}
+            <!-- Dynamic content goes here -->
+            {% endblock %}
+        </main>
+    </div>
 
     <!-- Footer -->
     <footer class="bg-dark text-white text-center py-3 mt-auto">
@@ -185,21 +223,23 @@
                 const emailInput = document.getElementById('id_email_address');
                 const contactInput = document.getElementById('id_contact');
 
-                userSelect.addEventListener('change', function () {
-                    const userId = this.value;
-                    if (userId) {
-                        fetch(`/api/user-info/?user_id=${userId}`)
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.name) nameInput.value = data.name;
-                                if (data.email) emailInput.value = data.email;
-                                if (data.contact) contactInput.value = data.contact;
-                            })
-                            .catch(err => console.error("Failed to fetch user info:", err));
-                    }
-                });
+                if (userSelect) {
+                    userSelect.addEventListener('change', function () {
+                        const userId = this.value;
+                        if (userId) {
+                            fetch(`/api/user-info/?user_id=${userId}`)
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.name) nameInput.value = data.name;
+                                    if (data.email) emailInput.value = data.email;
+                                    if (data.contact) contactInput.value = data.contact;
+                                })
+                                .catch(err => console.error("Failed to fetch user info:", err));
+                        }
+                    });
+                }
             });
         </script>
     {% endblock %}
-    </body>
+</body>
 </html>

@@ -1,4 +1,5 @@
 from django import forms
+from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User
 from .models import Vehicle, Driver, Requestor, Request, ServiceProvider, Service, GSMsensorData, Alert
 
@@ -7,6 +8,12 @@ class VehicleForm(forms.ModelForm):
     class Meta:
         model = Vehicle
         fields = ['vehicle_plate', 'vehicle_type', 'engine_type', 'mileage']
+        
+    def clean_vehicle_plate(self):
+        plate = self.cleaned_data['vehicle_plate'].upper().strip()
+        if Vehicle.objects.filter(vehicle_plate__iexact=plate).exists():
+            raise ValidationError("This vehicle plate number already exists.")
+        return plate
 
 
 class VehicleAllocationForm(forms.Form):

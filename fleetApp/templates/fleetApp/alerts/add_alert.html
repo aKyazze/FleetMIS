@@ -1,11 +1,27 @@
 {% extends "main.html" %}
 {% load crispy_forms_tags %}
 {% block title %}Add Alert{% endblock %}
+
 {% block content %}
-<h2>Create Alert</h2>
-<form method="POST">
-    {% csrf_token %}
-    {{ form|crispy }}
-    <button class="btn btn-success">Submit Alert</button>
-</form>
+<div class="container py-4" style="max-width: 800px;">
+    <h2 class="text-primary mb-4">Create New Alert</h2>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <form method="POST">
+                {% csrf_token %}
+                {{ form|crispy }}
+
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="{% url 'alert_list' %}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Back
+                    </a>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-check-circle"></i> Save Alert
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}

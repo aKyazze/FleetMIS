@@ -167,3 +167,11 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'kyazze85@gmail.com'
 EMAIL_HOST_PASSWORD = 'vcdu gkml itco mgke'  # Use App Password if using Gmail
 DEFAULT_FROM_EMAIL = 'FleetMIS <kyazze85@gmail.com>'
+
+'''EMAIL_HOST = 'mail.utcl.co.ug'  
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'itservicedesk@utcl.co.ug'
+EMAIL_HOST_PASSWORD = 'troubledesk2010'
+DEFAULT_FROM_EMAIL = 'FleetMIS <itservicedesk@utcl.co.ug>'
+'''

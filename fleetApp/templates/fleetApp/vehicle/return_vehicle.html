@@ -8,7 +8,6 @@
   <p>Current Mileage: {{ vehicle.mileage }}</p>
   {{ form|crispy}}
   <button type="submit" class="btn btn-success">Return Vehicle</button>
-  <a href="{% url 'vehicle' %}" class="btn btn-primary">Cancel</a>
   <a href="{% url 'trip_history' %}" class="btn btn-secondary mt-3">Cancel & Go Back</a>
 
 </form>

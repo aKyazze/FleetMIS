@@ -17,8 +17,7 @@ class Vehicle(models.Model):
     ("Available", "Available"), 
     ("Allocated", "Allocated")
   ]
- # vehicle_id = models.AutoField(primary_key=True)
-  vehicle_plate = models.CharField(max_length=20)
+  vehicle_plate = models.CharField(max_length=20, unique=True)
   vehicle_type = models.CharField(max_length=50)
   mileage = models.PositiveIntegerField()
   engine_type = models.CharField(max_length=4, choices=ENGIN)
