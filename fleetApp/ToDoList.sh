@@ -87,3 +87,19 @@ In themes.xml, modify to use your primary colors:
 🔹 Step 7: Implement Dashboard
 Each card (like in your Django dashboard) will be a CardView component.
 
+PreRequists: PACKAGES
+
+   1 pip install django
+   2 pip install -U django-jazzmin
+   3 pip install reportlab
+   4 pip install django-crispy_forms
+   5 pip install crispy bootstrap4
+   6 pip install django-crispy-forms crispy-bootstrap4
+   7 pip install djangorestframework
+   8 python manage.py runserver
+   9 python installation
+  10 
+  11 
+  12 
+  13 
+  14 

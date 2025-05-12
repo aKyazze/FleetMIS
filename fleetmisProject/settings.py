@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-jp(sk_4u07w!f*awus!3yiri+dto+qu(h(eao6p%9_aj!o+@v(
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    '172.25.1.57'
+    '172.25.1.57', '192.168.43.249','192.168.43.107','localhost', '127.0.0.1'
 ]
 
 
@@ -50,7 +50,6 @@ INSTALLED_APPS = [
    
 ]
 
-CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -138,6 +137,8 @@ STATICFILES_DIRS = [
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
+
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
