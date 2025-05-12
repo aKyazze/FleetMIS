@@ -45,70 +45,45 @@ driver_profile
 
 trip_history
 
-
-@login_required
-def trip_history(request):
-    try:
-        driver = Driver.objects.get(user=request.user)
-    except Driver.DoesNotExist:
-        messages.error(request, "No driver profile found for this user.")
-        return redirect('home')
-
-    trips = Request.objects.filter(
-        vehicle=driver.vehicle,
-        request_status='C'
-    ).select_related('vehicle', 'requestor')
-
-    for trip in trips:
-        if trip.mileage_at_return and trip.mileage_at_assignment:
-            trip.mileage_used = trip.mileage_at_return - trip.mileage_at_assignment
-        else:
-            trip.mileage_used = None
-
-    return render(request, 'fleetApp/driver/trip_history.html', {'trips': trips})
+Would you like a cleaned-up or refactored version of any of these views for better readability or maintainability?
 
 
+ Step 2: Define Navigation and Main Activities
+We'll use:
 
-@login_required
-def return_vehicle(request, vehicle_id):
-    vehicle = get_object_or_404(Vehicle, id=vehicle_id)
-    
-    # Ensure only the assigned driver can return
-    try:
-        driver = Driver.objects.get(user=request.user)
-        if driver.vehicle != vehicle:
-            messages.error(request, "You are not assigned to this vehicle.")
-            return redirect('assigned_trips')
-    except Driver.DoesNotExist:
-        messages.error(request, "Driver profile not found.")
-        return redirect('home')
+Navigation Drawer (like your sidebar)
 
-    if request.method == "POST":
-        form = VehicleReturnForm(request.POST)
-        if form.is_valid():
-            mileage_at_return = form.cleaned_data['mileage_at_return']
+Bottom Navigation (optional for mobile ergonomics)
 
-            # Update the request object
-            request_obj = Request.objects.filter(vehicle=vehicle, request_status="O").first()
-            if request_obj:
-                request_obj.mileage_at_return = mileage_at_return
-                request_obj.request_status = "C"
-                request_obj.time_of_return = timezone.now()
-                request_obj.save()
+🔹 Step 3: Create Core UI Layouts (to match your Django app)
+We'll now mirror the major views you have in Django.
 
-            # Update vehicle and driver
-            vehicle.status = 'Available'
-            vehicle.mileage = mileage_at_return
-            vehicle.save()
+Here are the essential screens to replicate:
 
-            driver.vehicle = None
-            driver.save()
+Login
 
-            messages.success(request, "Vehicle returned and trip completed.")
-            return redirect('trip_history')
-        else:
-            messages.error(request, "Please correct the form errors.")
-    else:
-        form = VehicleReturnForm()
+Dashboard
 
-    return render(request, 'fleetApp/vehicle/return_vehicle.html', {'vehicle': vehicle, 'form': form})
+List Views (e.g., vehicles, users, etc.)
+
+Form Screens (Add Vehicle, Add Driver, etc.)
+
+
+🔹 Step 4: Connect to Django via API
+Assuming your Django app already uses django-rest-framework, here’s how the Android app will interact:
+
+Tools:
+Retrofit: For API calls
+
+Gson/Moshi: For JSON parsing
+
+ViewModel + LiveData: For state management
+
+🔹 Step 5: Use ViewPager / RecyclerView for Lists
+To match your list views (table in HTML), we’ll use RecyclerView in Android.
+
+🔹 Step 6: Apply Theming Globally
+In themes.xml, modify to use your primary colors:
+🔹 Step 7: Implement Dashboard
+Each card (like in your Django dashboard) will be a CardView component.
+

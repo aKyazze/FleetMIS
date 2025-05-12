@@ -1,5 +1,6 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
+from .views import CustomAuthToken
 from . import views
 
 urlpatterns = [
@@ -72,6 +73,7 @@ urlpatterns = [
     path('trips/history/', views.trip_history, name='trip_history'),
     path('trips/assigned/', views.assigned_trips, name='assigned_trips'),
     path('driver/profile/', views.driver_profile_view, name='driver_profile'),
+    path('api/login/', CustomAuthToken.as_view(), name='api_login'),
     
 ]
 

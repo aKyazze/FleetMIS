@@ -14,6 +14,9 @@ from .models import Vehicle, Driver, Requestor, Request, ServiceProvider, Servic
 from .forms import VehicleForm, VehicleAllocationForm, DriverForm, ServiceProviderForm, ServiceForm, RequestorForm, RequestForm, RequestApprovalForm, VehicleReturnForm, GSMsensorDataForm, AlertForm
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
+from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.authtoken.models import Token
+from rest_framework.response import Response
 
 
 # Create your views here.
@@ -101,7 +104,9 @@ def register_user(request):
             messages.success(request, "User registered and added to staff list.")
             return redirect("requestor_list")
 
-#This is API endpoint view to return user Details by ID
+#This is API SECTION 
+# 
+# endpoint view to return user Details by ID
 @require_GET
 @login_required
 def get_user_info(request):
@@ -116,6 +121,20 @@ def get_user_info(request):
         })
     except User.DoesNotExist:
         return JsonResponse({'error': 'User not found'}, status=404)
+    
+
+# Login API Endpoint (Using Token Authentication)
+class CustomAuthToken(ObtainAuthToken):
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+        token = Token.objects.get(key=response.data['token'])
+        user = token.user
+        return Response({
+            'token': token.key,
+            'user_id': user.pk,
+            'username': user.username,
+            'email': user.email,
+        })
 ####################################################################################################
 ##################################### MAIN & HOME SECTION ##########################################
 

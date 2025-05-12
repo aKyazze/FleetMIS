@@ -25,7 +25,9 @@ SECRET_KEY = 'django-insecure-jp(sk_4u07w!f*awus!3yiri+dto+qu(h(eao6p%9_aj!o+@v(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    '172.25.1.57'
+]
 
 
 # Application definition
@@ -43,6 +45,8 @@ INSTALLED_APPS = [
     'fleetApp', 
     'crispy_forms',
      'crispy_bootstrap4',
+     'rest_framework',
+     'rest_framework.authtoken',  # For token-based authentication
    
 ]
 
@@ -175,3 +179,12 @@ EMAIL_HOST_USER = 'itservicedesk@utcl.co.ug'
 EMAIL_HOST_PASSWORD = 'troubledesk2010'
 DEFAULT_FROM_EMAIL = 'FleetMIS <itservicedesk@utcl.co.ug>'
 '''
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ]
+}
