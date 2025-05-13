@@ -5,13 +5,54 @@
 {% block content %}
 <div class="page-container">
   <h1>Update Driver</h1>
-  <form method="POST">
+  <form method="POST" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form|crispy }}
     <button type="submit">Update Driver</button>
     <a href="{% url 'drivers' %}" class="btn btn-primary">Cancel</a>
   </form>
 </div>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+      const userSelect = document.getElementById('id_user');
+      const nameInput = document.getElementById('id_name');
+      const emailInput = document.getElementById('id_email_address');
+      const contactInput = document.getElementById('id_contact');
+
+      const userMap = {
+          {% for user in form.fields.user.queryset %}
+              "{{ user.id }}": {
+                  "name": "{{ user.get_full_name|escapejs }}",
+                  "email": "{{ user.email|escapejs }}",
+                  "contact": "{{ user.username|escapejs }}"  // You may adjust to a phone field if needed
+              },
+          {% endfor %}
+      };
+
+      function populateUserFields(userId) {
+          const user = userMap[userId];
+          if (user) {
+              nameInput.value = user.name;
+              emailInput.value = user.email;
+              contactInput.value = user.contact;
+          } else {
+              nameInput.value = '';
+              emailInput.value = '';
+              contactInput.value = '';
+          }
+      }
+
+      userSelect.addEventListener('change', function () {
+          populateUserFields(this.value);
+      });
+
+      // Auto-populate on page load if a user is pre-selected
+      if (userSelect.value) {
+          populateUserFields(userSelect.value);
+      }
+  });
+</script>
+
 {% endblock %}
 
 

@@ -14,11 +14,11 @@
 </form>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const userSelect = document.getElementById('id_user');
-        const nameInput = document.getElementById('id_name');
-        const emailInput = document.getElementById('id_email_address');
-        const contactInput = document.getElementById('id_contact');
+    document.addEventListener("DOMContentLoaded", function () {
+        const userSelect = document.getElementById("id_user");
+        const nameField = document.getElementById("id_name");
+        const emailField = document.getElementById("id_email_address");
+        const contactField = document.getElementById("id_contact");
 
         if (userSelect) {
             userSelect.addEventListener('change', function () {
@@ -27,9 +27,9 @@
                     fetch(`/api/user-info/?user_id=${userId}`)
                         .then(response => response.json())
                         .then(data => {
-                            if (data.name) nameInput.value = data.name;
-                            if (data.email) emailInput.value = data.email;
-                            if (data.contact) contactInput.value = data.contact;
+                            if (data.name) nameField.value = data.name;
+                            if (data.email) emailField.value = data.email;
+                            if (data.contact) contactField.value = data.contact;
                         })
                         .catch(err => console.error("Failed to fetch user info:", err));
                 }

@@ -16,7 +16,10 @@
 
         <div class="row">
             <div class="col-md-5">
-                <label class="fw-bold mb-2">Available Permissions</label>
+                <label class="fw-bold mb-2 d-flex justify-content-between align-items-center">
+                    Available Permissions
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="selectAllFiltered('available-perms')">Select All</button>
+                </label>
                 <select multiple id="available-perms" class="form-select" size="15" style="min-height: 300px;">
                     {% for perm in available_permissions %}
                         <option value="{{ perm.id }}">{{ perm.name }}</option>
@@ -30,7 +33,10 @@
             </div>
 
             <div class="col-md-5">
-                <label class="fw-bold mb-2">Assigned Permissions</label>
+                <label class="fw-bold mb-2 d-flex justify-content-between align-items-center">
+                    Assigned Permissions
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="selectAll('assigned-perms')">Select All</button>
+                </label>
                 <select multiple id="assigned-perms" name="permissions" class="form-select" size="15" style="min-height: 300px;">
                     {% for perm in assigned_permissions %}
                         <option value="{{ perm.id }}">{{ perm.name }}</option>
@@ -39,7 +45,7 @@
             </div>
         </div>
 
-        <!-- Hidden input for final selected permissions -->
+        <!-- Hidden field for selected permission IDs -->
         <input type="hidden" id="selected-perms" name="selected_permissions">
 
         <div class="mt-4">
@@ -49,32 +55,48 @@
     </form>
 </div>
 
-<!-- Script Section -->
+<!-- JS Logic -->
 <script>
     function moveSelected(fromId, toId) {
         const from = document.getElementById(fromId);
         const to = document.getElementById(toId);
 
-        Array.from(from.selectedOptions).forEach(option => {
-            to.appendChild(option);
+        Array.from(from.selectedOptions).forEach(opt => {
+            to.appendChild(opt);
         });
     }
 
-    // Before submit, capture all assigned permission IDs
+    function selectAll(selectId) {
+        const selectBox = document.getElementById(selectId);
+        Array.from(selectBox.options).forEach(option => {
+            option.selected = true;
+        });
+    }
+
+    function selectAllFiltered(selectId) {
+        const selectBox = document.getElementById(selectId);
+        const query = document.getElementById("permissionSearch").value.toLowerCase();
+
+        Array.from(selectBox.options).forEach(option => {
+            const matches = option.text.toLowerCase().includes(query);
+            option.selected = matches;
+        });
+    }
+
+    // Capture final selections for submission
     document.querySelector('form').addEventListener('submit', function () {
         const assigned = document.getElementById('assigned-perms');
         const selected = Array.from(assigned.options).map(opt => opt.value);
         document.getElementById('selected-perms').value = selected.join(',');
     });
 
-    // Filter available permissions
+    // Filter logic
     document.getElementById('permissionSearch').addEventListener('input', function () {
         const query = this.value.toLowerCase();
         const options = document.getElementById('available-perms').options;
 
         Array.from(options).forEach(opt => {
-            const match = opt.text.toLowerCase().includes(query);
-            opt.style.display = match ? '' : 'none';
+            opt.style.display = opt.text.toLowerCase().includes(query) ? '' : 'none';
         });
     });
 </script>

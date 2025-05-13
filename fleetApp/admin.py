@@ -1,6 +1,5 @@
 
 # This is the Original version
-
 from django.contrib import admin
 from .models import Vehicle, Driver, Requestor, Request, ServiceProvider, Service, GSMsensorData, Alert
 

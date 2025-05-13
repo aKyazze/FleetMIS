@@ -25,6 +25,7 @@
                             <th>Current Location</th>
                             <th>Destination</th>
                             <th>Request Date</th>
+                            <th>Need Date</th>
                             <th>Status</th>
                         </tr>
                     </thead>
@@ -35,6 +36,7 @@
                             <td>{{ request.current_location }}</td>
                             <td>{{ request.destination }}</td>
                             <td>{{ request.request_date|date:"Y-m-d" }}</td>
+                            <td>{{ request.required_date }}</td>
                             <td><span class="badge bg-warning">Pending</span></td>
                         </tr>
                         {% empty %}

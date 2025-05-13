@@ -1,7 +1,8 @@
-from django.db import models
-from django.contrib.auth.models import User
-from django.utils import timezone 
+# Django imports
 from django.conf import settings
+from django.contrib.auth.models import User
+from django.db import models
+from django.utils import timezone
 
 # Create your models here.
 
@@ -59,6 +60,9 @@ class Driver(models.Model):
   contact = models.CharField(max_length=20)
   email_address = models.EmailField()
   vehicle = models.ForeignKey(Vehicle, on_delete=models.SET_NULL, null=True)
+  
+
+  
   
   def __str__(self):
       return f"{self.driver_name} {self.contact} {self.vehicle}"
@@ -192,6 +196,8 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='userprofile')
     contact = models.CharField(max_length=15)
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
+    passport_photo = models.ImageField(upload_to='driver_photos/', null=True, blank=True) 
+
 
     def __str__(self):
         return f"{self.user.get_full_name()} Profile"

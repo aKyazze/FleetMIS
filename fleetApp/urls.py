@@ -1,5 +1,6 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
+
 from .views import CustomAuthToken
 from . import views
 
@@ -90,6 +91,6 @@ urlpatterns = [
     path('groups/<int:group_id>/edit/', views.edit_group_permissions, name='edit_group_permissions'), 
     path('groups/<int:group_id>/edit/', views.edit_group, name='edit_group'),
     path('groups/<int:group_id>/delete/', views.delete_group, name='delete_group'),
-]
+] 
 
 

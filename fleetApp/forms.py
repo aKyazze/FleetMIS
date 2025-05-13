@@ -1,8 +1,13 @@
+# Standard library imports
+
+# Django imports
 from django import forms
-from django.core.exceptions import ValidationError
-from django.contrib.auth.models import User, Group, Permission
 from django.contrib.auth.forms import UserCreationForm
-from .models import UserProfile, Vehicle, Driver, Requestor, Request, ServiceProvider, Service, GSMsensorData, Alert
+from django.contrib.auth.models import Group, Permission, User
+from django.core.exceptions import ValidationError
+
+# Local app imports
+from .models import Alert, Driver, GSMsensorData, Request, Requestor, Service, ServiceProvider, UserProfile, Vehicle
 
 
 class VehicleForm(forms.ModelForm):
@@ -27,8 +32,10 @@ class DriverForm(forms.ModelForm):
         model = Driver
         fields = ['user', 'driver_name', 'gender', 'contact', 'email_address']
         widgets = {
-            'driver_name': forms.TextInput(attrs={'id': 'id_driver_name'}),
-            'email_address': forms.EmailInput(attrs={'id': 'id_email_address'}),
+            'user': forms.Select(attrs={'id': 'id_user'}),
+            'driver_name': forms.TextInput(attrs={'readonly': True, 'id': 'id_name'}),  
+            'email_address': forms.EmailInput(attrs={'readonly': True, 'id': 'id_email_address'}),
+            'contact': forms.TextInput(attrs={'readonly': True, 'id': 'id_contact'}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -36,9 +43,22 @@ class DriverForm(forms.ModelForm):
         assigned_users = Driver.objects.exclude(user__isnull=True).values_list('user_id', flat=True)
 
         if self.instance and self.instance.pk and self.instance.user:
+            # Editing: allow the already assigned user
             assigned_users = assigned_users.exclude(pk=self.instance.user.pk)
 
         self.fields['user'].queryset = User.objects.exclude(id__in=assigned_users)
+
+        # If form is bound (e.g. POST with errors), include the selected user temporarily
+        if 'user' in self.data:
+            try:
+                selected_user_id = int(self.data.get('user'))
+                # Re-add the selected user if filtered out
+                if selected_user_id not in self.fields['user'].queryset.values_list('id', flat=True):
+                    selected_user = User.objects.filter(pk=selected_user_id).first()
+                    if selected_user:
+                        self.fields['user'].queryset |= User.objects.filter(pk=selected_user.pk)
+            except (ValueError, TypeError):
+                pass
 
 
 class RequestorForm(forms.ModelForm):
@@ -61,7 +81,7 @@ def __init__(self, *args, **kwargs):
             self.fields['name'].initial = f"{user.first_name} {user.last_name}".strip()
             self.fields['email_address'].initial = user.email
 
-            # ✅ Corrected: use user.userprofile
+            # Corrected: use user.userprofile
             if hasattr(user, 'userprofile'):
                 self.fields['contact'].initial = user.userprofile.contact
 
@@ -123,9 +143,6 @@ class AlertForm(forms.ModelForm):
             'trigger_source', 'priority_level', 'recipient_role'
         ]
 
-from django import forms
-from django.contrib.auth.models import Group
-from .models import UserProfile
 
 class UserProfileForm(forms.Form):
     first_name = forms.CharField(max_length=30)
@@ -133,6 +150,7 @@ class UserProfileForm(forms.Form):
     email = forms.EmailField()
     contact = forms.CharField(max_length=15)
     gender = forms.ChoiceField(choices=UserProfile.GENDER_CHOICES)
+    passport_photo = forms.ImageField(required=False)
     groups = forms.ModelMultipleChoiceField(
         queryset=Group.objects.all(),
         required=False,

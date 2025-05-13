@@ -1,22 +1,43 @@
+# Standard library imports
+import base64
 import csv
-from django.shortcuts import render, redirect, get_object_or_404
-from django.utils import timezone 
-from django.utils.dateformat import DateFormat
-from django.db.models import F, Q, ExpressionWrapper, IntegerField
-from django.contrib import messages
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.models import Group, User, Permission
-from django.http import JsonResponse, HttpResponse
-from django.views.decorators.http import require_GET
-from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
-from fleetApp.utils.email_utils import send_notification
-from .models import UserProfile, Vehicle, Driver, Requestor, Request, ServiceProvider, Service, GSMsensorData, Alert
-from .forms import UserProfileForm, UserCredentialForm, VehicleForm, VehicleAllocationForm, DriverForm, ServiceProviderForm, ServiceForm, RequestorForm, RequestForm, RequestApprovalForm, VehicleReturnForm, GSMsensorDataForm, AlertForm, GroupForm, StaffEditForm
+
+# Third-party imports
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
-from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
+from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.response import Response
+
+# Django imports
+from django.contrib import messages
+from django.contrib.auth.decorators import (
+    login_required, 
+    permission_required, 
+    user_passes_test
+)
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import Group, Permission, User
+from django.db.models import ExpressionWrapper, F, IntegerField, Q
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
+from django.utils.dateformat import DateFormat
+from django.views.decorators.http import require_GET
+
+# Local application imports
+from fleetApp.utils.email_utils import send_notification
+from .forms import (
+    AlertForm, DriverForm, GroupForm, GSMsensorDataForm,
+    RequestApprovalForm, RequestForm, RequestorForm,
+    ServiceForm, ServiceProviderForm, StaffEditForm,
+    UserCredentialForm, UserProfileForm, 
+    VehicleAllocationForm, VehicleForm, VehicleReturnForm
+)
+from .models import (
+    Alert, Driver, GSMsensorData, Request, Requestor,
+    Service, ServiceProvider, UserProfile, Vehicle
+)
 
 
 # Create your views here.
@@ -89,22 +110,39 @@ def sign_up_view(request):
     }
     return render(request, 'registration/sign_up.html', context)
 
+# views.py
+
 @login_required
 def register_step1(request):
     if request.method == 'POST':
-        form = UserProfileForm(request.POST)
+        form = UserProfileForm(request.POST, request.FILES)
         if form.is_valid():
-            # Temporarily save data to session
+            # Store form data in session (only serializable data)
             request.session['registration_data'] = {
                 'first_name': form.cleaned_data['first_name'],
                 'last_name': form.cleaned_data['last_name'],
                 'email': form.cleaned_data['email'],
                 'contact': form.cleaned_data['contact'],
                 'gender': form.cleaned_data['gender'],
-            }            
-        return redirect('register_step2')
+            }
+
+            # Handle passport photo
+            photo_file = request.FILES.get('passport_photo')
+            if photo_file:
+                photo_data = base64.b64encode(photo_file.read()).decode('utf-8')
+                request.session['has_photo'] = True
+                request.session['photo_name'] = photo_file.name
+                request.session['photo_data'] = photo_data
+            else:
+                request.session['has_photo'] = False
+                request.session['photo_name'] = None
+                request.session['photo_data'] = None
+
+            request.session.modified = True  # Mark session as changed
+            return redirect('register_step2')
     else:
         form = UserProfileForm()
+
     return render(request, 'fleetApp/base/register_step1.html', {'form': form})
 
 
@@ -123,21 +161,38 @@ def register_step2(request):
             user.email = data['email']
             user.save()
 
-            # Save profile data
-            UserProfile.objects.create(
+            # Create UserProfile
+            profile = UserProfile.objects.create(
                 user=user,
                 contact=data['contact'],
-                gender=data['gender']
+                gender=data['gender'],
             )
 
-            # Assign group if selected
+            # Save photo if available
+            import base64
+            from django.core.files.base import ContentFile
+
+            # ...
+
+            if request.session.get('has_photo') and request.session.get('photo_data'):
+                photo_data = base64.b64decode(request.session['photo_data'])
+                photo_name = request.session.get('photo_name', 'photo.jpg')
+                profile.passport_photo.save(photo_name, ContentFile(photo_data))
+
+            # Assign group
             selected_group = form.cleaned_data.get('group')
             if selected_group:
                 user.groups.add(selected_group)
 
-            del request.session['registration_data']
+            # Clean up session
+            request.session.pop('registration_data', None)
+            request.session.pop('has_photo', None)
+            request.session.pop('photo_name', None)
+            request.session.pop('photo_data', None)
+
             messages.success(request, f"User {user.username} created successfully.")
             return redirect('staff_dashboard')
+
     else:
         initial_username = data['first_name'].lower()
         form = UserCredentialForm(initial={'username': initial_username})
@@ -154,14 +209,6 @@ def staff_dashboard(request):
     users = User.objects.select_related('userprofile').all()
     return render(request, 'fleetApp/base/staff_dashboard.html', {'users': users})
 
-from django.contrib.auth.models import User
-from .models import UserProfile
-from .forms import UserProfileForm
-from django.shortcuts import get_object_or_404, render, redirect
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-
-from django.contrib.auth.models import Group
 
 @login_required
 def edit_staff(request, user_id):
@@ -169,19 +216,23 @@ def edit_staff(request, user_id):
     profile, _ = UserProfile.objects.get_or_create(user=user)
 
     if request.method == 'POST':
-        form = UserProfileForm(request.POST)
+        form = UserProfileForm(request.POST, request.FILES)
         if form.is_valid():
             data = form.cleaned_data
+            # Update user basic info
             user.first_name = data['first_name']
             user.last_name = data['last_name']
             user.email = data['email']
             user.save()
 
+            # Update profile info
             profile.contact = data['contact']
             profile.gender = data['gender']
+            if request.FILES.get('passport_photo'):
+                profile.passport_photo = request.FILES['passport_photo']
             profile.save()
 
-            # ✅ Synchronize user groups:
+            # Update user groups
             selected_groups = set(data['groups'])
             current_groups = set(user.groups.all())
 
@@ -207,7 +258,11 @@ def edit_staff(request, user_id):
         }
         form = UserProfileForm(initial=initial)
 
-    return render(request, 'fleetApp/base/edit_staff.html', {'form': form, 'user_obj': user})
+    return render(request, 'fleetApp/base/edit_staff.html', {
+        'form': form,
+        'user_obj': user,
+        'photo': profile.passport_photo.url if profile.passport_photo else None,
+    })
 
 @login_required
 def delete_staff(request, user_id):
@@ -314,13 +369,10 @@ def get_user_info(request):
         return JsonResponse({
             'name': f"{user.first_name} {user.last_name}".strip(),
             'email': user.email,
-            # Assume contact is stored in user.profile or skip it if not available
-            'contact': user.profile.contact if hasattr(user, 'profile') else '',
+            'contact': user.userprofile.contact if hasattr(user, 'userprofile') else '',
         })
     except User.DoesNotExist:
         return JsonResponse({'error': 'User not found'}, status=404)
-    
-
 # Login API Endpoint (Using Token Authentication)
 class CustomAuthToken(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
@@ -425,14 +477,12 @@ def vehicle_view(request):
             output_field=IntegerField()
         )
     )
-    
     context = {
         'vehicles': vehicles,
         'requests': requests,
         'drivers': drivers,
     }
     return render(request, 'fleetApp/vehicle/vehicles.html', context)
-
 
 # Update or Edit Vehicle View
 @login_required
@@ -560,9 +610,20 @@ def return_vehicle(request, vehicle_id):
 
 # New Driver View 
 @login_required
+def driver_profile_view(request):
+    try:
+        driver = Driver.objects.get(user=request.user)
+    except Driver.DoesNotExist:
+        messages.error(request, "Driver profile not found.")
+        return redirect('home')  # or any fallback page
+
+    return render(request, 'fleetApp/driver/driver_profile.html', {'driver': driver})
+
+
+@login_required
 def add_driver(request):
     if request.method == 'POST':
-        form = DriverForm(request.POST)
+        form = DriverForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
             messages.success(request, "Driver added successfully!")
@@ -579,14 +640,15 @@ def add_driver(request):
 # Driver List View 
 @login_required
 def drivers_list(request):
-    drivers = Driver.objects.select_related('vehicle').all()  # Get drivers with their associated vehicles
-    # Loop through drivers to ensure "Unassigned" is shown if no vehicle is assigned
+    #drivers = Driver.objects.select_related('vehicle').all()  
+    drivers = Driver.objects.select_related('user').all()
+    
     for driver in drivers:
         if not driver.vehicle:
-            driver.vehicle_plate = "Unassigned"  # Set the vehicle_plate to "Unassigned" if no vehicle is assigned
+            driver.vehicle_plate = "Unassigned"  
         else:
-            driver.vehicle_plate = driver.vehicle.vehicle_plate  # Otherwise, display the vehicle plate
-    form = DriverForm()  # Driver form (if needed for adding new drivers)
+            driver.vehicle_plate = driver.vehicle.vehicle_plate  
+    form = DriverForm()  
     context = {
         'drivers': drivers,
         'form': form
@@ -709,7 +771,7 @@ def delete_requestor(request, requestor_id):
 def requisitions_view(request):
     requestors = Requestor.objects.all()
     requests = Request.objects.select_related('requestor', 'vehicle').all()
-    vehicles = Vehicle.objects.filter(status="Allocated")  # Only allocated vehicles
+    vehicles = Vehicle.objects.filter(status="Allocated")  
     approved_requests = Request.objects.filter(request_status="O")
     pending_requests = Request.objects.filter(request_status="P")
 
@@ -728,7 +790,7 @@ def requisitions_view(request):
 @login_required
 def add_request(request):
     try:
-        requestor = request.user.requestor  # Assumes OneToOne relation
+        requestor = request.user.requestor  
     except Requestor.DoesNotExist:
         messages.error(request, "No requestor profile found for this user.")
         return redirect('home')
@@ -738,7 +800,7 @@ def add_request(request):
         if form.is_valid():
             new_request = form.save(commit=False)
             new_request.requestor = request.user
-            new_request.request_status = 'P'  # Set as Pending
+            new_request.request_status = 'P'  
             new_request.save()
 
             #Notify Fleet Managers about new request
@@ -815,7 +877,7 @@ def request_list(request):
     elif status_filter == 'closed':
         requests = Request.objects.filter(request_status='C')  # 'C' for Closed
     else:
-        requests = Request.objects.all()  # Default: show all requests
+        requests = Request.objects.all()  
 
     context = {
         'requests': requests
@@ -949,8 +1011,7 @@ def delete_service_provider(request, provider_id):
         provider.delete()
         messages.success(request, "Service provider deleted successfully!")
         return redirect('service_provider_list')
-    #else:
-     #   messages.error(request, "Failed to delete service provider. Please try again.")
+    
     context = {
         'provider': provider
     }
@@ -1010,8 +1071,7 @@ def delete_service(request, service_id):
         service.delete()
         messages.success(request, "Service deleted successfully!")
         return redirect('service_list')
-    #else:
-        #messages.error(request, "Failed to delete service. Please try again.")
+    
     context = {
         'service': service
     }
@@ -1204,9 +1264,3 @@ def assigned_trips(request):
 
     return render(request, 'fleetApp/driver/assigned_trips.html', {'trips': trips})
 
-@login_required
-def driver_profile_view(request):
-    driver = get_object_or_404(Driver, user=request.user)
-    return render(request, 'fleetApp/driver/driver_profile.html', {
-        'driver': driver
-    })

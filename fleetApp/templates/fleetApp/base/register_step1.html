@@ -1,11 +1,14 @@
 {% extends "main.html" %}
 {% load crispy_forms_tags %}
+
 {% block title %}Register Step 1{% endblock %}
+
 {% block content %}
 <div class="page-container mt-4">
     <h3>Register New Staff</h3>
-    <form method="POST" id="staff-form">
+    <form method="POST" enctype="multipart/form-data" id="staff-form">
         {% csrf_token %}
+        
         <div class="mb-3">
             {{ form.first_name|as_crispy_field }}
         </div>
@@ -21,9 +24,12 @@
         <div class="mb-3">
             {{ form.gender|as_crispy_field }}
         </div>
+        <div class="mb-3">
+            {{ form.passport_photo|as_crispy_field }}
+        </div>
+
         <button type="submit" class="btn btn-success">Next</button>
         <a href="{% url 'staff_dashboard' %}" class="btn btn-secondary">Back</a>
-
     </form>
 </div>
 

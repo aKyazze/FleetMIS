@@ -1,8 +1,10 @@
-# fleetApp/signals.py
+# Django imports
 from django.contrib.auth.models import Group
-from django.db.models.signals import user_logged_in, post_save
+from django.db.models.signals import post_save, user_logged_in
 from django.dispatch import receiver
-from .models import Requestor, Request, GSMsensorData, Alert
+
+# Local app imports
+from .models import Alert, GSMsensorData, Request, Requestor
 from fleetApp.utils.email_utils import send_notification
 
 

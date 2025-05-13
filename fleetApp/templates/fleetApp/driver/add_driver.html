@@ -1,0 +1,50 @@
+{% extends "main.html" %}
+{% load crispy_forms_tags %}
+{% block title %}Add Driver{% endblock %}
+{% block header %}Add a Driver{% endblock %}
+{% block content %}
+<div class="form-container">
+    <h1>Add Driver</h1>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form|crispy }}
+        <button type="submit" class="btn btn-success">Add Driver</button>
+        <a href="{% url 'drivers' %}" class="btn btn-primary">Cancel</a>
+    </form>
+</div>
+
+<!-- JavaScript for auto-populating fields -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const userSelect = document.getElementById('id_user');
+        const nameInput = document.getElementById('id_name');
+        const emailInput = document.getElementById('id_email_address');
+        const contactInput = document.getElementById('id_contact');
+        const photoPreview = document.getElementById('photoPreview');
+    
+        const userMap = {
+            {% for user in form.fields.user.queryset %}
+                "{{ user.id }}": {
+                    "name": "{{ user.get_full_name|escapejs }}",
+                    "email": "{{ user.email|escapejs }}",
+                    "contact": "{{ user.username|escapejs }}",  // placeholder for contact
+                    "photo": "{% if user.profile.photo.url %}{{ user.profile.photo.url }}{% else %}{% static 'images/default-driver.jpeg' %}{% endif %}"
+                },
+            {% endfor %}
+        };
+    
+        userSelect.addEventListener('change', function () {
+            const userId = this.value;
+            const user = userMap[userId];
+            if (user) {
+                nameInput.value = user.name;
+                emailInput.value = user.email;
+                contactInput.value = user.contact;
+                if (photoPreview) {
+                    photoPreview.src = user.photo;
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

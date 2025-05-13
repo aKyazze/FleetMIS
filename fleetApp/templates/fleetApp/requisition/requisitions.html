@@ -31,6 +31,7 @@
                         <th>Requestor</th>
                         <th>Current Location</th>
                         <th>Destination</th>
+                        <th>Need Date</th>
                         <th>Status</th>
                         <th>Vehicle</th>
                         <th>Actions</th>
@@ -43,6 +44,7 @@
                         <td>{{ request.requestor.username }}</td>
                         <td>{{ request.current_location }}</td>
                         <td>{{ request.destination }}</td>
+                        <td>{{ request.required_date }}</td>
                         <td>
                             <span class="badge 
                                 {% if request.request_status == "P" %} bg-warning
@@ -88,7 +90,8 @@
                     <tr>
                         <th>#</th>
                         <th>Requestor</th>
-                        <th>Vehicle</th>
+                        <th>Need Date</th>
+                        <th>Vehicle Allocated</th>
                         <th>Date Approved</th>
                     </tr>
                 </thead>
@@ -97,6 +100,7 @@
                     <tr>
                         <td>{{ forloop.counter }}</td>
                         <td>{{ request.requestor.username }}</td>
+                        <td>{{ request.required_date }}</td>
                         <td>{{ request.vehicle.vehicle_plate }}</td>
                         <td>{{ request.time_of_allocation|date:"Y-m-d H:i" }}</td>
                     </tr>
