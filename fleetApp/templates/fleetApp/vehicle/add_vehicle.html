@@ -3,8 +3,8 @@
 {% block title %}VehiclesAdd{% endblock %}
 {% block header %}Add New Vehicle{% endblock %}
 {% block content %}
-    <div class="form-container">
-        <h1>Add Vehicle</h1>
+    <div class="page-container">
+        <h1>Register Vehicle</h1>
         <form method="POST">
             {% csrf_token %}
             {{ form|crispy }}

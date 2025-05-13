@@ -5,13 +5,13 @@ from django.utils.dateformat import DateFormat
 from django.db.models import F, Q, ExpressionWrapper, IntegerField
 from django.contrib import messages
 from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.models import Group, User
+from django.contrib.auth.models import Group, User, Permission
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.http import require_GET
-from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
 from fleetApp.utils.email_utils import send_notification
-from .models import Vehicle, Driver, Requestor, Request, ServiceProvider, Service, GSMsensorData, Alert
-from .forms import VehicleForm, VehicleAllocationForm, DriverForm, ServiceProviderForm, ServiceForm, RequestorForm, RequestForm, RequestApprovalForm, VehicleReturnForm, GSMsensorDataForm, AlertForm
+from .models import UserProfile, Vehicle, Driver, Requestor, Request, ServiceProvider, Service, GSMsensorData, Alert
+from .forms import UserProfileForm, UserCredentialForm, VehicleForm, VehicleAllocationForm, DriverForm, ServiceProviderForm, ServiceForm, RequestorForm, RequestForm, RequestApprovalForm, VehicleReturnForm, GSMsensorDataForm, AlertForm, GroupForm, StaffEditForm
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from rest_framework.authtoken.views import ObtainAuthToken
@@ -90,6 +90,136 @@ def sign_up_view(request):
     return render(request, 'registration/sign_up.html', context)
 
 @login_required
+def register_step1(request):
+    if request.method == 'POST':
+        form = UserProfileForm(request.POST)
+        if form.is_valid():
+            # Temporarily save data to session
+            request.session['registration_data'] = {
+                'first_name': form.cleaned_data['first_name'],
+                'last_name': form.cleaned_data['last_name'],
+                'email': form.cleaned_data['email'],
+                'contact': form.cleaned_data['contact'],
+                'gender': form.cleaned_data['gender'],
+            }            
+        return redirect('register_step2')
+    else:
+        form = UserProfileForm()
+    return render(request, 'fleetApp/base/register_step1.html', {'form': form})
+
+
+@login_required
+def register_step2(request):
+    data = request.session.get('registration_data')
+    if not data:
+        return redirect('register_step1')
+
+    if request.method == 'POST':
+        form = UserCredentialForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.first_name = data['first_name']
+            user.last_name = data['last_name']
+            user.email = data['email']
+            user.save()
+
+            # Save profile data
+            UserProfile.objects.create(
+                user=user,
+                contact=data['contact'],
+                gender=data['gender']
+            )
+
+            # Assign group if selected
+            selected_group = form.cleaned_data.get('group')
+            if selected_group:
+                user.groups.add(selected_group)
+
+            del request.session['registration_data']
+            messages.success(request, f"User {user.username} created successfully.")
+            return redirect('staff_dashboard')
+    else:
+        initial_username = data['first_name'].lower()
+        form = UserCredentialForm(initial={'username': initial_username})
+
+    return render(request, 'fleetApp/base/register_step2.html', {'form': form})
+
+@login_required
+def user_list(request):
+    users = User.objects.all()
+    return render(request, 'fleetApp/base/user_list.html', {'users': users})
+
+@login_required
+def staff_dashboard(request):
+    users = User.objects.select_related('userprofile').all()
+    return render(request, 'fleetApp/base/staff_dashboard.html', {'users': users})
+
+from django.contrib.auth.models import User
+from .models import UserProfile
+from .forms import UserProfileForm
+from django.shortcuts import get_object_or_404, render, redirect
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+
+from django.contrib.auth.models import Group
+
+@login_required
+def edit_staff(request, user_id):
+    user = get_object_or_404(User, pk=user_id)
+    profile, _ = UserProfile.objects.get_or_create(user=user)
+
+    if request.method == 'POST':
+        form = UserProfileForm(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+            user.first_name = data['first_name']
+            user.last_name = data['last_name']
+            user.email = data['email']
+            user.save()
+
+            profile.contact = data['contact']
+            profile.gender = data['gender']
+            profile.save()
+
+            # ✅ Synchronize user groups:
+            selected_groups = set(data['groups'])
+            current_groups = set(user.groups.all())
+
+            to_add = selected_groups - current_groups
+            to_remove = current_groups - selected_groups
+
+            for group in to_add:
+                user.groups.add(group)
+
+            for group in to_remove:
+                user.groups.remove(group)
+
+            messages.success(request, "Staff updated successfully with group assignments.")
+            return redirect('staff_dashboard')
+    else:
+        initial = {
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'email': user.email,
+            'contact': profile.contact,
+            'gender': profile.gender,
+            'groups': user.groups.all(),
+        }
+        form = UserProfileForm(initial=initial)
+
+    return render(request, 'fleetApp/base/edit_staff.html', {'form': form, 'user_obj': user})
+
+@login_required
+def delete_staff(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    if request.method == 'POST':
+        user.delete()
+        messages.success(request, "Staff deleted successfully.")
+        return redirect('staff_dashboard')
+    return render(request, 'fleetApp/base/delete_staff.html', {'user_obj': user})
+
+
+@login_required
 def register_user(request):
     if request.method == "POST":
         form = CustomUserCreationForm(request.POST)
@@ -103,6 +233,74 @@ def register_user(request):
             
             messages.success(request, "User registered and added to staff list.")
             return redirect("requestor_list")
+        
+@login_required
+@permission_required('auth.add_group', raise_exception=True)
+def add_group_view(request):
+    if request.method == 'POST':
+        form = GroupForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Group created successfully with permissions.")
+            return redirect('group_list')
+    else:
+        form = GroupForm()
+    return render(request, 'fleetApp/base/add_group.html', {'form': form})
+
+@login_required
+@permission_required('auth.view_group', raise_exception=True)
+def group_list_view(request):
+    groups = Group.objects.all().prefetch_related('permissions')
+    return render(request, 'fleetApp/base/group_list.html', {'groups': groups})
+
+@login_required
+def edit_group_permissions(request, group_id):
+    group = get_object_or_404(Group, id=group_id)
+    all_permissions = Permission.objects.all()
+    assigned_permissions = group.permissions.all()
+    available_permissions = all_permissions.exclude(id__in=assigned_permissions)
+
+    if request.method == 'POST':
+        selected_ids = request.POST.get('selected_permissions', '')
+        selected_ids = [int(i) for i in selected_ids.split(',') if i]
+
+        group.permissions.set(Permission.objects.filter(id__in=selected_ids))
+        messages.success(request, f"Permissions updated for group '{group.name}'.")
+        return redirect('group_list')
+
+    context = {
+        'group': group,
+        'assigned_permissions': assigned_permissions,
+        'available_permissions': available_permissions,
+    }
+    return render(request, 'fleetApp/base/edit_group_permissions.html', context)
+
+@login_required
+def edit_group(request, group_id):
+    group = get_object_or_404(Group, id=group_id)
+    all_perms = Permission.objects.all()
+
+    if request.method == 'POST':
+        group.name = request.POST.get('name')
+        group.save()
+        group.permissions.set(request.POST.getlist('permissions'))
+        messages.success(request, "Group updated successfully.")
+        return redirect('group_list')
+
+    return render(request, 'fleetApp/base/edit_group.html', {
+        'group': group,
+        'permissions': all_perms,
+    })
+
+@login_required
+def delete_group(request, group_id):
+    group = get_object_or_404(Group, id=group_id)
+    if request.method == 'POST':
+        group.delete()
+        messages.success(request, "Group deleted successfully.")
+        return redirect('group_list')
+    return render(request, 'fleetApp/base/delete_group.html', {'group': group})
+
 
 #This is API SECTION 
 # 
@@ -219,6 +417,7 @@ def add_vehicle(request):
 def vehicle_view(request):
     # Get all vehicles
     vehicles = Vehicle.objects.all()
+    drivers = Driver.objects.all()
     # Get all closed requests and annotate usage
     requests = Request.objects.filter(request_status="C").annotate(
         usage_summary=ExpressionWrapper(
@@ -230,6 +429,7 @@ def vehicle_view(request):
     context = {
         'vehicles': vehicles,
         'requests': requests,
+        'drivers': drivers,
     }
     return render(request, 'fleetApp/vehicle/vehicles.html', context)
 
@@ -449,6 +649,19 @@ def add_requestor(request):
     }
     return render(request, 'fleetApp/requisition/add_requestor.html', context)
 
+@login_required
+def get_user_info(request):
+    user_id = request.GET.get('user_id')
+    try:
+        user = User.objects.get(pk=user_id)
+        profile = getattr(user, 'userprofile', None)
+        return JsonResponse({
+            'name': f"{user.first_name} {user.last_name}",
+            'email': user.email,
+            'contact': profile.contact if profile else ''
+        })
+    except User.DoesNotExist:
+        return JsonResponse({'error': 'User not found'}, status=404)
 # List all requestors
 @login_required
 def requestor_list(request):

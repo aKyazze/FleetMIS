@@ -1,0 +1,48 @@
+{% extends "main.html" %}
+{% load crispy_forms_tags %}
+{% block title %}Register Step 1{% endblock %}
+{% block content %}
+<div class="page-container mt-4">
+    <h3>Register New Staff</h3>
+    <form method="POST" id="staff-form">
+        {% csrf_token %}
+        <div class="mb-3">
+            {{ form.first_name|as_crispy_field }}
+        </div>
+        <div class="mb-3">
+            {{ form.last_name|as_crispy_field }}
+        </div>
+        <div class="mb-3">
+            {{ form.email|as_crispy_field }}
+        </div>
+        <div class="mb-3">
+            {{ form.contact|as_crispy_field }}
+        </div>
+        <div class="mb-3">
+            {{ form.gender|as_crispy_field }}
+        </div>
+        <button type="submit" class="btn btn-success">Next</button>
+        <a href="{% url 'staff_dashboard' %}" class="btn btn-secondary">Back</a>
+
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const firstNameInput = document.getElementById('id_first_name');
+        const lastNameInput = document.getElementById('id_last_name');
+        const emailInput = document.getElementById('id_email');
+
+        function generateEmail() {
+            const firstName = firstNameInput.value.trim().toLowerCase();
+            const lastName = lastNameInput.value.trim().toLowerCase();
+            if (firstName && lastName) {
+                emailInput.value = `${firstName}.${lastName}@utcl.co.ug`;
+            }
+        }
+
+        firstNameInput.addEventListener('input', generateEmail);
+        lastNameInput.addEventListener('input', generateEmail);
+    });
+</script>
+{% endblock %}

@@ -2,7 +2,7 @@
 {% load crispy_forms_tags %}
 {% block title %}Staff{% endblock %}
 {% block content %}
-<a href="{% url 'add_requestor' %}" class="btn btn-primary">Add Requestor</a>
+<h2 class="text-secondary">Requestor List</h2>
 <table class="table">
     <thead>
         <tr>
@@ -32,4 +32,5 @@
         {% endfor %}
     </tbody>
 </table>
+<a href="{% url 'add_requestor' %}" class="btn btn-primary">Add Requestor</a>
 {% endblock %}

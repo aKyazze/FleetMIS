@@ -4,7 +4,7 @@
 {% block header %}Add a Service Provider{% endblock %}
 {% block content %}
     <div class="form-container">
-        <h1>New Service Provider</h1>
+        <h3>New Service Provider Form</h3>
         <form method="POST">
             {% csrf_token %}
             {{ form|crispy }}

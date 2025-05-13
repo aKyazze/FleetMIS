@@ -17,8 +17,24 @@ class Vehicle(models.Model):
     ("Available", "Available"), 
     ("Allocated", "Allocated")
   ]
+  VEHICLE_TYPE = [
+        ("Saloon", "Saloon Car"),
+        ("SUV", "SUV (Sport Utility Vehicle)"),
+        ("Pickup", "Pickup Truck"),
+        ("Truck", "Cargo Truck"),
+        ("Lorry", "Lorry"),
+        ("Minibus", "Minibus"),
+        ("Tipper", "Tipper Truck"),
+        ("Trailer", "Trailer"),
+        ("Motorcycle", "Motorcycle"),
+        ("Van", "Van"),
+        ("DoubleCab", "Double Cabin"),
+        ("Tractor", "Tractor"),
+        ("FuelTanker", "Fuel Tanker"),
+  ]
+  
   vehicle_plate = models.CharField(max_length=20, unique=True)
-  vehicle_type = models.CharField(max_length=50)
+  vehicle_type = models.CharField(max_length=20, choices=VEHICLE_TYPE)
   mileage = models.PositiveIntegerField()
   engine_type = models.CharField(max_length=4, choices=ENGIN)
   status = models.CharField(max_length=9, choices=STATUS, default="Available")
@@ -69,6 +85,7 @@ class Request(models.Model):
 
     requestor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="requests")
     request_date = models.DateField(auto_now_add=True)
+    required_date = models.DateField(help_text="Date by which vehicle is required") 
     current_location = models.CharField(max_length=50)
     destination = models.CharField(max_length=50)
     purpose = models.CharField(max_length=100)
@@ -108,7 +125,7 @@ class Request(models.Model):
 #Service Provider Entity:
 class ServiceProvider(models.Model):
     service_provider_name = models.CharField(max_length=100)
-    address = models.TextField()
+    address = models.CharField(max_length=100)
     contact = models.CharField(max_length=15)
     email_address = models.EmailField()
 
@@ -116,7 +133,7 @@ class ServiceProvider(models.Model):
         return self.service_provider_name
 #Service Entity:
 class Service(models.Model):
-    particular = models.CharField(max_length=100)
+    particular = models.TextField()
     quantity = models.PositiveIntegerField()
     cost = models.DecimalField(max_digits=10, decimal_places=2)
     service_provider = models.ForeignKey(ServiceProvider, on_delete=models.CASCADE)
@@ -165,3 +182,16 @@ class Alert(models.Model):
     priority_level = models.CharField(max_length=10, choices=PRIORITY)
     recipient_role = models.CharField(max_length=50)  # Fleet Manager / Driver
     timestamp = models.DateTimeField(auto_now_add=True)
+    
+    
+class UserProfile(models.Model):
+    GENDER_CHOICES = [
+        ('M', 'Male'),
+        ('F', 'Female'),
+    ]
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='userprofile')
+    contact = models.CharField(max_length=15)
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
+
+    def __str__(self):
+        return f"{self.user.get_full_name()} Profile"

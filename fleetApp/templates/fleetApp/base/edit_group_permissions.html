@@ -1,0 +1,81 @@
+{% extends "main.html" %}
+{% load static %}
+{% block title %}Edit Group Permissions{% endblock %}
+
+{% block content %}
+<div class="page-container mt-4">
+    <h3 class="mb-3">Edit Permissions for <strong>{{ group.name }}</strong></h3>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <!-- Permission Search -->
+        <div class="mb-3">
+            <input type="text" id="permissionSearch" class="form-control" placeholder="Search available permissions...">
+        </div>
+
+        <div class="row">
+            <div class="col-md-5">
+                <label class="fw-bold mb-2">Available Permissions</label>
+                <select multiple id="available-perms" class="form-select" size="15" style="min-height: 300px;">
+                    {% for perm in available_permissions %}
+                        <option value="{{ perm.id }}">{{ perm.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-2 d-flex flex-column justify-content-center align-items-center">
+                <button type="button" class="btn btn-outline-primary mb-2" onclick="moveSelected('available-perms', 'assigned-perms')">➡️</button>
+                <button type="button" class="btn btn-outline-danger" onclick="moveSelected('assigned-perms', 'available-perms')">⬅️</button>
+            </div>
+
+            <div class="col-md-5">
+                <label class="fw-bold mb-2">Assigned Permissions</label>
+                <select multiple id="assigned-perms" name="permissions" class="form-select" size="15" style="min-height: 300px;">
+                    {% for perm in assigned_permissions %}
+                        <option value="{{ perm.id }}">{{ perm.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <!-- Hidden input for final selected permissions -->
+        <input type="hidden" id="selected-perms" name="selected_permissions">
+
+        <div class="mt-4">
+            <button type="submit" class="btn btn-success">Save Changes</button>
+            <a href="{% url 'group_list' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<!-- Script Section -->
+<script>
+    function moveSelected(fromId, toId) {
+        const from = document.getElementById(fromId);
+        const to = document.getElementById(toId);
+
+        Array.from(from.selectedOptions).forEach(option => {
+            to.appendChild(option);
+        });
+    }
+
+    // Before submit, capture all assigned permission IDs
+    document.querySelector('form').addEventListener('submit', function () {
+        const assigned = document.getElementById('assigned-perms');
+        const selected = Array.from(assigned.options).map(opt => opt.value);
+        document.getElementById('selected-perms').value = selected.join(',');
+    });
+
+    // Filter available permissions
+    document.getElementById('permissionSearch').addEventListener('input', function () {
+        const query = this.value.toLowerCase();
+        const options = document.getElementById('available-perms').options;
+
+        Array.from(options).forEach(opt => {
+            const match = opt.text.toLowerCase().includes(query);
+            opt.style.display = match ? '' : 'none';
+        });
+    });
+</script>
+{% endblock %}

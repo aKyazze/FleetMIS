@@ -1,0 +1,59 @@
+{% extends "main.html" %}
+{% block title %}Staff Dashboard{% endblock %}
+{% block header %}Staff Management{% endblock %}
+{% block content %}
+
+<div class="page-container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3>Registered Users</h3>
+        <a href="{% url 'register_step1' %}" class="btn btn-primary">
+            <i class="bi bi-person-plus"></i> Add New Staff
+        </a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>#</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Gender</th>
+                    <th>Phone Contact</th>
+                    <th>Email Address</th>
+                    <th>Username</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ user.first_name }}</td>
+                    <td>{{ user.last_name }}</td>
+                    <td>{{ user.userprofile.gender|default:"-" }}</td>
+                    <td>{{ user.userprofile.contact|default:"-" }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.username }}</td>
+                    <td>
+                        <div class="btn-group" role="group">
+                            <a href="{% url 'edit_staff' user.id %}" class="btn btn-sm btn-outline-warning" title="Edit">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+                            <a href="{% url 'delete_staff' user.id %}" class="btn btn-sm btn-outline-danger" title="Delete"
+                               onclick="return confirm('Are you sure you want to delete this staff?');">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="text-center text-muted">No users found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

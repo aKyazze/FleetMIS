@@ -3,12 +3,9 @@
 {% load crispy_forms_tags %}
 {% block header %}Manage Drivers{% endblock %}
 {% block content %}
-<div class="containers">
-    <!-- Add Driver Button -->
-    <button type="button" class="btn btn-primary my-3" data-bs-toggle="modal" data-bs-target="#addDriverModal">
-        <i class="bi bi-person-plus"></i> Add Driver
-    </button>
+<div class="page-containers">
     <!-- Drivers Table -->
+    <h2 class="text-secondary">Driver List</h2>
     <table class="table table-striped">
         <thead>
             <tr>
@@ -50,6 +47,10 @@
             {% endfor %}
         </tbody>
     </table>
+        <!-- Add Driver Button -->
+        <a href="" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addDriverModal">
+            <i class="bi bi-plus-lg"></i> Register Driver <!-- Add Icon -->
+        </a>
 </div>
 <!-- Add Driver Modal -->
 <div class="modal fade" id="addDriverModal" tabindex="-1" aria-labelledby="addDriverModalLabel" aria-hidden="true">
@@ -58,8 +59,7 @@
             <form method="POST" action="{% url 'add_driver' %}">
                 {% csrf_token %}
                 <div class="modal-header">
-                    <h5 class="modal-title" id="addDriverModalLabel">Add New Driver</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">Cancel</button>
+                    <h5 class="modal-title" id="addDriverModalLabel">Driver Registration Form</h5>
                 </div>
                 <div class="modal-body">
                     {{ form|crispy }}
@@ -68,6 +68,7 @@
                     <button type="submit" class="btn btn-success">
                         <i class="bi bi-save"></i> Save
                     </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">Cancel</button>
                 </div>
             </form>
         </div>

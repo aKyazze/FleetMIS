@@ -102,10 +102,13 @@
         <div id="sidebar-wrapper">
             <div class="list-group list-group-flush px-2 pt-4">
                 {% if user|has_group:"Admins" %}
-                    <a href="/admin/auth/user/" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link" target="_blank">
+                    <!--<a href="/admin/auth/user/" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link" target="_blank">
+                        <i class="bi bi-person-gear"></i> Staff
+                    </a>-->
+                    <a href="{% url 'staff_dashboard'%}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
                         <i class="bi bi-person-gear"></i> Staff
                     </a>
-                    <a href="/admin/auth/group/" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link" target="_blank">
+                    <a href="{% url 'group_list'%}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
                         <i class="bi bi-people-fill"></i> Groups
                     </a>
                     <a href="{% url 'vehicle' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
@@ -120,17 +123,14 @@
                     <a href="{% url 'requisitions' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
                         <i class="bi bi-journal-check"></i> Requisitions
                     </a>
-                    <a href="{% url 'add_request' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
-                        <i class="bi bi-send-check"></i> Request Vehicle
-                    </a>
                     <a href="{% url 'service_provider_list' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
                         <i class="bi bi-building-gear"></i> Service Providers
                     </a>
                     <a href="{% url 'service_list' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
                         <i class="bi bi-wrench-adjustable"></i> Services
                     </a>
-                    <a href="{% url 'request_summary' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
-                        <i class="bi bi-bar-chart-line"></i> Reports
+                    <a href="{% url 'add_request' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
+                        <i class="bi bi-send-check"></i> Request Vehicle
                     </a>
                     <a href="{% url 'gsm_data_list' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
                         <i class="bi bi-broadcast-pin"></i> GSM Sensor Data
@@ -140,6 +140,9 @@
                         {% if unread_alerts_count > 0 %}
                             <span class="badge bg-danger rounded-pill">{{ unread_alerts_count }}</span>
                         {% endif %}
+                    </a>
+                    <a href="{% url 'request_summary' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
+                        <i class="bi bi-bar-chart-line"></i> Reports
                     </a>
                 {% elif user|has_group:"FleetManagers" %}
                     <!-- Fleet Manager Links -->
@@ -152,20 +155,17 @@
                     <a href="{% url 'requestor_list' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
                         <i class="bi bi-people"></i> Requestors
                     </a>
-                    <a href="{% url 'requisitions' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
-                        <i class="bi bi-clipboard-check"></i> Requisitions
-                    </a>
-                    <a href="{% url 'add_request' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
-                        <i class="bi bi-send-check"></i> Request Vehicle
-                    </a>
                     <a href="{% url 'service_provider_list' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
                         <i class="bi bi-building-gear"></i> Service Providers
                     </a>
                     <a href="{% url 'service_list' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
                         <i class="bi bi-wrench-adjustable"></i> Services
                     </a>
-                    <a href="{% url 'request_summary' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
-                        <i class="bi bi-bar-chart-line"></i> Reports
+                    <a href="{% url 'requisitions' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
+                        <i class="bi bi-clipboard-check"></i> Requisitions
+                    </a>
+                    <a href="{% url 'add_request' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
+                        <i class="bi bi-send-check"></i> Request Vehicle
                     </a>
                     <a href="{% url 'gsm_data_list' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
                         <i class="bi bi-broadcast-pin"></i> GSM Sensor Data
@@ -175,6 +175,9 @@
                         {% if unread_alerts_count > 0 %}
                             <span class="badge bg-danger rounded-pill">{{ unread_alerts_count }}</span>
                         {% endif %}
+                    </a>
+                    <a href="{% url 'request_summary' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
+                        <i class="bi bi-bar-chart-line"></i> Reports
                     </a>
                 {% elif user|has_group:"FleetDrivers" %}
                     <!-- Fleet Driver Links -->

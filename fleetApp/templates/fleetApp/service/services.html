@@ -4,10 +4,7 @@
 {% block header %}Manage Services{% endblock %}
 {% block content %}
 
-<!-- Add Service Button -->
-<a href="{% url 'add_service' %}" class="btn btn-primary my-3">
-    <i class="bi bi-plus-circle"></i> Add Service
-</a>
+<h2 class="text-secondary">List of Services</h2>
 
 <!-- Services Table -->
 <table class="table table-striped mt-3">
@@ -47,5 +44,8 @@
         {% endfor %}
     </tbody>
 </table>
-
+<!-- Add Service Button -->
+<a href="{% url 'add_service' %}" class="btn btn-primary my-3">
+    <i class="bi bi-plus-circle"></i> Request for Car Service
+</a>
 {% endblock %}

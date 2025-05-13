@@ -1,0 +1,12 @@
+{% extends "main.html" %}
+{% block title %}Delete Group{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h4>Are you sure you want to delete group <strong>{{ group.name }}</strong>?</h4>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Delete</button>
+        <a href="{% url 'group_list' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

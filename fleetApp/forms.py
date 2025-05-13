@@ -1,7 +1,8 @@
 from django import forms
 from django.core.exceptions import ValidationError
-from django.contrib.auth.models import User
-from .models import Vehicle, Driver, Requestor, Request, ServiceProvider, Service, GSMsensorData, Alert
+from django.contrib.auth.models import User, Group, Permission
+from django.contrib.auth.forms import UserCreationForm
+from .models import UserProfile, Vehicle, Driver, Requestor, Request, ServiceProvider, Service, GSMsensorData, Alert
 
 
 class VehicleForm(forms.ModelForm):
@@ -47,26 +48,35 @@ class RequestorForm(forms.ModelForm):
         widgets = {
             'name': forms.TextInput(attrs={'readonly': True}),
             'email_address': forms.EmailInput(attrs={'readonly': True}),
-            'contact': forms.TextInput(attrs={'readonly': False}),
+            'contact': forms.TextInput(attrs={'readonly': True}),
         }
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        user = self.initial.get('user') or self.data.get('user')
-        if user:
-            try:
-                user_obj = User.objects.get(pk=user)
-                self.fields['name'].initial = f"{user_obj.first_name} {user_obj.last_name}".strip()
-                self.fields['email_address'].initial = user_obj.email
-            except User.DoesNotExist:
-                pass
+def __init__(self, *args, **kwargs):
+    super().__init__(*args, **kwargs)
+    user_id = self.initial.get('user') or self.data.get('user')
 
+    if user_id:
+        try:
+            user = User.objects.get(pk=user_id)
+            self.fields['name'].initial = f"{user.first_name} {user.last_name}".strip()
+            self.fields['email_address'].initial = user.email
+
+            # ✅ Corrected: use user.userprofile
+            if hasattr(user, 'userprofile'):
+                self.fields['contact'].initial = user.userprofile.contact
+
+        except User.DoesNotExist:
+            pass
 
 class RequestForm(forms.ModelForm):
+    required_date = forms.DateField(
+        widget=forms.DateInput(attrs={'type': 'date'}),
+        help_text="Select the date when the vehicle is needed."
+    )
+
     class Meta:
         model = Request
-        fields = ['current_location', 'destination', 'purpose']
-
+        fields = ['current_location', 'destination', 'purpose', 'required_date']  
 
 class RequestApprovalForm(forms.ModelForm):
     class Meta:
@@ -112,3 +122,62 @@ class AlertForm(forms.ModelForm):
             'vehicle', 'sensor_data', 'alert_type', 'alert_message',
             'trigger_source', 'priority_level', 'recipient_role'
         ]
+
+from django import forms
+from django.contrib.auth.models import Group
+from .models import UserProfile
+
+class UserProfileForm(forms.Form):
+    first_name = forms.CharField(max_length=30)
+    last_name = forms.CharField(max_length=30)
+    email = forms.EmailField()
+    contact = forms.CharField(max_length=15)
+    gender = forms.ChoiceField(choices=UserProfile.GENDER_CHOICES)
+    groups = forms.ModelMultipleChoiceField(
+        queryset=Group.objects.all(),
+        required=False,
+        widget=forms.CheckboxSelectMultiple
+    )
+    
+class StaffEditForm(forms.ModelForm):
+    contact = forms.CharField(max_length=15)
+    gender = forms.ChoiceField(choices=UserProfile.GENDER_CHOICES)
+
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'email']
+    
+class UserCredentialForm(forms.ModelForm):
+    password1 = forms.CharField(widget=forms.PasswordInput, label="Password")
+    password2 = forms.CharField(widget=forms.PasswordInput, label="Confirm Password")
+    group = forms.ModelChoiceField(queryset=Group.objects.all(), required=False)
+
+    class Meta:
+        model = User
+        fields = ['username']
+
+    def clean(self):
+        cleaned_data = super().clean()
+        p1 = cleaned_data.get("password1")
+        p2 = cleaned_data.get("password2")
+        if p1 and p2 and p1 != p2:
+            raise forms.ValidationError("Passwords do not match")
+        return cleaned_data
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.set_password(self.cleaned_data["password1"])
+        if commit:
+            user.save()
+        return user
+class GroupForm(forms.ModelForm):
+    permissions = forms.ModelMultipleChoiceField(
+        queryset=Permission.objects.all(),
+        widget=forms.CheckboxSelectMultiple,
+        required=False,
+        label="Assign Permissions"
+    )
+
+    class Meta:
+        model = Group
+        fields = ['name', 'permissions']

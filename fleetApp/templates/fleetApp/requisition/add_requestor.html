@@ -2,11 +2,39 @@
 {% load crispy_forms_tags %}
 {% block title %}New Requestor{% endblock %}
 {% block header %}Add New Requestor{% endblock %}
+
 {% block content %}
-<form method="POST">
+<h5 class="modal-title" id="addDriverModalLabel">Requestor Registration Form</h5>
+
+<form method="POST" id="requestor-form">
     {% csrf_token %}
     {{ form|crispy }}
     <button type="submit" class="btn btn-success">Save</button>
     <a href="{% url 'requestor_list' %}" class="btn btn-secondary">Cancel</a>
 </form>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const userSelect = document.getElementById('id_user');
+        const nameInput = document.getElementById('id_name');
+        const emailInput = document.getElementById('id_email_address');
+        const contactInput = document.getElementById('id_contact');
+
+        if (userSelect) {
+            userSelect.addEventListener('change', function () {
+                const userId = this.value;
+                if (userId) {
+                    fetch(`/api/user-info/?user_id=${userId}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.name) nameInput.value = data.name;
+                            if (data.email) emailInput.value = data.email;
+                            if (data.contact) contactInput.value = data.contact;
+                        })
+                        .catch(err => console.error("Failed to fetch user info:", err));
+                }
+            });
+        }
+    });
+</script>
 {% endblock %}

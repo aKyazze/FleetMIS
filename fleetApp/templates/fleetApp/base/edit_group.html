@@ -1,0 +1,26 @@
+{% extends "main.html" %}
+{% block title %}Edit Group{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h3>Edit Group: {{ group.name }}</h3>
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="name">Group Name</label>
+            <input type="text" name="name" value="{{ group.name }}" class="form-control">
+        </div>
+        <div class="mb-3">
+            <label>Permissions</label>
+            <select multiple name="permissions" class="form-control" style="height: 200px; overflow-y: scroll;">
+                {% for perm in permissions %}
+                    <option value="{{ perm.id }}" {% if perm in group.permissions.all %}selected{% endif %}>
+                        {{ perm.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Update Group</button>
+        <a href="{% url 'group_list' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

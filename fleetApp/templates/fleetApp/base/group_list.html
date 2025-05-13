@@ -1,0 +1,81 @@
+{% extends "main.html" %}
+{% block title %}Group List{% endblock %}
+{% block content %}
+
+<div class="page-container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="fw-bold">User Groups</h2>
+        <a href="{% url 'add_group' %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Add Group
+        </a>
+    </div>
+
+    <!-- Search Box -->
+    <div class="mb-3">
+        <input type="text" class="form-control" id="groupSearch" placeholder="Search groups by name...">
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle" id="groupTable">
+            <thead class="table-light">
+                <tr>
+                    <th style="width: 5%;">#</th>
+                    <th style="width: 25%;">Group Name</th>
+                    <th style="width: 45%;">Permissions</th>
+                    <th style="width: 25%;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for group in groups %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td class="group-name">{{ group.name }}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#perm-{{ group.id }}">
+                            Show Permissions
+                        </button>
+                        <div class="collapse mt-2" id="perm-{{ group.id }}">
+                            {% if group.permissions.all %}
+                            <ul class="list-group list-group-flush">
+                                {% for perm in group.permissions.all %}
+                                <li class="list-group-item small">{{ perm.name }}</li>
+                                {% endfor %}
+                            </ul>
+                            {% else %}
+                            <span class="text-muted small">No permissions assigned.</span>
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td>
+                        <a href="{% url 'edit_group_permissions' group.id %}" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-pencil"></i> Edit
+                        </a>
+                        <a href="{% url 'delete_group' group.id %}" class="btn btn-sm btn-outline-danger" 
+                           onclick="return confirm('Are you sure you want to delete the group {{ group.name }}?');">
+                            <i class="bi bi-trash"></i> Delete
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center text-muted">No groups found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- JavaScript to Filter Groups -->
+<script>
+    document.getElementById("groupSearch").addEventListener("keyup", function () {
+        let input = this.value.toLowerCase();
+        let rows = document.querySelectorAll("#groupTable tbody tr");
+
+        rows.forEach(function (row) {
+            let name = row.querySelector(".group-name").textContent.toLowerCase();
+            row.style.display = name.includes(input) ? "" : "none";
+        });
+    });
+</script>
+{% endblock %}

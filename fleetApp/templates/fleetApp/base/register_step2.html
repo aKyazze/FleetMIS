@@ -1,0 +1,26 @@
+{% extends "main.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Step 2: User Credentials{% endblock %}
+{% block header %}Create User Credentials{% endblock %}
+
+{% block content %}
+<div class="page-container mt-4" style="max-width: 600px;">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">User Credentials & Group Assignment</h4>
+        </div>
+        <div class="card-body">
+            <form method="POST">
+                {% csrf_token %}
+                {{ form|crispy }}
+
+                <div class="text-end mt-3">
+                    <button type="submit" class="btn btn-success">Create User</button>
+                    <a href="{% url 'register_step1' %}" class="btn btn-secondary">Back</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

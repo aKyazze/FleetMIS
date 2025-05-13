@@ -3,7 +3,6 @@
 {% block title %}GSM Sensor Data{% endblock %}
 {% block content %}
 <h2>GSM Sensor Data</h2>
-<a href="{% url 'add_gsm_data' %}" class="btn btn-primary mb-3">Add Sensor Data</a>
 <table class="table table-bordered">
     <thead>
         <tr>
@@ -28,4 +27,5 @@
         {% endfor %}
     </tbody>
 </table>
+<a href="{% url 'add_gsm_data' %}" class="btn btn-primary mb-3">Add Sensor Data</a>
 {% endblock %}

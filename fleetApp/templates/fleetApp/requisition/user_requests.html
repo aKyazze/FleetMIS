@@ -8,6 +8,7 @@
             <th>Vehicle</th>
             <th>Status</th>
             <th>Date Requested</th>
+            <th>Date Required</th>
         </tr>
     </thead>
     <tbody>
@@ -17,6 +18,7 @@
             <td>{{ req.vehicle }}</td>
             <td>{{ req.request_status }}</td>
             <td>{{ req.request_date }}</td>
+            <td>{{ req.required_date }}</td>
         </tr>
         {% empty %}
         <tr><td colspan="4">No requests found.</td></tr>

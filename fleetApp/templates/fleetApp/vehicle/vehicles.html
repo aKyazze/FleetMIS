@@ -1,21 +1,12 @@
 {% extends "main.html" %}
 {% load crispy_forms_tags %}
+{% load driver_tags %}
 {% block title %}Fleet Management | Vehicles{% endblock %}
 {% block header %}Manage Vehicles{% endblock %}
 {% block content %}
 
 <div class="containers">
     <!-- Tabs for Vehicles List and Trip Summary -->
-    {% if messages %}
-            <div class="container mt-3">
-                {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">Close</button>
-                    </div>
-                {% endfor %}
-            </div>
-            {% endif %}
     <ul class="nav nav-tabs mb-3" id="fleetTab" role="tablist">
         <li class="nav-item" role="presentation">
             <button class="nav-link active" id="vehicles-list-tab" data-bs-toggle="tab" data-bs-target="#vehicles-list" type="button" role="tab" aria-controls="vehicles-list" aria-selected="true">
@@ -49,11 +40,13 @@
                         <td>{{ vehicle.mileage }}</td>
                         <td>{{ vehicle.status }}</td>
                         <td>
-                            {% if vehicle.status == "Allocated" %}
-                                {{ vehicle.driver_set.first.driver_name }}
-                            {% else %}
-                                <span class="badge bg-secondary">Unassigned</span>
-                            {% endif %}
+                            {% with drivers|get_driver_for_vehicle:vehicle as assigned_driver %}
+                                {% if assigned_driver %}
+                                    {{ assigned_driver.driver_name }}
+                                {% else %}
+                                    <span class="badge bg-secondary">Unassigned</span>
+                                {% endif %}
+                            {% endwith %}
                         </td>
                         <td>
                             <div class="btn-group" role="group" aria-label="Actions">
@@ -79,7 +72,7 @@
                 </tbody>
             </table>
             <a href="{% url 'add_vehicle' %}" class="btn btn-primary">
-                <i class="bi bi-plus-lg"></i> Add Vehicle <!-- Add Icon -->
+                <i class="bi bi-plus-lg"></i> Register Vehicle <!-- Add Icon -->
             </a>
         </div>
         

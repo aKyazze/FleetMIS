@@ -24,7 +24,8 @@ urlpatterns = [
      path('drivers/add/', views.add_driver, name='add_driver'),
      path('drivers/edit/<int:driver_id>/', views.edit_driver, name='edit_driver'),
      path('drivers/delete/<int:driver_id>/', views.delete_driver, name='delete_driver'),
-     
+     path('driver/profile/', views.driver_profile_view, name='driver_profile'),
+
 ################################################################### Service Provider urls
      path('service-providers/', views.service_provider_list, name='service_provider_list'),
      path('service-providers/add/', views.add_service_provider, name='add_service_provider'),
@@ -53,10 +54,14 @@ urlpatterns = [
     path('requests/delete/<int:request_id>/', views.delete_request, name='delete_request'),
     path('requests/approve/<int:request_id>/', views.approve_request, name='approve_request'),
     path('my-requests/', views.user_requests, name='user_requests'),
+    path('trips/history/', views.trip_history, name='trip_history'),
+    path('trips/assigned/', views.assigned_trips, name='assigned_trips'),
+
     
   #################################################################### Registration URLs
    
     path('signUp/', views.sign_up_view, name='registration'),
+    path('api/login/', CustomAuthToken.as_view(), name='api_login'),
     path('redirect-after-login/', views.login_redirect_view, name='login_redirect'),
     path('accounts/password_change/', auth_views.PasswordChangeView.as_view(), name='password_change'),
     path('accounts/password_change/done/', auth_views.PasswordChangeDoneView.as_view(), name='password_change_done'),
@@ -70,11 +75,21 @@ urlpatterns = [
     path('export/trip-logs/csv/', views.export_trip_logs_csv, name='export_trip_logs_csv'),
     path('export/trip-logs/pdf/', views.export_trip_logs_pdf, name='export_trip_logs_pdf'),
     path('charts/', views.chart_views, name='chart_views'),
-    path('trips/history/', views.trip_history, name='trip_history'),
-    path('trips/assigned/', views.assigned_trips, name='assigned_trips'),
-    path('driver/profile/', views.driver_profile_view, name='driver_profile'),
-    path('api/login/', CustomAuthToken.as_view(), name='api_login'),
     
+    ##################################################################### For Users/Staff
+    path('users/register/step1/', views.register_step1, name='register_step1'),
+    path('users/register/step2/', views.register_step2, name='register_step2'),
+    path('users/', views.user_list, name='user_list'),
+    path('staff/', views.staff_dashboard, name='staff_dashboard'),
+    path('staff/<int:user_id>/edit/', views.edit_staff, name='edit_staff'),
+    path('staff/<int:user_id>/delete/', views.delete_staff, name='delete_staff'),
+    
+    ##################################################################### For groups
+    path('groups/add/', views.add_group_view, name='add_group'),
+    path('groups/', views.group_list_view, name='group_list'),   
+    path('groups/<int:group_id>/edit/', views.edit_group_permissions, name='edit_group_permissions'), 
+    path('groups/<int:group_id>/edit/', views.edit_group, name='edit_group'),
+    path('groups/<int:group_id>/delete/', views.delete_group, name='delete_group'),
 ]
 
 

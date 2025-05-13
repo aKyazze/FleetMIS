@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'fleetApp', 
     'crispy_forms',
      'crispy_bootstrap4',
+      'crispy_bootstrap5',
      'rest_framework',
      'rest_framework.authtoken',  # For token-based authentication
    
@@ -138,7 +139,9 @@ STATICFILES_DIRS = [
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
-CRISPY_TEMPLATE_PACK = 'bootstrap4'
+#CRISPY_TEMPLATE_PACK = 'bootstrap4'
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
