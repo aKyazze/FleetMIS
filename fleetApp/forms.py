@@ -7,24 +7,37 @@ from django.contrib.auth.models import Group, Permission, User
 from django.core.exceptions import ValidationError
 
 # Local app imports
-from .models import Alert, Driver, GSMsensorData, Request, Requestor, Service, ServiceProvider, UserProfile, Vehicle
+from .models import Alert, Driver, GSMsensorData, Request, Requestor, Service, ServiceProvider, UserProfile, Vehicle, Department
 
 
 class VehicleForm(forms.ModelForm):
     class Meta:
         model = Vehicle
         fields = ['vehicle_plate', 'vehicle_type', 'engine_type', 'mileage']
-        
+
+    def __init__(self, *args, **kwargs):
+        # Get instance for comparison during update
+        self.instance = kwargs.get('instance')
+        super().__init__(*args, **kwargs)
+
     def clean_vehicle_plate(self):
         plate = self.cleaned_data['vehicle_plate'].upper().strip()
-        if Vehicle.objects.filter(vehicle_plate__iexact=plate).exists():
+        qs = Vehicle.objects.filter(vehicle_plate__iexact=plate)
+        if self.instance:
+            qs = qs.exclude(id=self.instance.id)
+        if qs.exists():
             raise ValidationError("This vehicle plate number already exists.")
         return plate
 
-
 class VehicleAllocationForm(forms.Form):
     driver = forms.ModelChoiceField(queryset=Driver.objects.filter(vehicle__isnull=True))
-    # You can add more fields here like request, vehicle, etc., if needed.
+
+class VehicleReturnForm(forms.Form):
+    mileage_at_return = forms.IntegerField(
+        label="Mileage at Return",
+        required=True,
+        min_value=0,
+    )
 
 
 class DriverForm(forms.ModelForm):
@@ -121,12 +134,6 @@ class ServiceForm(forms.ModelForm):
         fields = ['particular', 'quantity', 'cost', 'service_provider', 'vehicle']
 
 
-class VehicleReturnForm(forms.Form):
-    mileage_at_return = forms.IntegerField(
-        label="Mileage at Return",
-        required=True,
-        min_value=0,
-    )
 
 
 class GSMsensorDataForm(forms.ModelForm):
@@ -151,6 +158,7 @@ class UserProfileForm(forms.Form):
     contact = forms.CharField(max_length=15)
     gender = forms.ChoiceField(choices=UserProfile.GENDER_CHOICES)
     passport_photo = forms.ImageField(required=False)
+    department = forms.ChoiceField(choices=Department.DEPARTMENT_LIST)
     groups = forms.ModelMultipleChoiceField(
         queryset=Group.objects.all(),
         required=False,
@@ -160,6 +168,7 @@ class UserProfileForm(forms.Form):
 class StaffEditForm(forms.ModelForm):
     contact = forms.CharField(max_length=15)
     gender = forms.ChoiceField(choices=UserProfile.GENDER_CHOICES)
+    
 
     class Meta:
         model = User

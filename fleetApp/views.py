@@ -18,12 +18,14 @@ from django.contrib.auth.decorators import (
 )
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import Group, Permission, User
+from django.core.files.base import ContentFile
 from django.db.models import ExpressionWrapper, F, IntegerField, Q
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.utils.dateformat import DateFormat
 from django.views.decorators.http import require_GET
+
 
 # Local application imports
 from fleetApp.utils.email_utils import send_notification
@@ -124,6 +126,7 @@ def register_step1(request):
                 'email': form.cleaned_data['email'],
                 'contact': form.cleaned_data['contact'],
                 'gender': form.cleaned_data['gender'],
+                'department_id': form.cleaned_data['department'],
             }
 
             # Handle passport photo
@@ -159,6 +162,7 @@ def register_step2(request):
             user.first_name = data['first_name']
             user.last_name = data['last_name']
             user.email = data['email']
+            department_code = data['department_id']
             user.save()
 
             # Create UserProfile
@@ -166,18 +170,29 @@ def register_step2(request):
                 user=user,
                 contact=data['contact'],
                 gender=data['gender'],
+                department=department_code,
             )
 
-            # Save photo if available
-            import base64
-            from django.core.files.base import ContentFile
-
-            # ...
+            # Save passport photo if available
 
             if request.session.get('has_photo') and request.session.get('photo_data'):
                 photo_data = base64.b64decode(request.session['photo_data'])
                 photo_name = request.session.get('photo_name', 'photo.jpg')
                 profile.passport_photo.save(photo_name, ContentFile(photo_data))
+
+            # Create or update Staff record
+            from fleetApp.models import Staff  # Ensure correct import
+
+            staff, created = Staff.objects.get_or_create(user=user)
+            staff.first_name = user.first_name
+            staff.last_name = user.last_name
+            staff.email = user.email
+            staff.contact = data['contact']
+            staff.gender = data['gender']
+            staff.department = department_code
+            if profile.passport_photo:
+                staff._photo = profile.passport_photo
+            staff.save()
 
             # Assign group
             selected_group = form.cleaned_data.get('group')
@@ -185,19 +200,17 @@ def register_step2(request):
                 user.groups.add(selected_group)
 
             # Clean up session
-            request.session.pop('registration_data', None)
-            request.session.pop('has_photo', None)
-            request.session.pop('photo_name', None)
-            request.session.pop('photo_data', None)
+            for key in ['registration_data', 'has_photo', 'photo_name', 'photo_data']:
+                request.session.pop(key, None)
 
             messages.success(request, f"User {user.username} created successfully.")
             return redirect('staff_dashboard')
-
     else:
         initial_username = data['first_name'].lower()
         form = UserCredentialForm(initial={'username': initial_username})
 
     return render(request, 'fleetApp/base/register_step2.html', {'form': form})
+
 
 @login_required
 def user_list(request):
@@ -228,6 +241,7 @@ def edit_staff(request, user_id):
             # Update profile info
             profile.contact = data['contact']
             profile.gender = data['gender']
+            profile.department = data['department']
             if request.FILES.get('passport_photo'):
                 profile.passport_photo = request.FILES['passport_photo']
             profile.save()

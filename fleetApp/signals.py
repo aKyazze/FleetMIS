@@ -1,10 +1,10 @@
 # Django imports
-from django.contrib.auth.models import Group
+from django.contrib.auth.models import Group, User
 from django.db.models.signals import post_save, user_logged_in
 from django.dispatch import receiver
 
 # Local app imports
-from .models import Alert, GSMsensorData, Request, Requestor
+from .models import Alert, GSMsensorData, Request, Requestor, Staff
 from fleetApp.utils.email_utils import send_notification
 
 
@@ -56,13 +56,28 @@ def generate_alert(sender, instance, created, **kwargs):
 @receiver(post_save, sender=Request)
 def notify_pending_request(sender, instance, created, **kwargs):
     if created and instance.request_status == "P":
+        print("== Sending Trip Request Notification ==")
+        print("Requestor:", getattr(instance.requestor, 'name', 'Unknown'))
+        print("Destination:", instance.destination)
+        print("Request Date:", instance.request_date)
+        print("Required Date:", instance.required_date)  # Diagnostic line
+
         send_notification(
             subject='New Trip Request Pending',
             template_name='emails/pending_request_manager.html',
             context={
-                'requestor': instance.requestor.name,
+                'requestor': getattr(instance.requestor, 'name', 'Unknown'),
+                'requestor_name': getattr(instance.requestor, 'name', 'Unknown'),
                 'destination': instance.destination,
-                'request_date': instance.request_date
+                'purpose': instance.purpose,
+                'request_date': instance.request_date,
+                'required_date': instance.required_date,
+                'manager_name': "Fleet Manager"
             },
             recipient_email='fleetmanager@utcl.com'
         )
+
+@receiver(post_save, sender=User)
+def create_staff_profile(sender, instance, created, **kwargs):
+    if created and not instance.is_superuser:
+        Staff.objects.get_or_create(user=instance)

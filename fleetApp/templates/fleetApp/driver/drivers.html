@@ -44,9 +44,9 @@
             </td>
             <td>
                 <div class="btn-group" role="group" aria-label="Driver Actions">
-                    <a href="{% url 'edit_driver' driver.id %}" class="btn btn-sm btn-warning">
+                    <!--<a href="{% url 'edit_driver' driver.id %}" class="btn btn-sm btn-warning">
                         <i class="bi bi-pencil-square"></i>
-                    </a>
+                    </a>-->
                     <a href="{% url 'delete_driver' driver.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this Driver?');">
                         <i class="bi bi-trash"></i>
                     </a>
@@ -65,7 +65,7 @@
 <div class="modal fade" id="addDriverModal" tabindex="-1" aria-labelledby="addDriverModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form method="POST" action="{% url 'add_driver' %}" enctype="multipart/form-data">>
+            <form method="POST" action="{% url 'add_driver' %}" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="modal-header">
                     <h5 class="modal-title" id="addDriverModalLabel">Driver Registration Form</h5>

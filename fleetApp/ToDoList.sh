@@ -1,4 +1,4 @@
-Final Project report. 
+# ToDo List  =====================================================
 
 sys cleanUp:
 tcl㉿NB202405232201)-[~/…/office/Sem-2/FinalYrProject/FleetMIS]
@@ -20,3 +20,11 @@ PreRequists: PACKAGES
    8 python manage.py runserver
    9 python installation
   
+# ToDo List Pendings  =============================================
+
+  Some pending functionalities:
+  * Need date should not allow passed dates, 
+  * Modifications in reports
+  * Emails to include need dates
+  * Fleet Driver need date is missing
+  ** ** Final Year Project report ** 
