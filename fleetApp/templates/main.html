@@ -106,7 +106,7 @@
                             <span class="badge bg-danger rounded-pill">{{ unread_alerts_count }}</span>
                         {% endif %}
                     </a>
-                    <a href="{% url 'request_summary' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
+                    <a href="{% url 'report_selection' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
                         <i class="bi bi-bar-chart-line"></i> Reports
                     </a>
                 {% elif user|has_group:"FleetManagers" %}
@@ -141,9 +141,9 @@
                             <span class="badge bg-danger rounded-pill">{{ unread_alerts_count }}</span>
                         {% endif %}
                     </a>
-                    <a href="{% url 'request_summary' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
+                    <a href="{% url 'report_selection' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
                         <i class="bi bi-bar-chart-line"></i> Reports
-                    </a>
+                    </a>                    
                 {% elif user|has_group:"FleetDrivers" %}
                     <!-- Fleet Driver Links -->
                     <a href="{% url 'assigned_trips' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">

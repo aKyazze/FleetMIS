@@ -1,0 +1,27 @@
+{% extends "main.html" %}
+{% block title %}All Vehicle Requests{% endblock %}
+{% block content %}
+<div class="page-container mt-4">
+    <h3 class="mb-3">📝 All Vehicle Requests</h3>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Requestor</th>
+                <th>Destination</th>
+                <th>Status</th>
+                <th>Date Requested</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for req in requests %}
+            <tr>
+                <td>{{ req.requestor.username }}</td>
+                <td>{{ req.destination }}</td>
+                <td>{{ req.request_status }}</td>
+                <td>{{ req.request_date }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

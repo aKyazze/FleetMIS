@@ -2,10 +2,22 @@
 {% block title %}Delete Staff{% endblock %}
 {% block content %}
 <div class="page-container mt-4">
-    <h4>Are you sure you want to delete {{ user_obj.get_full_name|default:user_obj.username }}?</h4>
+
+    {% if error_message %}
+        <div class="alert alert-danger" role="alert">
+            {{ error_message }}
+        </div>
+    {% endif %}
+
+    <h4>Are you sure you want to delete 
+        <strong>{{ user_obj.get_full_name|default:user_obj.username }}</strong>?
+    </h4>
+
     <form method="post">
         {% csrf_token %}
-        <button type="submit" class="btn btn-danger">Yes, Delete</button>
+        <button type="submit" class="btn btn-danger" {% if error_message %}disabled{% endif %}>
+            Yes, Delete
+        </button>
         <a href="{% url 'staff_dashboard' %}" class="btn btn-secondary">Cancel</a>
     </form>
 </div>

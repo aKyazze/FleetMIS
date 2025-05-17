@@ -1,0 +1,27 @@
+{% extends "main.html" %}
+{% block title %}Available Vehicles{% endblock %}
+{% block content %}
+<div class="page-container mt-4">
+    <h3 class="mb-3">✅ Available Vehicles</h3>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Vehicle Plate</th>
+                <th>Model</th>
+                <th>Category</th>
+                <th>Mileage</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for vehicle in vehicles %}
+            <tr>
+                <td>{{ vehicle.vehicle_plate }}</td>
+                <td>{{ vehicle.vehicle_type }}</td>
+                <td>{{ vehicle.engine_type }}</td>
+                <td>{{ vehicle.mileage }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

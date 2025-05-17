@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Closed Trips Report</title>
+    <style>
+        body { font-family: Arial, sans-serif; font-size: 12px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #000; padding: 6px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <h2>✔️ Closed Trips Report</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Requestor</th>
+                <th>Vehicle</th>
+                <th>Driver</th>
+                <th>Destination</th>
+                <th>Status</th>
+                <th>Request Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for trip in trips %}
+            <tr>
+                <td>{{ trip.requestor.username }}</td>
+                <td>{{ trip.vehicle.vehicle_plate|default:"N/A" }}</td>
+                <td>{{ trip.driver.driver_name|default:"N/A" }}</td>
+                <td>{{ trip.destination }}</td>
+                <td>{{ trip.request_status }}</td>
+                <td>{{ trip.request_date|date:"Y-m-d" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

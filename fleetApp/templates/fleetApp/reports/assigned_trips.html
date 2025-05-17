@@ -1,0 +1,27 @@
+{% extends "main.html" %}
+{% block title %}Assigned Trips Report{% endblock %}
+{% block content %}
+<div class="page-container mt-4">
+    <h3 class="mb-3">🚗 Assigned Trips</h3>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Requestor</th>
+                <th>Vehicle</th>
+                <th>Driver</th>
+                <th>Destination</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for trip in trips %}
+            <tr>
+                <td>{{ trip.requestor.username }}</td>
+                <td>{{ trip.vehicle.vehicle_plate }}</td>
+                <td>{{ trip.driver.driver_name|default:"N/A" }}</td>
+                <td>{{ trip.destination }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

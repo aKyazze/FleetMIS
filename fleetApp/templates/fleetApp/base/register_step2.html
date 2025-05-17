@@ -14,11 +14,8 @@
             <form method="POST">
                 {% csrf_token %}
                 {{ form|crispy }}
-
-                <div class="text-end mt-3">
-                    <button type="submit" class="btn btn-success">Create</button>
-                    <a href="{% url 'register_step1' %}" class="btn btn-secondary">Cancel</a>
-                </div>
+                <button type="submit" class="btn btn-success">Create</button>
+                <a href="{% url 'register_step1' %}" class="btn btn-secondary">Cancel</a>
             </form>
         </div>
     </div>

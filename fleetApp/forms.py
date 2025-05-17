@@ -5,6 +5,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import Group, Permission, User
 from django.core.exceptions import ValidationError
+from django.utils import timezone
 
 # Local app imports
 from .models import Alert, Driver, GSMsensorData, Request, Requestor, Service, ServiceProvider, UserProfile, Vehicle, Department
@@ -101,6 +102,7 @@ def __init__(self, *args, **kwargs):
         except User.DoesNotExist:
             pass
 
+
 class RequestForm(forms.ModelForm):
     required_date = forms.DateField(
         widget=forms.DateInput(attrs={'type': 'date'}),
@@ -109,12 +111,20 @@ class RequestForm(forms.ModelForm):
 
     class Meta:
         model = Request
-        fields = ['current_location', 'destination', 'purpose', 'required_date']  
+        fields = ['current_location', 'destination', 'purpose', 'required_date']
 
+    def clean_required_date(self):
+        required_date = self.cleaned_data.get('required_date')
+        today = timezone.localdate()
+
+        if required_date < today:
+            raise forms.ValidationError("Required date cannot be in the past.")
+        
+        return required_date
 class RequestApprovalForm(forms.ModelForm):
     class Meta:
         model = Request
-        fields = ['vehicle', 'driver']  # ✅ Include driver in approval form
+        fields = ['vehicle', 'driver']  # Include driver in approval form
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

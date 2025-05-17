@@ -1,0 +1,25 @@
+{% extends "main.html" %}
+{% block title %}Vehicle Mileage{% endblock %}
+{% block content %}
+<div class="page-container mt-4">
+    <h3 class="mb-3">⛽ Vehicle Mileage Report</h3>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Vehicle Plate</th>
+                <th>Model</th>
+                <th>Mileage (KM)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for vehicle in vehicles %}
+            <tr>
+                <td>{{ vehicle.vehicle_plate }}</td>
+                <td>{{ vehicle.vehicle_type }}</td>
+                <td>{{ vehicle.mileage }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

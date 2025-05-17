@@ -21,6 +21,10 @@ PreRequists: PACKAGES
    9 python installation
    10 pip install psycopg2-binary
    11 pip install django-cors-headers
+   12 pip install xhtml2pdf
+   13 pip install xhtml2pdf
+
+
 
 
    # ================== Create a PostgreSQL database and user ========================
@@ -150,3 +154,5 @@ Each will have a layout (XML) and optionally interact with the Django API.
 /api/requests/create/ → create trip request
 
 Shall I proceed creating the first two Activities with sample UI and connect to Django mock endpoints?
+
+

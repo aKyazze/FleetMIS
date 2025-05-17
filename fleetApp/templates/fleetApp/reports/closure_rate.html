@@ -1,0 +1,12 @@
+{% extends "main.html" %}
+{% block title %}Trip Closure Rate{% endblock %}
+{% block content %}
+<div class="page-container mt-4">
+    <h3 class="mb-3">📈 Trip Closure Rate</h3>
+    <ul class="list-group">
+        <li class="list-group-item">Total Trip Requests: <strong>{{ total }}</strong></li>
+        <li class="list-group-item">Closed Trip Requests: <strong>{{ closed }}</strong></li>
+        <li class="list-group-item">Closure Rate: <strong>{{ rate }}%</strong></li>
+    </ul>
+</div>
+{% endblock %}

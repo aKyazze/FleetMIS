@@ -1,0 +1,27 @@
+{% extends "main.html" %}
+{% block title %}Serviced Vehicles{% endblock %}
+{% block content %}
+<div class="page-container mt-4">
+    <h3 class="mb-3">🛠️ Serviced Vehicles</h3>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Vehicle</th>
+                <th>Service Date</th>
+                <th>Service Type</th>
+                <th>Cost</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for service in services %}
+            <tr>
+                <td>{{ service.vehicle.vehicle_plate }}</td>
+                <td>{{ service.service_date }}</td>
+                <td>{{ service.particular }}</td>
+                <td>{{ service.cost }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

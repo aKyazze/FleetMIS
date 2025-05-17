@@ -136,6 +136,7 @@ class Service(models.Model):
     cost = models.DecimalField(max_digits=10, decimal_places=2)
     service_provider = models.ForeignKey(ServiceProvider, on_delete=models.CASCADE)
     vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE)
+    service_date = models.DateField(default=timezone.now)
     
     def __str__(self):
         return f"{self.particular} for {self.vehicle.vehicle_plate}"

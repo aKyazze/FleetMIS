@@ -62,6 +62,10 @@ urlpatterns = [
   #################################################################### API & Registration URLs
    
     path('signUp/', views.sign_up_view, name='registration'),
+    path('password/change/', views.custom_password_change, name='password_change'),
+    path('password/change/done/', 
+         lambda request: render(request, 'registration/password_change_done.html'), 
+         name='password_change_done'),
     path('redirect-after-login/', views.login_redirect_view, name='login_redirect'),
     path('accounts/password_change/', auth_views.PasswordChangeView.as_view(), name='password_change'),
     path('accounts/password_change/done/', auth_views.PasswordChangeDoneView.as_view(), name='password_change_done'),
@@ -81,9 +85,9 @@ urlpatterns = [
     path('gsm-data/add/', views.add_gsm_data, name='add_gsm_data'),
     path('alerts/', views.alert_list, name='alert_list'),
     path('alerts/add/', views.add_alert, name='add_alert'),
-    path('export/trip-logs/csv/', views.export_trip_logs_csv, name='export_trip_logs_csv'),
-    path('export/trip-logs/pdf/', views.export_trip_logs_pdf, name='export_trip_logs_pdf'),
-    path('charts/', views.chart_views, name='chart_views'),
+    #path('export/trip-logs/csv/', views.export_trip_logs_csv, name='export_trip_logs_csv'),
+    #path('export/trip-logs/pdf/', views.export_trip_logs_pdf, name='export_trip_logs_pdf'),
+    #path('charts/', views.chart_views, name='chart_views'),
     
     ##################################################################### For Users/Staff
     path('users/register/step1/', views.register_step1, name='register_step1'),
@@ -99,6 +103,25 @@ urlpatterns = [
     path('groups/<int:group_id>/edit/', views.edit_group_permissions, name='edit_group_permissions'), 
     path('groups/<int:group_id>/edit/', views.edit_group, name='edit_group'),
     path('groups/<int:group_id>/delete/', views.delete_group, name='delete_group'),
-] 
+    
+    ##################################################################### For Reports
+    
+    # Report landing and selector
+    path("reports/", views.report_selection_view, name="report_selection"),
+    path("reports/generate/", views.generate_report_view, name="generate_report"),
+
+    # PDF and CSV export options
+    path("reports/closed_trips/", views.export_trip_logs_pdf, name="export_trip_logs_pdf"),
+    path("reports/trip_logs_csv/", views.export_trip_logs_csv, name="export_trip_logs_csv"),
+
+    # Individual report views
+    path("reports/assigned_trips/", views.report_assigned_trips, name="report_assigned_trips"),
+    path("reports/vehicle_mileage/", views.report_vehicle_mileage, name="report_vehicle_mileage"),
+    path("reports/all_vehicles/", views.report_all_vehicles, name="report_all_vehicles"),
+    path("reports/serviced/", views.report_serviced_vehicles, name="report_serviced_vehicles"),
+    path("reports/available/", views.report_available_vehicles, name="report_available_vehicles"),
+    path("reports/requests/", views.report_vehicle_requests, name="report_vehicle_requests"),
+    path("reports/closure_rate/", views.report_closure_rate, name="report_closure_rate"),
+]
 
 
