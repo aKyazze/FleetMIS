@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="dark_blue">#001f3f</color>
+    <color name="orange">#FF851B</color>
+    <color name="white">#FFFFFF</color>
+    <color name="gray_light">#f9f9f9</color>
+
+    <!-- Text colors -->
+    <color name="primaryText">#001f3f</color>
+    <color name="secondaryText">#7A7A7A</color>
+
+    <!-- Required for button background -->
+    <color name="teal_700">#018786</color>
+</resources>

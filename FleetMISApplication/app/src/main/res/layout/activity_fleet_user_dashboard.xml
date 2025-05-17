@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:padding="16dp"
+    tools:context=".ui.dashboard.FleetUsersDashboardActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Welcome Text -->
+        <TextView
+            android:id="@+id/txtWelcome"
+            android:text="Welcome,"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="@color/primaryText"
+            android:layout_marginBottom="16dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <!-- Pending Requests Count -->
+        <TextView
+            android:id="@+id/txtTotalVehicles"
+            android:text="Pending Requests: 0"
+            android:textSize="16sp"
+            android:textColor="@color/secondaryText"
+            android:layout_marginBottom="8dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <!-- Completed Trips Count -->
+        <TextView
+            android:id="@+id/txtTrips"
+            android:text="Completed Trips: 0"
+            android:textSize="16sp"
+            android:textColor="@color/secondaryText"
+            android:layout_marginBottom="16dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <!-- Request a Vehicle -->
+        <Button
+            android:id="@+id/btnRequestVehicle"
+            android:text="Request Vehicle"
+            android:background="@drawable/edittext_background"
+            android:textColor="@color/white"
+            android:layout_marginTop="8dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- View Request Status -->
+        <Button
+            android:id="@+id/btnTrackRequests"
+            android:text="Track My Requests"
+            android:background="@drawable/edittext_background"
+            android:textColor="@color/white"
+            android:layout_marginTop="8dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- Optional: View Trip Records -->
+        <Button
+            android:id="@+id/btnViewTrips"
+            android:text="View Trip Records"
+            android:background="@drawable/edittext_background"
+            android:textColor="@color/white"
+            android:layout_marginTop="8dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- Logout Button -->
+        <Button
+            android:id="@+id/btnLogout"
+            android:text="Logout"
+            android:background="@drawable/edittext_background"
+            android:textColor="@color/white"
+            android:layout_marginTop="12dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+</ScrollView>

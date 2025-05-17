@@ -7,7 +7,10 @@ from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from .serializers import RequestCreateSerializer, RequestReadSerializer
 
 # Django imports
 from django.contrib import messages
@@ -16,6 +19,7 @@ from django.contrib.auth.decorators import (
     permission_required, 
     user_passes_test
 )
+from django.contrib.auth import authenticate
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import Group, Permission, User
 from django.core.files.base import ContentFile
@@ -371,7 +375,7 @@ def delete_group(request, group_id):
     return render(request, 'fleetApp/base/delete_group.html', {'group': group})
 
 
-#This is API SECTION 
+#This is Backend API Endpoints SECTION 
 # 
 # endpoint view to return user Details by ID
 @require_GET
@@ -387,18 +391,120 @@ def get_user_info(request):
         })
     except User.DoesNotExist:
         return JsonResponse({'error': 'User not found'}, status=404)
-# Login API Endpoint (Using Token Authentication)
 class CustomAuthToken(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)
         token = Token.objects.get(key=response.data['token'])
         user = token.user
+
+        if user.groups.filter(name="FleetDriver").exists():
+            role = "FleetDriver"
+        elif user.groups.filter(name="FleetUsers").exists():
+            role = "FleetUser"
+        else:
+            role = "Unknown"
+
         return Response({
             'token': token.key,
             'user_id': user.pk,
             'username': user.username,
             'email': user.email,
+            'role': role
+        }
+    )
+        
+ 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def fleet_dashboard_api(request):
+    user = request.user
+    name = user.get_full_name() or user.username
+
+    response_data = {
+        "name": name,
+        "role": None,
+    }
+
+    if user.groups.filter(name="FleetUsers").exists() or user.groups.filter(name="FleetDrivers").exists():
+        # Basic user / driver view
+        pending = Request.objects.filter(requestor=user, request_status="P").count()
+        approved = Request.objects.filter(requestor=user, request_status="O").count()
+        completed = Request.objects.filter(requestor=user, request_status="C").count()
+
+        response_data.update({
+            "role": "FleetUser",
+            "pendingRequests": pending,
+            "approvedRequests": approved,
+            "completedRequests": completed,
         })
+
+    elif user.groups.filter(name="FleetManagers").exists() or user.is_superuser:
+        # Manager or admin view
+        totalVehicles = Vehicle.objects.count()
+        totalDrivers = Driver.objects.count()
+        totalRequestors = Requestor.objects.count()
+        totalServices = Service.objects.count()
+        totalServiceProviders = ServiceProvider.objects.count()
+        totalPendingRequests = Request.objects.filter(request_status="P").count()
+        totalCompletedRequests = Request.objects.filter(request_status="C").count()
+        unreadAlerts = Alert.objects.filter(read=False).count()
+
+        response_data.update({
+            "role": "FleetManager",
+            "totalVehicles": totalVehicles,
+            "totalDrivers": totalDrivers,
+            "totalRequestors": totalRequestors,
+            "totalServices": totalServices,
+            "totalServiceProviders": totalServiceProviders,
+            "totalPendingRequests": totalPendingRequests,
+            "totalCompletedRequests": totalCompletedRequests,
+            "unreadAlertsCount": unreadAlerts,
+        })
+
+    else:
+        response_data["role"] = "None"
+        response_data["message"] = "You do not have dashboard access"
+
+    return JsonResponse(response_data)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_vehicle_request(request):
+    """
+    Create a new trip request. Converts camelCase input from frontend to snake_case.
+    """
+    user = request.user
+    data = request.data
+
+    # Normalize camelCase → snake_case
+    payload = {
+        "requestor": user.id,
+        "current_location": data.get("currentLocation"),
+        "destination": data.get("destination"),
+        "purpose": data.get("purpose"),
+        "required_date": data.get("requiredDate"),
+        "request_status": "P",
+    }
+
+    print("Normalized Payload Received:", payload)
+
+    serializer = RequestCreateSerializer(data=payload)
+    if serializer.is_valid():
+        serializer.save()
+        return Response({"message": "Request submitted successfully"}, status=201)
+    return Response(serializer.errors, status=400)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_requests(request):
+    """
+    Returns all requests made by the currently authenticated user.
+    """
+    requests = Request.objects.filter(requestor=request.user).order_by('-request_date')
+    serializer = RequestReadSerializer(requests, many=True)
+    return Response(serializer.data)
+
 ####################################################################################################
 ##################################### MAIN & HOME SECTION ##########################################
 

@@ -1,12 +1,15 @@
 {% extends "main.html" %}
 {% load crispy_forms_tags %}
+{% load static %}
 {% block title %}Staff{% endblock %}
 {% block content %}
 <h2 class="text-secondary">Requestor List</h2>
+<a href="{% url 'add_requestor' %}" class="btn btn-primary">Add Requestor</a>
 <table class="table">
     <thead>
         <tr>
             <th>#</th>
+            <th>Photo</th> 
             <th>Name</th>
             <th>Contact</th>
             <th>Email</th>
@@ -17,6 +20,13 @@
         {% for requestor in requestors %}
         <tr>
             <td>{{ forloop.counter }}</td>
+            <td>
+                {% if requestor.user.userprofile.passport_photo %}
+                    <img src="{{ requestor.user.userprofile.passport_photo.url }}" class="rounded-circle" width="50" height="50" alt="Driver Photo">
+                {% else %}
+                    <img src="{% static 'images/default-driver.jpeg' %}" class="rounded-circle" width="50" height="50" alt="Default Photo">
+                {% endif %}
+            </td>
             <td>{{ requestor.name }}</td>
             <td>{{ requestor.contact }}</td>
             <td>{{ requestor.email_address }}</td>
@@ -32,5 +42,4 @@
         {% endfor %}
     </tbody>
 </table>
-<a href="{% url 'add_requestor' %}" class="btn btn-primary">Add Requestor</a>
 {% endblock %}

@@ -19,6 +19,9 @@
         <!-- Vehicles List Tab -->
         <div class="tab-pane fade show active" id="vehicles-list" role="tabpanel" aria-labelledby="vehicles-list-tab">
             <h2 class="text-secondary">Vehicles List</h2>
+            <a href="{% url 'add_vehicle' %}" class="btn btn-primary">
+                <i class="bi bi-plus-lg"></i> Register Vehicle <!-- Add Icon -->
+            </a>
             <table class="table table-striped">
                 <thead>
                     <tr>
@@ -77,15 +80,11 @@
                                 {% endif %}
                             </div>
                         </td>
-                                            </tr>
-                    {% endfor %}
+                    </tr>
+                {% endfor %}
                 </tbody>
             </table>
-            <a href="{% url 'add_vehicle' %}" class="btn btn-primary">
-                <i class="bi bi-plus-lg"></i> Register Vehicle <!-- Add Icon -->
-            </a>
-        </div>
-        
+        </div>  
     </div>
 </div>
 {% endblock %}

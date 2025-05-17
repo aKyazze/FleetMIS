@@ -7,11 +7,15 @@
 <div class="page-containers">
     <!-- Drivers Table -->
     <h2 class="text-secondary">Driver List</h2>
+            <!-- Add Driver Button -->
+            <a href="" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addDriverModal">
+                <i class="bi bi-plus-lg"></i> Register Driver <!-- Add Icon -->
+            </a>    
 <table class="table table-striped">
     <thead>
         <tr>
             <th>No.</th>
-            <th>Photo</th> <!-- Added -->
+            <th>Photo</th> 
             <th>Name</th>
             <th>Gender</th>
             <th>Contact</th>
@@ -56,10 +60,6 @@
         {% endfor %}
     </tbody>
 </table>
-        <!-- Add Driver Button -->
-        <a href="" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addDriverModal">
-            <i class="bi bi-plus-lg"></i> Register Driver <!-- Add Icon -->
-        </a>
 </div>
 <!-- Add Driver Modal -->
 <div class="modal fade" id="addDriverModal" tabindex="-1" aria-labelledby="addDriverModalLabel" aria-hidden="true">

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:background="@color/white">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <EditText
+            android:id="@+id/inputCurrentLocation"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:hint="Current Location"
+            android:inputType="text"
+            android:layout_marginBottom="16dp"
+            android:paddingVertical="12dp" />
+
+        <EditText
+            android:id="@+id/inputDestination"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:hint="Destination"
+            android:inputType="text"
+            android:layout_marginBottom="16dp"
+            android:paddingVertical="12dp" />
+
+        <EditText
+            android:id="@+id/inputPurpose"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:hint="Purpose"
+            android:inputType="text"
+            android:layout_marginBottom="16dp"
+            android:paddingVertical="12dp" />
+
+        <EditText
+            android:id="@+id/inputRequiredDate"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:hint="Required Date (YYYY-MM-DD)"
+            android:inputType="date"
+            android:layout_marginBottom="16dp"
+            android:paddingVertical="12dp" />
+
+        <Button
+            android:id="@+id/btnSubmitRequest"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:text="Submit Request"
+            android:backgroundTint="@color/teal_700"
+            android:textColor="@android:color/white"
+            android:layout_marginTop="8dp" />
+
+        <Button
+            android:id="@+id/btnCancel"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:text="Cancel"
+            android:backgroundTint="@android:color/darker_gray"
+            android:textColor="@android:color/white"
+            android:layout_marginTop="12dp" />
+    </LinearLayout>
+</ScrollView>

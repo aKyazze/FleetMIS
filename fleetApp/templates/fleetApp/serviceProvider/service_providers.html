@@ -5,6 +5,10 @@
 {% block content %}
 
 <h2 class="text-secondary">Service Provider List</h2>
+<!-- Add Service Provider Button -->
+<a href="{% url 'add_service_provider' %}" class="btn btn-primary my-3">
+    <i class="bi bi-person-plus"></i> Register Service Provider
+</a>
 <!-- Service Providers Table -->
 <table class="table table-striped mt-3">
     <thead>
@@ -37,8 +41,4 @@
         {% endfor %}
     </tbody>
 </table>
-<!-- Add Service Provider Button -->
-<a href="{% url 'add_service_provider' %}" class="btn btn-primary my-3">
-    <i class="bi bi-person-plus"></i> Register Service Provider
-</a>
 {% endblock %}

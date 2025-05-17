@@ -59,14 +59,22 @@ urlpatterns = [
     path('trips/assigned/', views.assigned_trips, name='assigned_trips'),
 
     
-  #################################################################### Registration URLs
+  #################################################################### API & Registration URLs
    
     path('signUp/', views.sign_up_view, name='registration'),
-    path('api/login/', CustomAuthToken.as_view(), name='api_login'),
     path('redirect-after-login/', views.login_redirect_view, name='login_redirect'),
     path('accounts/password_change/', auth_views.PasswordChangeView.as_view(), name='password_change'),
     path('accounts/password_change/done/', auth_views.PasswordChangeDoneView.as_view(), name='password_change_done'),
     path('api/user-info/', views.get_user_info, name='get_user_info'),
+    path('api/login/', CustomAuthToken.as_view(), name='api-login'),
+    path('api/fleet/dashboard/', views.fleet_dashboard_api, name='fleet_dashboard_api'),
+    path("api/requests/create/", views.create_vehicle_request, name="create_vehicle_request"),
+    #path("api/requests/user/", views.user_requests_api, name="user_requests_api"),
+    path("api/requests/create/", views.create_vehicle_request, name="create_vehicle_request"),
+    path("api/requests/user/", views.get_user_requests, name="get_user_requests"),
+
+
+
 
   #################################################################### GSMSensor & Alerts URLs
     path('gsm-data/', views.gsm_data_list, name='gsm_data_list'),

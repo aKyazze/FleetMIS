@@ -26,9 +26,9 @@ SECRET_KEY = 'django-insecure-jp(sk_4u07w!f*awus!3yiri+dto+qu(h(eao6p%9_aj!o+@v(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [
-    '172.25.1.57', '192.168.43.249','192.168.43.107','localhost', '127.0.0.1'
-]
+# settings.py
+ALLOWED_HOSTS = ['*']  # or your IP
+CORS_ORIGIN_ALLOW_ALL = True
 
 
 # Application definition
@@ -49,11 +49,13 @@ INSTALLED_APPS = [
       'crispy_bootstrap5',
      'rest_framework',
      'rest_framework.authtoken',  # For token-based authentication
+     'corsheaders',
    
 ]
 
 
 MIDDLEWARE = [
+     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -62,6 +64,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+CORS_ALLOW_ALL_ORIGINS = True
 
 ROOT_URLCONF = 'fleetmisProject.urls'
 
@@ -90,13 +94,24 @@ WSGI_APPLICATION = 'fleetmisProject.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+### Replaced with PostgreSQL
+#DATABASES = {
+ #   'default': {
+  #      'ENGINE': 'django.db.backends.sqlite3',
+   #     'NAME': BASE_DIR / 'db.sqlite3',
+    #}
+#}
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'fleetmis',
+        'USER': 'rasheed',
+        'PASSWORD': 'test@25!',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
