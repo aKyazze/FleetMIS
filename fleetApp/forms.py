@@ -8,7 +8,7 @@ from django.core.exceptions import ValidationError
 from django.utils import timezone
 
 # Local app imports
-from .models import Alert, Driver, GSMsensorData, Request, Requestor, Service, ServiceProvider, UserProfile, Vehicle, Department
+from .models import Alert, Driver, GSMsensorData, Request, Requestor, Service, ServiceFeedback, ServiceProvider, UserProfile, Vehicle, Department
 
 
 class VehicleForm(forms.ModelForm):
@@ -141,10 +141,12 @@ class ServiceProviderForm(forms.ModelForm):
 class ServiceForm(forms.ModelForm):
     class Meta:
         model = Service
-        fields = ['particular', 'quantity', 'cost', 'service_provider', 'vehicle']
+        fields = ['service_date','particular', 'quantity', 'cost', 'service_provider', 'vehicle']
 
-
-
+class ServiceFeedbackForm(forms.ModelForm):
+    class Meta:
+        model = ServiceFeedback
+        fields = ['invoice_number', 'feedback_notes', 'invoice_file']
 
 class GSMsensorDataForm(forms.ModelForm):
     class Meta:

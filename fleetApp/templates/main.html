@@ -85,9 +85,12 @@
                     <a href="{% url 'requestor_list' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
                         <i class="bi bi-people"></i> Requestors
                     </a>
-                    <a href="{% url 'requisitions' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
-                        <i class="bi bi-journal-check"></i> Requisitions
-                    </a>
+                    <a href="{% url 'requisitions' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-clipboard-check"></i> Requisitions</span>
+                        {% if pending_reqs_count > 0 %}
+                            <span class="badge bg-warning text-dark rounded-pill">{{ pending_reqs_count }}</span>
+                        {% endif %}
+                    </a>                    
                     <a href="{% url 'service_provider_list' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
                         <i class="bi bi-building-gear"></i> Service Providers
                     </a>
@@ -97,7 +100,7 @@
                     <a href="{% url 'add_request' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
                         <i class="bi bi-send-check"></i> Request Vehicle
                     </a>
-                    <a href="{% url 'gsm_data_list' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
+                    <!--<a href="{% url 'gsm_data_list' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
                         <i class="bi bi-broadcast-pin"></i> GSM Sensor Data
                     </a>
                     <a href="{% url 'alert_list' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link d-flex justify-content-between align-items-center">
@@ -105,7 +108,7 @@
                         {% if unread_alerts_count > 0 %}
                             <span class="badge bg-danger rounded-pill">{{ unread_alerts_count }}</span>
                         {% endif %}
-                    </a>
+                    </a>-->
                     <a href="{% url 'report_selection' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
                         <i class="bi bi-bar-chart-line"></i> Reports
                     </a>
@@ -126,13 +129,16 @@
                     <a href="{% url 'service_list' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
                         <i class="bi bi-wrench-adjustable"></i> Services
                     </a>
-                    <a href="{% url 'requisitions' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
-                        <i class="bi bi-clipboard-check"></i> Requisitions
+                    <a href="{% url 'requisitions' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-clipboard-check"></i> Requisitions</span>
+                        {% if pending_reqs_count > 0 %}
+                            <span class="badge bg-warning text-dark rounded-pill">{{ pending_reqs_count }}</span>
+                        {% endif %}
                     </a>
                     <a href="{% url 'add_request' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
                         <i class="bi bi-send-check"></i> Request Vehicle
                     </a>
-                    <a href="{% url 'gsm_data_list' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
+                   <!-- <a href="{% url 'gsm_data_list' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
                         <i class="bi bi-broadcast-pin"></i> GSM Sensor Data
                     </a>
                     <a href="{% url 'alert_list' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link d-flex justify-content-between align-items-center">
@@ -140,7 +146,7 @@
                         {% if unread_alerts_count > 0 %}
                             <span class="badge bg-danger rounded-pill">{{ unread_alerts_count }}</span>
                         {% endif %}
-                    </a>
+                    </a> -->
                     <a href="{% url 'report_selection' %}" class="list-group-item list-group-item-action bg-transparent text-white sidebar-link">
                         <i class="bi bi-bar-chart-line"></i> Reports
                     </a>                    

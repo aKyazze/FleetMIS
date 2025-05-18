@@ -27,12 +27,18 @@ class Vehicle(models.Model):
         ("Van", "Van"),
         ("DoubleCab", "Double Cabin"),
   ]
+  SERVICE_STATUS_CHOICES = [
+        ('PENDING', 'Pending'),
+        ('IN_PROGRESS', 'In Progress'),
+        ('COMPLETED', 'Completed'),
+    ]
   
   vehicle_plate = models.CharField(max_length=20, unique=True)
   vehicle_type = models.CharField(max_length=20, choices=VEHICLE_TYPE)
   mileage = models.PositiveIntegerField()
   engine_type = models.CharField(max_length=4, choices=ENGIN)
   status = models.CharField(max_length=9, choices=STATUS, default="Available")
+  service_status = models.CharField(max_length=20,choices=SERVICE_STATUS_CHOICES,default='PENDING')
   
   def __str__(self):
       return f"{self.vehicle_plate} {self.vehicle_type} ({self.mileage})- {self.status}"
@@ -41,7 +47,6 @@ class Vehicle(models.Model):
       self.status = 'Available'
       self.save()
       
-
 #Driver Entity:
 class Driver(models.Model):
   GENDER_OPTION = [
@@ -144,6 +149,14 @@ class Service(models.Model):
     def calculate_total(self):
         return self.quantity * self.cost
     
+class ServiceFeedback(models.Model):
+    service = models.OneToOneField(Service, on_delete=models.CASCADE)
+    invoice_number = models.CharField(max_length=100)
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    feedback_notes = models.TextField(blank=True)
+    invoice_file = models.FileField(upload_to='invoices/')
+    submitted_at = models.DateTimeField(auto_now_add=True)
+
 
 #GSMsensorData Entity: 
 class GSMsensorData(models.Model):

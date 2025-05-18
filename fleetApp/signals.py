@@ -4,7 +4,7 @@ from django.db.models.signals import post_save, user_logged_in
 from django.dispatch import receiver
 
 # Local app imports
-from .models import Alert, GSMsensorData, Request, Requestor, Staff
+from .models import Alert, GSMsensorData, Request, Requestor, Staff, ServiceFeedback
 from fleetApp.utils.email_utils import send_notification
 
 
@@ -12,6 +12,12 @@ from fleetApp.utils.email_utils import send_notification
 def create_requestor_profile(sender, request, user, **kwargs):
     if user.groups.filter(name='FleetUsers').exists():
         Requestor.objects.get_or_create(user=user)
+        
+@receiver(post_save, sender=User)
+def create_staff_profile(sender, instance, created, **kwargs):
+    if created and not instance.is_superuser:
+        Staff.objects.get_or_create(user=instance)
+
 
 #logic to check thresholds when saving sensor data:
 
@@ -70,14 +76,28 @@ def notify_pending_request(sender, instance, created, **kwargs):
                 'requestor_name': getattr(instance.requestor, 'name', 'Unknown'),
                 'destination': instance.destination,
                 'purpose': instance.purpose,
-                'request_date': instance.request_date,
-                'required_date': instance.required_date,
+                'request_date': instance.request_date.strftime('%B %d, %Y'),
+                'required_date': instance.required_date.strftime('%B %d, %Y'),
                 'manager_name': "Fleet Manager"
             },
             recipient_email='fleetmanager@utcl.com'
         )
 
-@receiver(post_save, sender=User)
-def create_staff_profile(sender, instance, created, **kwargs):
-    if created and not instance.is_superuser:
-        Staff.objects.get_or_create(user=instance)
+@receiver(post_save, sender=Service)
+def notify_service_provider(sender, instance, created, **kwargs):
+    if created:
+        send_notification(
+            subject='New Vehicle Service Request',
+            template_name='emails/service_request_notification.html',
+            context={
+                'provider': instance.service_provider.service_provider_name,
+                'vehicle': instance.vehicle.vehicle_plate,
+                'service_date': instance.service_date,
+                'particular': instance.particular,
+            },
+            recipient_email=instance.service_provider.email_address
+        )
+
+        # Update vehicle status
+        instance.vehicle.service_status = 'IN_PROGRESS'
+        instance.vehicle.save()

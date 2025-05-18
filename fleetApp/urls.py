@@ -34,10 +34,16 @@ urlpatterns = [
      path('service-providers/delete/<int:provider_id>/', views.delete_service_provider, name='delete_service_provider'),
      
  #################################################################### Service URLs
-     path('services/', views.service_list, name='service_list'),
-     path('services/add/', views.add_service, name='add_service'),
-     path('services/edit/<int:service_id>/', views.edit_service, name='edit_service'),
-     path('services/delete/<int:service_id>/', views.delete_service, name='delete_service'),
+    path('services/', views.service_list, name='service_list'),
+    path('services/add/', views.add_service, name='add_service'),
+    path('services/edit/<int:service_id>/', views.edit_service, name='edit_service'),
+    path('services/delete/<int:service_id>/', views.delete_service, name='delete_service'),
+    path('service/<int:service_id>/feedback/', views.submit_service_feedback, name='submit_service_feedback'),
+    path('services/<int:service_id>/feedback/add/', views.add_service_feedback, name='add_service_feedback'),
+    path('service-feedback/<int:feedback_id>/', views.view_service_feedback, name='view_service_feedback'),
+
+
+
 
 ##################################################################### Requestor URLs
     path('requestors/', views.requestor_list, name='requestor_list'),

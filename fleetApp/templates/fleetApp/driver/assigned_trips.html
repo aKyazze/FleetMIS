@@ -23,7 +23,7 @@
                   <td>{{ trip.vehicle.vehicle_plate }}</td>
                   <td>{{ trip.destination }}</td>
                   <td>{{ trip.requestor.username }}</td>
-                  <td>{{ request.required_date }}</td>
+                  <td>{{ trip.required_date }}</td>
                   <td>{{ trip.time_of_allocation|date:"Y-m-d H:i" }}</td>
                   <td>
                       <a href="{% url 'return_vehicle' trip.vehicle.id %}" class="btn btn-sm btn-success">

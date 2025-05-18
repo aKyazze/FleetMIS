@@ -83,6 +83,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'fleetApp.context_processors.unread_alerts_count',
+                'fleetApp.context_processors.requisition_notifications',
             ],
         },
     },
@@ -137,7 +138,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Africa/Kampala'
 
 USE_I18N = True
 
@@ -196,7 +197,7 @@ DEFAULT_FROM_EMAIL = 'FleetMIS <kyazze85@gmail.com>'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'itservicedesk@utcl.co.ug'
-EMAIL_HOST_PASSWORD = 'troubledesk2010'
+EMAIL_HOST_PASSWORD = 'testing'
 DEFAULT_FROM_EMAIL = 'FleetMIS <itservicedesk@utcl.co.ug>'
 '''
 

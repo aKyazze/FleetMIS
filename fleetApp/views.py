@@ -30,6 +30,7 @@ from django.http import HttpResponse, JsonResponse
 from django.template.loader import get_template
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.utils.timezone import localtime
 from django.utils.dateformat import DateFormat
 from django.views.decorators.http import require_GET
 
@@ -39,13 +40,13 @@ from fleetApp.utils.email_utils import send_notification
 from .forms import (
     AlertForm, DriverForm, GroupForm, GSMsensorDataForm,
     RequestApprovalForm, RequestForm, RequestorForm,
-    ServiceForm, ServiceProviderForm, StaffEditForm,
+    ServiceForm, ServiceFeedbackForm, ServiceProviderForm, StaffEditForm,
     UserCredentialForm, UserProfileForm, 
     VehicleAllocationForm, VehicleForm, VehicleReturnForm
 )
 from .models import (
     Alert, Driver, GSMsensorData, Request, Requestor,
-    Service, ServiceProvider, UserProfile, Vehicle
+    Service, ServiceFeedback, ServiceProvider, UserProfile, Vehicle
 )
 
 
@@ -513,11 +514,12 @@ def create_vehicle_request(request):
     }
 
     print("Normalized Payload Received:", payload)
-
+    
     serializer = RequestCreateSerializer(data=payload)
     if serializer.is_valid():
-        serializer.save()
+        serializer.save(requestor=user)  # Ensure requestor is attached
         return Response({"message": "Request submitted successfully"}, status=201)
+
     return Response(serializer.errors, status=400)
 
 
@@ -735,7 +737,7 @@ def return_vehicle(request, vehicle_id):
                                 'vehicle': vehicle.vehicle_plate,
                                 'driver': driver.driver_name if driver else "Unknown",
                                 'mileage': mileage_at_return,
-                                'time': timezone.now().strftime("%H:%M %p"),
+                                'time': localtime(timezone.now()).strftime("%Y-%m-%d %I:%M %p"),
                             },
                             recipient_email=manager.email
                         )
@@ -965,6 +967,7 @@ def add_request(request):
                                 'destination': new_request.destination,
                                 'purpose': new_request.purpose,
                                 'request_date': new_request.request_date,
+                                'required_date':new_request.required_date,
                             },
                             recipient_email=manager.email
                         )
@@ -1040,7 +1043,8 @@ def approve_request(request, request_id):
 
         request_obj.vehicle = selected_vehicle
         request_obj.request_status = "O"  # Open (Allocated)
-        request_obj.time_of_allocation = timezone.now()
+        request_obj.time_of_allocation = localtime(timezone.now())
+        request_obj.need_date = localtime(timezone.now())
         request_obj.mileage_at_assignment = selected_vehicle.mileage
         request_obj.save()
 
@@ -1049,7 +1053,7 @@ def approve_request(request, request_id):
         request_obj.driver = selected_driver 
         request_obj.save()
 
-        # Notify Driver
+        # Notify Driver 
         if selected_driver:
             send_notification(
                 subject='Vehicle Assigned for Trip',
@@ -1057,7 +1061,9 @@ def approve_request(request, request_id):
                 context={
                     'driver_name': selected_driver.driver_name,
                     'vehicle': selected_vehicle.vehicle_plate,
+                    'requestor_name': request_obj.requestor.username,
                     'destination': request_obj.destination,
+                    'need_date': request_obj.need_date.date(),
                     'date': request_obj.time_of_allocation.date(),
                     'time': request_obj.time_of_allocation.time()
                 },
@@ -1171,13 +1177,33 @@ def add_service(request):
     if request.method == 'POST':
         form = ServiceForm(request.POST)
         if form.is_valid():
-            form.save()
+            service_instance = form.save()
+
+            # Send notification directly to service provider
+            if service_instance.service_provider.email_address:
+                send_notification(
+                    subject='New Vehicle Service Request',
+                    template_name='emails/service_request_notification.html',
+                    context={
+                        'provider': service_instance.service_provider.service_provider_name,
+                        'vehicle': service_instance.vehicle.vehicle_plate,
+                        'service_date': service_instance.service_date,
+                        'particular': service_instance.particular,
+                    },
+                    recipient_email=service_instance.service_provider.email_address
+                )
+
+            # Update vehicle status
+            service_instance.vehicle.service_status = 'IN_PROGRESS'
+            service_instance.vehicle.save()
+
             messages.success(request, "Service added successfully!")
             return redirect('service_list')
         else:
             messages.error(request, "Failed to add service. Please check the form.")
     else:
         form = ServiceForm()
+    
     context = {
         'form': form
     }
@@ -1222,6 +1248,47 @@ def delete_service(request, service_id):
         'service': service
     }
     return render(request, 'fleetApp/service/delete_service.html', context)
+
+@login_required
+def submit_service_feedback(request, service_id):
+    service = get_object_or_404(Service, id=service_id)
+
+    # Prevent duplicate feedback
+    if hasattr(service, 'servicefeedback'):
+        messages.warning(request, "Feedback for this service already exists.")
+        return redirect('service_list')
+
+    if request.method == 'POST':
+        form = ServiceFeedbackForm(request.POST, request.FILES)
+        if form.is_valid():
+            feedback = form.save(commit=False)
+            feedback.service = service
+            # Auto-calculate the total amount
+            feedback.total_amount = service.calculate_total()
+            # Optional: auto-generate invoice number
+            if not feedback.invoice_number:
+                feedback.invoice_number = f"INV-{service.id:05d}"
+            feedback.save()
+
+            # Update vehicle status
+            service.vehicle.service_status = 'COMPLETED'
+            service.vehicle.save()
+
+            messages.success(request, "Service feedback submitted and status updated.")
+            return redirect('service_list')
+    else:
+        form = ServiceFeedbackForm()
+
+    return render(request, 'fleetApp/service/submit_feedback.html', {'form': form, 'service': service})
+
+def add_service_feedback(request, service_id):
+    return submit_service_feedback(request, service_id)
+
+@login_required
+def view_service_feedback(request, feedback_id):
+    feedback = get_object_or_404(ServiceFeedback, id=feedback_id)
+    return render(request, 'fleetApp/service/view_service_feedback.html', {'feedback': feedback})
+
 
 ####################################################################################################
 ##################################### GSM & ALERT VIEW SECTION ##########################################

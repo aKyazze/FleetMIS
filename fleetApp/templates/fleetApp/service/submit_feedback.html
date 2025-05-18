@@ -1,0 +1,20 @@
+
+{% extends "main.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+<h5>Service Details</h5>
+<ul>
+  <li>Particular: {{ service.particular }}</li>
+  <li>Quantity: {{ service.quantity }}</li>
+  <li>Cost per Unit: {{ service.cost }}</li>
+  <li>Total Cost: {{ service.calculate_total }}</li>
+</ul>
+
+<form method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  {{ form|crispy }}
+  <button type="submit" class="btn btn-success">Submit Feedback</button>
+  <a href="{% url 'service_list' %}" class="btn btn-primary">Cancel</a>
+</form>
+{% endblock %}
+
