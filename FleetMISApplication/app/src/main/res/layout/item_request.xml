@@ -7,15 +7,57 @@
     android:padding="16dp">
 
     <LinearLayout
-        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
-        <TextView android:id="@+id/txtDestination" android:text="Destination:" android:textStyle="bold" />
-        <TextView android:id="@+id/txtStatus" android:text="Status:" />
-        <TextView android:id="@+id/txtVehicle" android:text="Vehicle:" />
-        <TextView android:id="@+id/txtDriver" android:text="Driver:" />
-        <TextView android:id="@+id/txtDriverContact" android:text="Driver Contact:" />
-        <TextView android:id="@+id/txtDates" android:text="Dates:" />
+        <TextView
+            android:id="@+id/txtDestination"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Destination"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:paddingBottom="4dp" />
+
+        <TextView
+            android:id="@+id/txtStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Status"
+            android:textSize="14sp"
+            android:paddingBottom="4dp" />
+
+        <TextView
+            android:id="@+id/txtVehicle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Vehicle"
+            android:textSize="14sp"
+            android:paddingBottom="4dp" />
+
+        <TextView
+            android:id="@+id/txtDriver"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Driver"
+            android:textSize="14sp"
+            android:paddingBottom="4dp" />
+
+        <TextView
+            android:id="@+id/txtDriverContact"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Driver Contact"
+            android:textSize="14sp"
+            android:paddingBottom="4dp" />
+
+        <TextView
+            android:id="@+id/txtDates"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Dates"
+            android:textSize="14sp"
+            android:paddingBottom="4dp" />
     </LinearLayout>
 </androidx.cardview.widget.CardView>

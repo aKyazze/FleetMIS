@@ -7,10 +7,10 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.fleetmisapplication.model.DashboardResponse
-import com.example.fleetmisapplication.utils.SessionManager
 import com.example.fleetmisapplication.ui.dashboard.FleetUsersDashboardActivity
 import com.example.fleetmisapplication.ui.driver.FleetDriversDashboardActivity
 import com.example.fleetmisapplication.ui.manager.FleetManagerDashboardActivity
+import com.example.fleetmisapplication.utils.SessionManager
 import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
@@ -23,6 +23,12 @@ class MainActivity : AppCompatActivity() {
     private lateinit var passwordInput: EditText
     private lateinit var loginButton: Button
     private lateinit var sessionManager: SessionManager
+
+    companion object {
+        private const val ROLE_USER = "FleetUser"
+        private const val ROLE_DRIVER = "FleetDriver"
+        private const val ROLE_MANAGER = "FleetManager"
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,6 +58,7 @@ class MainActivity : AppCompatActivity() {
                     if (response.isSuccessful) {
                         val loginResponse = response.body()
                         if (loginResponse != null) {
+                            // Save token and user info
                             sessionManager.saveAuthToken(
                                 loginResponse.token,
                                 loginResponse.username,
@@ -62,6 +69,8 @@ class MainActivity : AppCompatActivity() {
 
                             // Load dashboard and redirect based on role
                             loadAndRedirectDashboard("Token ${loginResponse.token}")
+                        } else {
+                            Toast.makeText(this@MainActivity, "Unexpected response", Toast.LENGTH_SHORT).show()
                         }
                     } else {
                         Toast.makeText(this@MainActivity, "Invalid credentials", Toast.LENGTH_SHORT).show()
@@ -82,26 +91,28 @@ class MainActivity : AppCompatActivity() {
                 val response = ApiClient.instance.getUserDashboard(token)
                 if (response.isSuccessful) {
                     val dashboardData = response.body()
+
                     when (dashboardData?.role) {
-                        "FleetUser" -> {
+                        ROLE_USER -> {
                             startActivity(Intent(this@MainActivity, FleetUsersDashboardActivity::class.java))
                         }
-                        "FleetDriver" -> {
+                        ROLE_DRIVER -> {
                             startActivity(Intent(this@MainActivity, FleetDriversDashboardActivity::class.java))
                         }
-                        "FleetManager" -> {
+                        ROLE_MANAGER -> {
                             startActivity(Intent(this@MainActivity, FleetManagerDashboardActivity::class.java))
                         }
                         else -> {
-                            Toast.makeText(this@MainActivity, "Access denied. No role assigned.", Toast.LENGTH_LONG).show()
+                            Toast.makeText(this@MainActivity, "Access denied. Unrecognized role.", Toast.LENGTH_LONG).show()
                         }
                     }
-                    finish()
+
+                    finish() // Prevent going back to login screen
                 } else {
-                    Toast.makeText(this@MainActivity, "Failed to load dashboard data", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@MainActivity, "Failed to retrieve dashboard data", Toast.LENGTH_SHORT).show()
                 }
             } catch (e: Exception) {
-                Toast.makeText(this@MainActivity, "Error: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(this@MainActivity, "Error: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
             }
         }
     }

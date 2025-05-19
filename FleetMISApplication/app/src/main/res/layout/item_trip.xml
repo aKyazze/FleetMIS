@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="12dp"
+    android:background="@color/gray_light"
+    android:layout_marginBottom="12dp">
+
+    <TextView
+        android:id="@+id/vehiclePlate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Vehicle: ABC123"
+        android:textStyle="bold"
+        android:textColor="@color/primaryText"
+        android:layout_marginBottom="4dp"/>
+
+    <TextView
+        android:id="@+id/destination"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Destination: Kampala"
+        android:textColor="@color/secondaryText"
+        android:layout_marginBottom="2dp"/>
+
+    <TextView
+        android:id="@+id/requestor"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Requested by: John"
+        android:layout_marginBottom="2dp"/>
+
+    <TextView
+        android:id="@+id/needDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Need: 2025-06-01"
+        android:layout_marginBottom="2dp"/>
+
+    <TextView
+        android:id="@+id/allocationTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Assigned: 2025-06-01 09:00"
+        android:layout_marginBottom="4dp"/>
+
+    <TextView
+        android:id="@+id/mileageAtAssignment"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Mileage at Assignment: 00000"
+        android:textColor="@color/primaryText"
+        android:layout_marginBottom="4dp"/>
+
+</LinearLayout>

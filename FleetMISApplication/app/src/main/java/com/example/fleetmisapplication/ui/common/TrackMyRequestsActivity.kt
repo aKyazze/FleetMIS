@@ -1,8 +1,8 @@
 package com.example.fleetmisapplication.ui.common
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.fleetmisapplication.ApiClient
 import com.example.fleetmisapplication.R
 import com.example.fleetmisapplication.model.UserRequest
+import com.example.fleetmisapplication.ui.dashboard.FleetUsersDashboardActivity
 import com.example.fleetmisapplication.utils.SessionManager
 import retrofit2.Call
 import retrofit2.Callback
@@ -20,6 +21,7 @@ class TrackMyRequestsActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var sessionManager: SessionManager
     private lateinit var adapter: RequestsAdapter
+    private lateinit var backButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,19 +29,20 @@ class TrackMyRequestsActivity : AppCompatActivity() {
 
         sessionManager = SessionManager(this)
         recyclerView = findViewById(R.id.recyclerRequests)
-        val backButton = findViewById<Button>(R.id.btnBack)
+        backButton = findViewById(R.id.btnBack)
 
         adapter = RequestsAdapter()
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
 
         backButton.setOnClickListener {
-            finish()  // Just go back to the previous screen
+            val intent = Intent(this, FleetUsersDashboardActivity::class.java)
+            startActivity(intent)
+            finish()
         }
 
         fetchUserRequests()
     }
-
 
     private fun fetchUserRequests() {
         val token = sessionManager.fetchAuthToken() ?: return

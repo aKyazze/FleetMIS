@@ -1,0 +1,88 @@
+{% extends "main.html" %}
+{% block title %}Fleet Manager Dashboard | Fleet Management{% endblock %}
+
+{% block content %}
+<h1 class="text-dark">Fleet Manager Dashboard</h1>
+<p class="text-muted">Overview of vehicles, drivers, requests, and operations.</p>
+
+<div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+    <!-- Manager/Admin Dashboard -->
+    <div class="dashboard-cards row row-cols-1 row-cols-sm-2 row-cols-md-2 row-cols-lg-4 g-4">
+      <div class="col">
+          <div class="card bg-primary text-white shadow-sm h-100 p-3">
+              <div class="card-body">
+                  <h5 class="card-title">Total Vehicles</h5>
+                  <h2 class="display-6 fw-bold">{{ total_vehicles }}</h2>
+              </div>
+          </div>
+      </div>
+      <div class="col">
+          <div class="card bg-success text-white shadow-sm h-100 p-3">
+              <div class="card-body">
+                  <h5 class="card-title">Total Drivers</h5>
+                  <h2 class="display-6 fw-bold">{{ total_drivers }}</h2>
+              </div>
+          </div>
+      </div>
+      <div class="col">
+          <div class="card bg-warning text-white shadow-sm h-100 p-3">
+              <div class="card-body">
+                  <h5 class="card-title">Total Requestors</h5>
+                  <h2 class="display-6 fw-bold">{{ total_requestors }}</h2>
+              </div>
+          </div>
+      </div>
+      <div class="col">
+          <div class="card bg-secondary text-white shadow-sm h-100 p-3">
+              <div class="card-body">
+                  <h5 class="card-title">Service Providers</h5>
+                  <h2 class="display-6 fw-bold">{{ total_service_providers }}</h2>
+              </div>
+          </div>
+      </div>
+      <div class="col">
+          <div class="card bg-dark text-white shadow-sm h-100 p-3">
+              <div class="card-body">
+                  <h5 class="card-title">Total Services</h5>
+                  <h2 class="display-6 fw-bold">{{ total_services }}</h2>
+              </div>
+          </div>
+      </div>
+      <div class="col">
+          <div class="card bg-info text-white shadow-sm h-100 p-3">
+              <div class="card-body">
+                  <h5 class="card-title">Pending Requests</h5>
+                  <h2 class="display-6 fw-bold">{{ total_pending_requests }}</h2>
+              </div>
+          </div>
+      </div>
+      <div class="col">
+          <div class="card bg-success text-white shadow-sm h-100 p-3">
+              <div class="card-body">
+                  <h5 class="card-title">Completed Requests</h5>
+                  <h2 class="display-6 fw-bold">{{ total_completed_requests }}</h2>
+              </div>
+          </div>
+      </div>
+      <div class="col">
+          <div class="card bg-danger text-white shadow-sm h-100 p-3">
+              <div class="card-body">
+                  <h5 class="card-title">High Priority Alerts</h5>
+                  <h2 class="display-6 fw-bold">{{ unread_alerts_count }}</h2>
+                  <a href="{% url 'alert_list' %}" class="btn btn-outline-light mt-3 w-100">View Alerts</a>
+              </div>
+          </div>
+      </div>
+      <div class="col">
+          <div class="card bg-warning text-white shadow-sm h-100 p-3">
+              <div class="card-body">
+                  <h5>Sensor Analytics</h5>
+                  <p class="small">Speed, Fuel, Engine Temp Trends</p>
+                  <a href="{% url 'report_selection' %}" class="btn btn-outline-light mt-3 w-100">View Reports</a>
+              </div>
+          </div>
+      </div>
+  </div>
+</div>
+
+{% endblock %}

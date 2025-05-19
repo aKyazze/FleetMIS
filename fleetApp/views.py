@@ -10,7 +10,8 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from .serializers import RequestCreateSerializer, RequestReadSerializer
+from rest_framework import serializers
+from .serializers import RequestCreateSerializer, RequestReadSerializer, VehicleSerializer, DriverSerializer, TripSerializer
 from xhtml2pdf import pisa
 from io import BytesIO
 
@@ -53,53 +54,81 @@ from .models import (
 # Create your views here.
 ############################################################################################
 ######################### LOGIN VIEWS #####################################################
+
+# ----------------------------------------
+# GROUP CHECK HELPERS (with superuser access)
+# ----------------------------------------
+
+def is_admin(user):
+    return user.is_superuser or user.groups.filter(name='Admins').exists()
+
+def is_fleet_manager(user):
+    return user.is_superuser or user.groups.filter(name='FleetManagers').exists()
+
+def is_fleet_driver(user):
+    return user.is_superuser or user.groups.filter(name='FleetDrivers').exists()
+
+
+def is_fleet_user(user):
+    return user.is_superuser or user.groups.filter(name='FleetUsers').exists()
+
+# Central dashboard redirection view
+@login_required
+def dashboard_redirect_view(request):
+    user = request.user
+    if is_admin(user):
+        return redirect('admin_dashboard')
+    elif is_fleet_manager(user):
+        return redirect('fleet_manager_dashboard')
+    elif is_fleet_driver(user):
+        return redirect('fleet_driver_dashboard')
+    elif is_fleet_user(user):
+        return redirect('fleet_user_dashboard')
+    else:
+        return redirect('default_dashboard')  # fallback
+# ----------------------------------------
+# REDIRECTION VIEW AFTER LOGIN
+# ----------------------------------------
+
 @login_required
 def login_redirect_view(request):
     user = request.user
-    if user.groups.filter(name='Admins').exists():
+    if is_admin(user):
         return redirect('admin_dashboard')
-    elif user.groups.filter(name='FleetManagers').exists():
+    elif is_fleet_manager(user):
         return redirect('fleet_manager_dashboard')
-    elif user.groups.filter(name='FleetUsers').exists():
-        return redirect('fleet_user_dashboard')
+    elif is_fleet_driver(user):
+        return redirect('driver_profile')
+    elif is_fleet_user(user):
+        return redirect('home')
     else:
-        return redirect('default_dashboard')  # Optional fallback
-    
+        return redirect('default_dashboard')  # fallback for ungrouped users
 
-def is_admin(user):
-    return user.groups.filter(name='Admins').exists()
+# ----------------------------------------
+# DASHBOARD VIEWS
+# ----------------------------------------
 
 @user_passes_test(is_admin)
 def admin_dashboard(request):
-    ...
+    return render(request, 'fleetApp/dashboards/admin_dashboard.html')  
 
-def is_fleet_manager(user):
-    return user.groups.filter(name='FleetManagers').exists()
 
 @user_passes_test(is_fleet_manager)
-def fleet_dashboard(request):
-    ...
+def fleet_manager_dashboard(request):
+    return render(request, 'fleetApp/dashboards/fleet_manager_dashboard.html')
 
-@login_required
-def user_requests(request):
-    # Get filter from query string (?status=pending or ?status=closed)
-    status_filter = request.GET.get('status')
+@user_passes_test(is_fleet_driver)
+def fleet_driver_dashboard(request):
+    return render(request, 'fleetApp/dashboards/driver_profile.html')
 
-    # Apply filter logic
-    if status_filter == 'pending':
-        requests = Request.objects.filter(requestor=request.user, request_status='P')
-    elif status_filter == 'closed':
-        requests = Request.objects.filter(requestor=request.user, request_status='C')
-    else:
-        requests = Request.objects.filter(requestor=request.user)
+@user_passes_test(is_fleet_user)
+def fleet_user_dashboard(request):
+    return render(request, 'fleetApp/dashboards/home.html')
 
-    # Pass selected status for template use (e.g., UI highlighting)
-    context = {
-        'requests': requests,
-        'selected_status': status_filter
-    }
+@login_required  # fallback view for undefined roles
+def default_dashboard(request):
+    return render(request, 'fleetApp/dashboards/default_dashboard.html')
 
-    return render(request, 'fleetApp/requisition/user_requests.html', context)
 
 ################################################################################################################
 ######################################## SECTION FOR Registration Views ########################################
@@ -402,9 +431,12 @@ def delete_group(request, group_id):
     return render(request, 'fleetApp/base/delete_group.html', {'group': group})
 
 
-#This is Backend API Endpoints SECTION 
+# -----------------------------------------------#
+# This is Backend API Endpoints SECTION 
 # 
 # endpoint view to return user Details by ID
+# -----------------------------------------------#
+
 @require_GET
 @login_required
 def get_user_info(request):
@@ -418,6 +450,8 @@ def get_user_info(request):
         })
     except User.DoesNotExist:
         return JsonResponse({'error': 'User not found'}, status=404)
+
+# endpoint API views to handle logic for Logged in user Details by Group
 class CustomAuthToken(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)
@@ -441,6 +475,7 @@ class CustomAuthToken(ObtainAuthToken):
     )
         
  
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def fleet_dashboard_api(request):
@@ -452,54 +487,73 @@ def fleet_dashboard_api(request):
         "role": None,
     }
 
-    if user.groups.filter(name="FleetUsers").exists() or user.groups.filter(name="FleetDrivers").exists():
-        # Basic user / driver view
-        pending = Request.objects.filter(requestor=user, request_status="P").count()
-        approved = Request.objects.filter(requestor=user, request_status="O").count()
-        completed = Request.objects.filter(requestor=user, request_status="C").count()
+    try:
+        if user.groups.filter(name__in=["FleetUsers"]).exists():
+            # Fleet User view
+            pending = Request.objects.filter(requestor=user, request_status="P").count()
+            approved = Request.objects.filter(requestor=user, request_status="O").count()
+            completed = Request.objects.filter(requestor=user, request_status="C").count()
 
+            response_data.update({
+                "role": "FleetUser",
+                "pendingRequests": pending,
+                "approvedRequests": approved,
+                "completedRequests": completed,
+            })
+
+        elif user.groups.filter(name="FleetDrivers").exists():
+            # Driver view
+            try:
+                driver = Driver.objects.get(user=user)
+                assigned = Request.objects.filter(driver=driver, request_status='O').count()
+                completed = Request.objects.filter(driver=driver, request_status='C').count()
+                vehicle_plate = driver.vehicle.vehicle_plate if driver.vehicle else "N/A"
+
+                response_data.update({
+                    "role": "FleetDriver",
+                    "assignedTrips": assigned,
+                    "completedTrips": completed,
+                    "vehiclePlate": vehicle_plate,
+                })
+            except Driver.DoesNotExist:
+                response_data.update({
+                    "role": "FleetDriver",
+                    "message": "Driver profile not found.",
+                })
+
+        elif user.groups.filter(name="FleetManagers").exists() or user.is_superuser:
+            # Manager or Admin view
+            response_data.update({
+                "role": "FleetManager",
+                "totalVehicles": Vehicle.objects.count(),
+                "totalDrivers": Driver.objects.count(),
+                "totalRequestors": Requestor.objects.count(),
+                "totalServices": Service.objects.count(),
+                "totalServiceProviders": ServiceProvider.objects.count(),
+                "totalPendingRequests": Request.objects.filter(request_status="P").count(),
+                "totalCompletedRequests": Request.objects.filter(request_status="C").count(),
+                "unreadAlertsCount": Alert.objects.filter(read=False).count(),
+            })
+
+        else:
+            response_data.update({
+                "role": "None",
+                "message": "You do not have dashboard access."
+            })
+
+    except Exception as e:
+        # Log error as needed
         response_data.update({
-            "role": "FleetUser",
-            "pendingRequests": pending,
-            "approvedRequests": approved,
-            "completedRequests": completed,
+            "error": "An unexpected error occurred.",
+            "details": str(e)
         })
-
-    elif user.groups.filter(name="FleetManagers").exists() or user.is_superuser:
-        # Manager or admin view
-        totalVehicles = Vehicle.objects.count()
-        totalDrivers = Driver.objects.count()
-        totalRequestors = Requestor.objects.count()
-        totalServices = Service.objects.count()
-        totalServiceProviders = ServiceProvider.objects.count()
-        totalPendingRequests = Request.objects.filter(request_status="P").count()
-        totalCompletedRequests = Request.objects.filter(request_status="C").count()
-        unreadAlerts = Alert.objects.filter(read=False).count()
-
-        response_data.update({
-            "role": "FleetManager",
-            "totalVehicles": totalVehicles,
-            "totalDrivers": totalDrivers,
-            "totalRequestors": totalRequestors,
-            "totalServices": totalServices,
-            "totalServiceProviders": totalServiceProviders,
-            "totalPendingRequests": totalPendingRequests,
-            "totalCompletedRequests": totalCompletedRequests,
-            "unreadAlertsCount": unreadAlerts,
-        })
-
-    else:
-        response_data["role"] = "None"
-        response_data["message"] = "You do not have dashboard access"
 
     return JsonResponse(response_data)
 
+# endpoint API view to handle logic for vehicle request Details by the USER/Requestor
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def create_vehicle_request(request):
-    """
-    Create a new trip request. Converts camelCase input from frontend to snake_case.
-    """
     user = request.user
     data = request.data
 
@@ -532,6 +586,109 @@ def get_user_requests(request):
     requests = Request.objects.filter(requestor=request.user).order_by('-request_date')
     serializer = RequestReadSerializer(requests, many=True)
     return Response(serializer.data)
+
+
+# endpoint API views to handle logic for Driver Details 
+#
+# API: Get Logged-in Driver Profile
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def driver_profile_api(request):
+    try:
+        driver = Driver.objects.select_related('user', 'vehicle').get(user=request.user)
+        return Response({
+            "name": driver.driver_name,
+            "email": driver.user.email,
+            "contact": driver.contact,
+            "vehiclePlate": driver.vehicle.vehicle_plate if driver.vehicle else "Unassigned",
+            "assignedVehicleId": driver.vehicle.id if driver.vehicle else None,
+        })
+    except Driver.DoesNotExist:
+        return Response({"error": "Driver profile not found."}, status=404)
+
+# API: Get Trips Assigned to Driver
+
+# Serializer to return requestor as an object
+class RequestorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username']
+
+# Main Trip serializer used by the API
+class TripSerializer(serializers.ModelSerializer):
+    vehicle = VehicleSerializer(read_only=True)
+    requestor = RequestorSerializer(read_only=True)
+
+    class Meta:
+        model = Request
+        fields = [
+            'id', 'destination', 'purpose', 'request_status',
+            'request_date', 'required_date', 'vehicle', 'requestor',
+            'mileage_at_assignment', 'mileage_at_return', 'time_of_allocation'
+        ]
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def driver_assigned_trips_api(request):
+    try:
+        driver = Driver.objects.get(user=request.user)
+        requests = Request.objects.filter(driver=driver)\
+            .select_related('vehicle', 'requestor')\
+            .order_by('-request_date')
+
+        serializer = TripSerializer(requests, many=True)
+        return Response(serializer.data)
+    except Driver.DoesNotExist:
+        return Response({"error": "Driver not found"}, status=404)
+
+# API: Update Mileage and Status
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def update_trip_status_api(request, request_id):
+    try:
+        trip = Request.objects.select_related('vehicle').get(id=request_id, driver__user=request.user)
+    except Request.DoesNotExist:
+        return Response({"error": "Trip not found or not assigned to you"}, status=404)
+
+    status = request.data.get("request_status")
+    mileage_at_assignment = request.data.get("mileage_at_assignment")
+    mileage_at_return = request.data.get("mileage_at_return")
+
+    if status not in ['O', 'C']:
+        return Response({"error": "Invalid status"}, status=400)
+
+    if status == 'O':
+        # Auto-fill from vehicle mileage if not provided
+        if not mileage_at_assignment:
+            mileage_at_assignment = trip.vehicle.mileage
+        trip.mileage_at_assignment = mileage_at_assignment
+        trip.time_of_allocation = timezone.now()
+        trip.request_status = 'O'
+        trip.save()
+        trip.vehicle.status = "Allocated"
+        trip.vehicle.save()
+        return Response({"message": "Trip started", "mileage_at_assignment": mileage_at_assignment})
+
+    elif status == 'C':
+        if not mileage_at_return:
+            return Response({"error": "Mileage at return is required to complete trip"}, status=400)
+
+        trip.mileage_at_return = mileage_at_return
+        trip.request_status = "C"
+        trip.vehicle.status = "Available"
+        trip.vehicle.mileage = mileage_at_return
+        trip.vehicle.save()
+        trip.save()
+
+        # Unassign driver
+        driver = Driver.objects.filter(vehicle=trip.vehicle).first()
+        if driver:
+            driver.vehicle = None
+            driver.save()
+
+        return Response({"message": "Trip completed and vehicle returned."})
+
+
 
 ####################################################################################################
 ##################################### MAIN & HOME SECTION ##########################################
@@ -1107,6 +1264,27 @@ def request_summary(request):
         "closed_requests": closed_requests,
         "trip_summary": trip_summary
     })
+
+@login_required
+def user_requests(request):
+    # Get filter from query string (?status=pending or ?status=closed)
+    status_filter = request.GET.get('status')
+
+    # Apply filter logic
+    if status_filter == 'pending':
+        requests = Request.objects.filter(requestor=request.user, request_status='P')
+    elif status_filter == 'closed':
+        requests = Request.objects.filter(requestor=request.user, request_status='C')
+    else:
+        requests = Request.objects.filter(requestor=request.user)
+
+    # Pass selected status for template use (e.g., UI highlighting)
+    context = {
+        'requests': requests,
+        'selected_status': status_filter
+    }
+
+    return render(request, 'fleetApp/requisition/user_requests.html', context)
 
 #######################################################################################################################################
 ######################################## This Section for Service Provider Views #######################################################

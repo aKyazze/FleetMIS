@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/scrollView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="16dp"
     android:background="@color/white"
-    xmlns:tools="http://schemas.android.com/tools"
     tools:context=".ui.driver.FleetDriversDashboardActivity">
 
     <LinearLayout
@@ -25,56 +25,59 @@
 
         <TextView
             android:id="@+id/txtTrips"
-            android:text="Trips Completed: 0"
+            android:text="Trips Pending: 0"
             android:textSize="16sp"
-            android:textColor="@color/secondaryText"
-            android:layout_marginBottom="16dp"
+
+            android:textColor="@android:color/holo_red_dark"
+            android:layout_marginBottom="24dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
+
+        <!-- Dashboard Actions -->
         <Button
             android:id="@+id/btnAssignedTrips"
             android:text="Assigned Trips"
-            android:background="@drawable/edittext_background"
+            android:backgroundTint="@color/dark_blue"
             android:textColor="@color/white"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp" />
+            android:layout_marginBottom="12dp" />
 
         <Button
             android:id="@+id/btnTripHistory"
             android:text="Trip History"
-            android:background="@drawable/edittext_background"
+            android:backgroundTint="@color/teal_700"
             android:textColor="@color/white"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp" />
+            android:layout_marginBottom="12dp" />
 
         <Button
             android:id="@+id/btnDriverProfile"
             android:text="My Profile"
-            android:background="@drawable/edittext_background"
+            android:backgroundTint="@color/orange"
             android:textColor="@color/white"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp" />
+            android:layout_marginBottom="12dp" />
 
         <Button
             android:id="@+id/btnRequestVehicle"
             android:text="Request Vehicle"
-            android:background="@drawable/edittext_background"
+            android:backgroundTint="@color/primaryText"
             android:textColor="@color/white"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp" />
+            android:layout_marginBottom="12dp" />
 
         <Button
             android:id="@+id/btnLogout"
             android:text="Logout"
-            android:background="@drawable/edittext_background"
+            android:backgroundTint="@color/dark_blue"
             android:textColor="@color/white"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp" />
+            android:layout_marginTop="20dp" />
     </LinearLayout>
 </ScrollView>

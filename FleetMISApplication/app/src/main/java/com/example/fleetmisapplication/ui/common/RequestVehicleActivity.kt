@@ -1,20 +1,21 @@
 package com.example.fleetmisapplication.ui.common
 
+import android.app.DatePickerDialog
+import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
-import android.widget.EditText
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.example.fleetmisapplication.R
 import com.example.fleetmisapplication.ApiClient
 import com.example.fleetmisapplication.model.VehicleRequestBody
 import com.example.fleetmisapplication.model.ApiResponse
 import com.example.fleetmisapplication.utils.SessionManager
-import android.content.Intent
 import com.example.fleetmisapplication.ui.dashboard.FleetUsersDashboardActivity
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.text.SimpleDateFormat
+import java.util.*
 
 class RequestVehicleActivity : AppCompatActivity() {
 
@@ -24,7 +25,7 @@ class RequestVehicleActivity : AppCompatActivity() {
     private lateinit var purposeInput: EditText
     private lateinit var requiredDateInput: EditText
     private lateinit var submitButton: Button
-    private lateinit var cancelButton: Button // ✅ Add this
+    private lateinit var cancelButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,24 +33,45 @@ class RequestVehicleActivity : AppCompatActivity() {
 
         sessionManager = SessionManager(this)
 
-        // Bind views
         locationInput = findViewById(R.id.inputCurrentLocation)
         destinationInput = findViewById(R.id.inputDestination)
         purposeInput = findViewById(R.id.inputPurpose)
         requiredDateInput = findViewById(R.id.inputRequiredDate)
         submitButton = findViewById(R.id.btnSubmitRequest)
-        cancelButton = findViewById(R.id.btnCancel) // ✅ Bind cancel button
+        cancelButton = findViewById(R.id.btnCancel)
+
+        // ✅ Show DatePickerDialog on clicking requiredDateInput
+        requiredDateInput.setOnClickListener {
+            showDatePickerDialog()
+        }
 
         submitButton.setOnClickListener {
             submitVehicleRequest()
         }
 
-        // ✅ Cancel button logic
         cancelButton.setOnClickListener {
-            val intent = Intent(this, FleetUsersDashboardActivity::class.java)
-            startActivity(intent)
+            startActivity(Intent(this, FleetUsersDashboardActivity::class.java))
             finish()
         }
+    }
+
+    private fun showDatePickerDialog() {
+        val calendar = Calendar.getInstance()
+        val datePicker = DatePickerDialog(
+            this,
+            { _, year, month, day ->
+                val pickedDate = Calendar.getInstance()
+                pickedDate.set(year, month, day)
+                val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+                requiredDateInput.setText(sdf.format(pickedDate.time))
+            },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        )
+        // ✅ Prevent past dates
+        datePicker.datePicker.minDate = calendar.timeInMillis
+        datePicker.show()
     }
 
     private fun submitVehicleRequest() {
@@ -70,10 +92,7 @@ class RequestVehicleActivity : AppCompatActivity() {
         }
 
         val requestBody = VehicleRequestBody(
-            currentLocation = currentLocation,
-            destination = destination,
-            purpose = purpose,
-            requiredDate = requiredDate
+            currentLocation, destination, purpose, requiredDate
         )
 
         Toast.makeText(this, "Submitting request...", Toast.LENGTH_SHORT).show()

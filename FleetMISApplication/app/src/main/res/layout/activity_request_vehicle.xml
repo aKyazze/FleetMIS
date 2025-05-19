@@ -37,14 +37,26 @@
             android:layout_marginBottom="16dp"
             android:paddingVertical="12dp" />
 
-        <EditText
+        <!--<EditText
             android:id="@+id/inputRequiredDate"
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:hint="Required Date (YYYY-MM-DD)"
             android:inputType="date"
             android:layout_marginBottom="16dp"
+            android:paddingVertical="12dp" />-->
+
+        <EditText
+            android:id="@+id/inputRequiredDate"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:hint="Required Date"
+            android:focusable="false"
+            android:clickable="true"
+            android:inputType="none"
+            android:layout_marginBottom="16dp"
             android:paddingVertical="12dp" />
+
 
         <Button
             android:id="@+id/btnSubmitRequest"

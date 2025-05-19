@@ -1,0 +1,26 @@
+<div class="table-responsive">
+  <table class="table table-bordered">
+      <thead>
+          <tr>
+              <th>#</th>
+              <th>Vehicle</th>
+              <th>Destination</th>
+              <th>Request Date</th>
+              <th>Status</th>
+          </tr>
+      </thead>
+      <tbody>
+          {% for request in requests %}
+          <tr>
+              <td>{{ forloop.counter }}</td>
+              <td>{{ request.vehicle.vehicle_plate|default:"N/A" }}</td>
+              <td>{{ request.destination }}</td>
+              <td>{{ request.request_date|date:"Y-m-d" }}</td>
+              <td><span class="badge bg-info">{{ status }}</span></td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="5" class="text-center">No requests found</td></tr>
+          {% endfor %}
+      </tbody>
+  </table>
+</div>

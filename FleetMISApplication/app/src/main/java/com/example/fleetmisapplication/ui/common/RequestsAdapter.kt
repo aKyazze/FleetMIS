@@ -1,3 +1,4 @@
+// File: com/example/fleetmisapplication/ui/common/RequestsAdapter.kt
 package com.example.fleetmisapplication.ui.common
 
 import android.view.LayoutInflater
@@ -38,12 +39,12 @@ class RequestsAdapter : RecyclerView.Adapter<RequestsAdapter.RequestViewHolder>(
         private val txtDates: TextView = itemView.findViewById(R.id.txtDates)
 
         fun bind(request: UserRequest) {
-            txtDestination.text = "To: ${request.destination}"
+            txtDestination.text = "To: ${request.destination ?: "N/A"}"
             txtStatus.text = "Status: ${statusText(request.requestStatus)}"
             txtVehicle.text = "Vehicle: ${request.vehicle?.vehiclePlate ?: "Not Assigned"}"
             txtDriver.text = "Driver: ${request.driver?.driverName ?: "N/A"}"
             txtDriverContact.text = "Driver Contact: ${request.driver?.contact ?: "N/A"}"
-            txtDates.text = "Dates: ${request.requestDate ?: "N/A"} → ${request.requiredDate ?: "N/A"}"
+            txtDates.text = "Dates: ${request.requestDate ?: "--"} → ${request.requiredDate ?: "--"}"
         }
 
         private fun statusText(code: String): String {

@@ -1,0 +1,35 @@
+{% extends "main.html" %}
+{% block title %}Driver Dashboard | Fleet Management{% endblock %}
+
+{% block content %}
+<h1 class="text-dark">Driver Dashboard</h1>
+
+<p class="text-muted">Your assigned trips and logs are shown below.</p>
+
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Vehicle</th>
+                <th>Destination</th>
+                <th>Date Assigned</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for trip in driver_trips %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ trip.vehicle.vehicle_plate }}</td>
+                <td>{{ trip.destination }}</td>
+                <td>{{ trip.time_of_allocation|date:"Y-m-d H:i" }}</td>
+                <td>{{ trip.status }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="text-center">No assigned trips</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

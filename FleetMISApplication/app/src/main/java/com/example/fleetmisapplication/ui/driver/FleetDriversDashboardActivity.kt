@@ -54,16 +54,17 @@ class FleetDriversDashboardActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             try {
-                val response = ApiClient.instance.getUserDashboard("Token $token")
+                val response = ApiClient.instance.getAssignedTrips("Token $token")
                 if (response.isSuccessful) {
-                    val dashboardData = response.body()
-                    binding.txtWelcome.text = "Welcome, ${dashboardData?.name}"
-                    binding.txtTrips.text = "Trips Completed: ${dashboardData?.completedRequests ?: 0}"
+                    val trips = response.body() ?: emptyList()
+                    val pendingTrips = trips.filter { it.request_status == "O" } // ✅ Pending status
+                    binding.txtWelcome.text = "Welcome, ${sessionManager.fetchUsername() ?: "Driver"}"
+                    binding.txtTrips.text = "Trips Pending: ${pendingTrips.size}" // ✅ Updated label
                 } else {
                     Toast.makeText(this@FleetDriversDashboardActivity, "Failed to load dashboard", Toast.LENGTH_SHORT).show()
                 }
             } catch (e: Exception) {
-                Toast.makeText(this@FleetDriversDashboardActivity, "Error: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(this@FleetDriversDashboardActivity, "Error: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
             }
         }
     }

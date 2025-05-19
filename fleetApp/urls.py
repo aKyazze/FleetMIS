@@ -11,8 +11,12 @@ urlpatterns = [
          # Home urls
     path('', views.home_view, name='home'),
 
-    
-############################################################################# Vehicle urls 
+    path('dashboard/', views.dashboard_redirect_view, name='dashboard'),  # Central dashboard route
+    path('dashboard/admin/', views.admin_dashboard, name='admin_dashboard'),
+    path('dashboard/fleet_manager/', views.fleet_manager_dashboard, name='fleet_manager_dashboard'),
+    path('dashboard/fleet_driver/', views.fleet_driver_dashboard, name='fleet_driver_dashboard'),
+    path('dashboard/fleet_user/', views.fleet_user_dashboard, name='fleet_user_dashboard'),
+    path('dashboard/default/', views.default_dashboard, name='default_dashboard'),############################################################################# Vehicle urls 
     path('vehicles/', views.vehicle_view, name='vehicle'),
     path('add-vehicle/', views.add_vehicle, name='add_vehicle'), 
     path('edit-vehicle/<int:vehicle_id>/', views.vehicle_update, name='edit_vehicle'),
@@ -41,6 +45,8 @@ urlpatterns = [
     path('service/<int:service_id>/feedback/', views.submit_service_feedback, name='submit_service_feedback'),
     path('services/<int:service_id>/feedback/add/', views.add_service_feedback, name='add_service_feedback'),
     path('service-feedback/<int:feedback_id>/', views.view_service_feedback, name='view_service_feedback'),
+    
+
 
 
 
@@ -67,6 +73,8 @@ urlpatterns = [
     
   #################################################################### API & Registration URLs
    
+    #path('role-based-redirect/', views.role_based_redirect, name='role_based_redirect'),
+    path('dashboard/admin/', views.admin_dashboard, name='admin_dashboard'),
     path('signUp/', views.sign_up_view, name='registration'),
     path('password/change/', views.custom_password_change, name='password_change'),
     path('password/change/done/', 
@@ -79,9 +87,14 @@ urlpatterns = [
     path('api/login/', CustomAuthToken.as_view(), name='api-login'),
     path('api/fleet/dashboard/', views.fleet_dashboard_api, name='fleet_dashboard_api'),
     path("api/requests/create/", views.create_vehicle_request, name="create_vehicle_request"),
-    #path("api/requests/user/", views.user_requests_api, name="user_requests_api"),
     path("api/requests/create/", views.create_vehicle_request, name="create_vehicle_request"),
     path("api/requests/user/", views.get_user_requests, name="get_user_requests"),
+    path("api/driver/profile/", views.driver_profile_api, name="driver_profile_api"),
+    #path("api/driver/trips/", views.driver_assigned_trips_api, name="driver_assigned_trips_api"),
+    #path("api/driver/trips/<int:request_id>/update/", views.update_trip_status_api, name="update_trip_status_api"),
+    path("api/trips/assigned/", views.driver_assigned_trips_api, name="driver_assigned_trips_api"),
+    path("api/trips/update/<int:request_id>/", views.update_trip_status_api, name="update_trip_status_api"),
+
 
 
 
@@ -91,9 +104,6 @@ urlpatterns = [
     path('gsm-data/add/', views.add_gsm_data, name='add_gsm_data'),
     path('alerts/', views.alert_list, name='alert_list'),
     path('alerts/add/', views.add_alert, name='add_alert'),
-    #path('export/trip-logs/csv/', views.export_trip_logs_csv, name='export_trip_logs_csv'),
-    #path('export/trip-logs/pdf/', views.export_trip_logs_pdf, name='export_trip_logs_pdf'),
-    #path('charts/', views.chart_views, name='chart_views'),
     
     ##################################################################### For Users/Staff
     path('users/register/step1/', views.register_step1, name='register_step1'),

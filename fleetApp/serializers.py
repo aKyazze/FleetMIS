@@ -37,3 +37,19 @@ class RequestCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Request
         fields = ['current_location', 'destination', 'purpose', 'required_date']
+        
+class TripSerializer(serializers.ModelSerializer):
+    vehicle = VehicleSerializer(read_only=True)
+    requestor = serializers.SerializerMethodField()
+
+    def get_requestor(self, obj):
+        return obj.requestor.get_full_name() or obj.requestor.username
+
+    class Meta:
+        model = Request
+        fields = [
+            'id', 'destination', 'purpose', 'request_status',
+            'request_date', 'required_date', 'vehicle', 'requestor',
+            'mileage_at_assignment', 'mileage_at_return'
+        ]
+
