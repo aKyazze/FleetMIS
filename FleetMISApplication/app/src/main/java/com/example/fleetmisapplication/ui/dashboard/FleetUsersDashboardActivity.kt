@@ -55,8 +55,8 @@ class FleetUsersDashboardActivity : AppCompatActivity() {
                 if (response.isSuccessful) {
                     val dashboardData = response.body()
                     binding.txtWelcome.text = "Welcome, ${dashboardData?.name}"
-                    // Updated this line to use txtPendingRequests instead of txtTotalVehicles
                     binding.txtPendingRequests.text = "Pending Requests: ${dashboardData?.pendingRequests ?: 0}"
+                    binding.txtApprovedRequests.text = "Approved Requests: ${dashboardData?.approvedRequests ?: 0}"  // <-- Add this line
                     binding.txtTrips.text = "Completed Trips: ${dashboardData?.completedRequests ?: 0}"
                 } else {
                     Toast.makeText(this@FleetUsersDashboardActivity, "Failed to load dashboard", Toast.LENGTH_SHORT).show()

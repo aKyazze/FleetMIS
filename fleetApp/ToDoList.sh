@@ -114,45 +114,6 @@ dbeaver
 # ToDo List Pendings  =============================================
 
   Some pending functionalities:
-  * Need date should not allow passed dates, 
-  * Modifications in reports
-  * Emails to include need dates
-  * Fleet Driver need date is missing
+  
   ** ** Final Year Project report ** 
-
-Role-based dashboard navigation (Manager vs User vs Driver)
-
-New screens (TripRecords, RequestVehicle, etc.)
-
-Data visualizations or backend optimizations
-
-Deployment tips or security enhancements.
-
-✅ Next Steps
-Now that layouts are ready, here’s what follows:
-
-1. 🔨 Activities to create:
-RequestVehicleActivity.kt
-
-TrackMyRequestsActivity.kt
-
-AssignedTripsActivity.kt
-
-TripHistoryActivity.kt
-
-DriverProfileActivity.kt
-
-Each will have a layout (XML) and optionally interact with the Django API.
-
-2. ⚙ Django Backend
-/api/driver/profile/
-
-/api/requests/user/ → filter by user
-
-/api/requests/driver/ → for drivers
-
-/api/requests/create/ → create trip request
-
-Shall I proceed creating the first two Activities with sample UI and connect to Django mock endpoints?
-
 
