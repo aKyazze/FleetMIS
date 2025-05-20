@@ -60,8 +60,6 @@ class Driver(models.Model):
   email_address = models.EmailField()
   vehicle = models.ForeignKey(Vehicle, on_delete=models.SET_NULL, null=True)
   
-
-  
   
   def __str__(self):
       return f"{self.driver_name} {self.contact} {self.vehicle}"
