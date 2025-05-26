@@ -1,14 +1,23 @@
-{% extends "main.html" %}
-{% block title %}All Vehicle Information{% endblock %}
-{% block content %}
-<div class="page-container mt-4">
-    <h3 class="mb-3">📋 All Vehicle Information</h3>
-    <table class="table table-hover">
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>All Vehicle Information</title>
+    <style>
+        body { font-family: Arial, sans-serif; font-size: 12px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #000; padding: 6px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <h2>📋 All Vehicle Information</h2>
+    <table>
         <thead>
             <tr>
                 <th>Plate</th>
                 <th>Model</th>
-                <th>Category</th>
+                <th>Engine Type</th>
                 <th>Mileage</th>
                 <th>Status</th>
             </tr>
@@ -25,9 +34,5 @@
             {% endfor %}
         </tbody>
     </table>
-</div>
-<a href="{% url 'report_selection' %}" class="btn btn-secondary">Cancel</a>
-<a href="{% url 'export_all_vehicles_pdf' %}" class="btn btn-success ms-2">
-    <i class="bi bi-file-earmark-pdf"></i> Download PDF
-</a>
-{% endblock %}
+</body>
+</html>

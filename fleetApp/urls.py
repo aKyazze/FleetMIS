@@ -1,7 +1,7 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
 
-from .views import CustomAuthToken
+from .views import CustomAuthToken, admin_reset_password
 from . import views
 
 urlpatterns = [
@@ -77,6 +77,7 @@ urlpatterns = [
     path('dashboard/admin/', views.admin_dashboard, name='admin_dashboard'),
     path('signUp/', views.sign_up_view, name='registration'),
     path('password/change/', views.custom_password_change, name='password_change'),
+    #path('admin/reset-password/', admin_reset_password, name='admin_reset_password'),
     path('password/change/done/', 
          lambda request: render(request, 'registration/password_change_done.html'), 
          name='password_change_done'),
@@ -112,6 +113,8 @@ urlpatterns = [
     path('staff/', views.staff_dashboard, name='staff_dashboard'),
     path('staff/<int:user_id>/edit/', views.edit_staff, name='edit_staff'),
     path('staff/<int:user_id>/delete/', views.delete_staff, name='delete_staff'),
+    path('staff/<int:user_id>/reset-password/', views.admin_reset_password, name='admin_reset_password'),
+
     
     ##################################################################### For groups
     path('groups/add/', views.add_group_view, name='add_group'),
@@ -126,10 +129,6 @@ urlpatterns = [
     path("reports/", views.report_selection_view, name="report_selection"),
     path("reports/generate/", views.generate_report_view, name="generate_report"),
 
-    # PDF and CSV export options
-    path("reports/closed_trips/", views.export_trip_logs_pdf, name="export_trip_logs_pdf"),
-    path("reports/trip_logs_csv/", views.export_trip_logs_csv, name="export_trip_logs_csv"),
-
     # Individual report views
     path("reports/assigned_trips/", views.report_assigned_trips, name="report_assigned_trips"),
     path("reports/vehicle_mileage/", views.report_vehicle_mileage, name="report_vehicle_mileage"),
@@ -138,6 +137,19 @@ urlpatterns = [
     path("reports/available/", views.report_available_vehicles, name="report_available_vehicles"),
     path("reports/requests/", views.report_vehicle_requests, name="report_vehicle_requests"),
     path("reports/closure_rate/", views.report_closure_rate, name="report_closure_rate"),
+    
+    # PDF and CSV export options
+    path("reports/closed_trips/", views.export_trip_logs_pdf, name="export_trip_logs_pdf"),
+    path('export/all-vehicles/', views.export_all_vehicles_pdf, name='export_all_vehicles_pdf'),
+    path('export/assigned-trips/', views.export_assigned_trips_pdf, name='export_assigned_trips_pdf'),
+    path('export/vehicle-requests/', views.export_vehicle_requests_pdf, name='export_vehicle_requests_pdf'),
+    path('export/vehicle-mileage/', views.export_vehicle_mileage_pdf, name='export_vehicle_mileage_pdf'),
+    path('export/available-vehicles/', views.export_available_vehicles_pdf, name='export_available_vehicles_pdf'),
+    path('export/serviced-vehicles/', views.export_serviced_vehicles_pdf, name='export_serviced_vehicles_pdf'),
+    path('reports/closure-rate/pdf/', views.export_closure_rate_pdf, name='export_closure_rate_pdf'),
+
+
+
 ]
 
 

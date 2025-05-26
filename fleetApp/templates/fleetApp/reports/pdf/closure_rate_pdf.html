@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Trip Closure Rate Report</title>
+    <style>
+        body { font-family: Arial, sans-serif; font-size: 14px; padding: 30px; }
+        h2 { text-align: center; margin-bottom: 30px; }
+        ul { list-style: none; padding: 0; }
+        li { padding: 10px 0; border-bottom: 1px solid #ddd; }
+    </style>
+</head>
+<body>
+    <h2>📈 Trip Closure Rate Report</h2>
+    <ul>
+        <li><strong>Total Trip Requests:</strong> {{ total }}</li>
+        <li><strong>Closed Trip Requests:</strong> {{ closed }}</li>
+        <li><strong>Closure Rate:</strong> {{ rate }}%</li>
+    </ul>
+</body>
+</html>

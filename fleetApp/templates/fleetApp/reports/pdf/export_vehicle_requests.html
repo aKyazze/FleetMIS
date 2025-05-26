@@ -1,16 +1,23 @@
-{% extends "main.html" %}
-{% block title %}All Vehicle Requests{% endblock %}
-{% block content %}
-<div class="page-container mt-4">
-    <h3 class="mb-3">📝 All Vehicle Requests</h3>
-    <table class="table table-bordered">
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>All Vehicle Requests</title>
+    <style>
+        body { font-family: Arial, sans-serif; font-size: 12px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #000; padding: 6px; text-align: left; }
+    </style>
+</head>
+<body>
+    <h2>📝 All Vehicle Requests</h2>
+    <table>
         <thead>
             <tr>
                 <th>Requestor</th>
                 <th>Destination</th>
                 <th>Status</th>
                 <th>Date Requested</th>
-                <th>Need Date</th>
             </tr>
         </thead>
         <tbody>
@@ -20,15 +27,9 @@
                 <td>{{ req.destination }}</td>
                 <td>{{ req.request_status }}</td>
                 <td>{{ req.request_date }}</td>
-                <td>{{ req.required_date }}</td>
-
             </tr>
             {% endfor %}
         </tbody>
     </table>
-</div>
-<a href="{% url 'report_selection' %}" class="btn btn-secondary">Cancel</a>
-<a href="{% url 'export_vehicle_requests_pdf' %}" class="btn btn-success ms-2">
-    <i class="bi bi-file-earmark-pdf"></i> Download PDF
-</a>
-{% endblock %}
+</body>
+</html>

@@ -24,6 +24,7 @@ from django.contrib.auth.decorators import (
 )
 from django.contrib.auth import authenticate, update_session_auth_hash
 from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm
+from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import Group, Permission, User
 from django.core.files.base import ContentFile
 from django.db.models import ExpressionWrapper, F, IntegerField, Q
@@ -39,7 +40,7 @@ from django.views.decorators.http import require_GET
 # Local application imports
 from fleetApp.utils.email_utils import send_notification
 from .forms import (
-    AlertForm, DriverForm, GroupForm, GSMsensorDataForm,
+    AdminPasswordResetForm, AlertForm, DriverForm, GroupForm, GSMsensorDataForm,
     RequestApprovalForm, RequestForm, RequestorForm,
     ServiceForm, ServiceFeedbackForm, ServiceProviderForm, StaffEditForm,
     UserCredentialForm, UserProfileForm, 
@@ -148,6 +149,26 @@ def sign_up_view(request):
         'form': form,
     }
     return render(request, 'registration/sign_up.html', context)
+
+
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def admin_reset_password(request, user_id):  
+    user = get_object_or_404(User, pk=user_id)
+
+    if request.method == 'POST':
+        form = AdminPasswordResetForm(request.POST)
+        if form.is_valid():
+            password = form.cleaned_data['new_password']
+            user.password = make_password(password)
+            user.save()
+            return redirect('staff_dashboard')  # Update as per your URL name
+    else:
+        form = AdminPasswordResetForm()
+
+    return render(request, 'registration/admin_reset_password.html', {
+        'form': form,
+        'user': user
+    })
 
 @login_required
 def custom_password_change(request):
@@ -1513,12 +1534,6 @@ def add_alert(request):
 
 #PDF Export using ReportLab
 
-@login_required
-def report_selection_view(request):
-    return render(request, 'fleetApp/reports/report_selection.html')
-
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
 
 @login_required
 def report_selection_view(request):
@@ -1597,22 +1612,89 @@ def report_vehicle_requests(request):
     requests = Request.objects.all().order_by('-request_date')
     return render(request, 'fleetApp/reports/vehicle_requests.html', {'requests': requests})
 
-# === REPORT 7: Closure Rate ===
+# =========================
+# Updated PDF Export Views
+# =========================
+
+# Helper function to generate PDFs from templates
+def render_to_pdf(template_path, context, filename):
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    template = get_template(template_path)
+    html = template.render(context)
+    pisa_status = pisa.CreatePDF(html, dest=response)
+    if pisa_status.err:
+        return HttpResponse('PDF generation failed')
+    return response
+
+# Example: All Vehicles PDF Export
 @login_required
-def report_closure_rate(request):
-    total_requests = Request.objects.count()
-    closed_requests = Request.objects.filter(request_status='C').count()
-    rate = (closed_requests / total_requests * 100) if total_requests > 0 else 0
-    return render(request, 'fleetApp/reports/closure_rate.html', {
-        'total': total_requests,
-        'closed': closed_requests,
-        'rate': round(rate, 2),
-    })
+def export_all_vehicles_pdf(request):
+    vehicles = Vehicle.objects.all()
+    template = get_template('fleetApp/reports/pdf/export_all_vehicles.html')  # Use your template path
+    html = template.render({'vehicles': vehicles})
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="all_vehicles.pdf"'
+    pisa.CreatePDF(html, dest=response)
+    return response
+
+@login_required
+def export_assigned_trips_pdf(request):
+    trips = Request.objects.filter(vehicle__isnull=False)
+    template = get_template('fleetApp/reports/pdf/export_assigned_trips.html')
+    html = template.render({'trips': trips})
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="assigned_trips.pdf"'
+    pisa.CreatePDF(html, dest=response)
+    return response
+
+@login_required
+def export_vehicle_requests_pdf(request):
+    requests = Request.objects.all()
+    template = get_template('fleetApp/reports/pdf/export_vehicle_requests.html')
+    html = template.render({'requests': requests})
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="vehicle_requests.pdf"'
+    pisa.CreatePDF(html, dest=response)
+    return response
+
+@login_required
+def export_vehicle_mileage_pdf(request):
+    vehicles = Vehicle.objects.all()
+    template = get_template('fleetApp/reports/pdf/export_vehicle_mileage.html')
+    html = template.render({'vehicles': vehicles})
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="vehicle_mileage.pdf"'
+    pisa.CreatePDF(html, dest=response)
+    return response
+
+@login_required
+def export_available_vehicles_pdf(request):
+    assigned = Request.objects.filter(request_status__in=["P", "O"]).values_list('vehicle_id', flat=True)
+    available = Vehicle.objects.exclude(id__in=assigned)
+    template = get_template('fleetApp/reports/pdf/export_available_vehicles.html')
+    html = template.render({'vehicles': available})
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="available_vehicles.pdf"'
+    pisa.CreatePDF(html, dest=response)
+    return response
+
+@login_required
+def export_serviced_vehicles_pdf(request):
+    services = Service.objects.select_related('vehicle').order_by('-service_date')
+    template = get_template('fleetApp/reports/pdf/export_serviced_vehicles.html')
+    html = template.render({'services': services})
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="serviced_vehicles.pdf"'
+    pisa.CreatePDF(html, dest=response)
+    return response
+
+# === REPORT 6: Vehicle Requests ===
 
 @login_required
 def export_trip_logs_pdf(request):
     closed_trips = Request.objects.filter(request_status='C')
-    template_path = 'fleetApp/reports/closed_trips_pdf.html'  # Make sure this template exists
+    template_path = 'fleetApp/reports/pdf/closed_trips_pdf.html'  # Make sure this template exists
     context = {'trips': closed_trips}
 
     # Render HTML to PDF
@@ -1626,112 +1708,47 @@ def export_trip_logs_pdf(request):
         return HttpResponse('PDF generation failed: %s' % pisa_status.err)
     return response
 
+# === REPORT 6: Vehicle Requests ===
+@login_required
+def report_closure_rate(request):
+    total_requests = Request.objects.count()
+    closed_requests = Request.objects.filter(request_status='C').count()
+    rate = (closed_requests / total_requests * 100) if total_requests > 0 else 0
+
+    context = {
+        'total': total_requests,
+        'closed': closed_requests,
+        'rate': round(rate, 2),
+    }
+    return render(request, 'fleetApp/reports/pdf/closure_rate.html', context)
+
+# === REPORT 6: Vehicle Requests ===
+@login_required
+def export_closure_rate_pdf(request):
+    total_requests = Request.objects.count()
+    closed_requests = Request.objects.filter(request_status='C').count()
+    rate = (closed_requests / total_requests * 100) if total_requests > 0 else 0
+
+    template_path = 'fleetApp/reports/closure_rate_pdf.html'
+    context = {
+        'total': total_requests,
+        'closed': closed_requests,
+        'rate': round(rate, 2),
+    }
+
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="trip_closure_rate.pdf"'
+    template = get_template(template_path)
+    html = template.render(context)
+    pisa_status = pisa.CreatePDF(html, dest=response)
+
+    if pisa_status.err:
+        return HttpResponse('PDF generation failed')
+    return response
+
+
 # CSV Export: Trip Logs with Alerts
 
-@login_required
-def export_trip_logs_csv(request):
-    response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="closed_trips.csv"'
-
-    writer = csv.writer(response)
-    writer.writerow(['Requestor', 'Vehicle', 'Driver', 'Destination', 'Status', 'Request Date'])
-
-    closed_trips = Request.objects.filter(request_status='C')
-    for trip in closed_trips:
-        driver = trip.driver.driver_name if trip.driver else 'N/A'
-        writer.writerow([
-            trip.requestor.username,
-            trip.vehicle.vehicle_plate if trip.vehicle else 'N/A',
-            driver,
-            trip.destination,
-            trip.request_status,
-            trip.request_date.strftime('%Y-%m-%d')
-        ])
-    return response
-
-@login_required
-def export_vehicle_mileage_csv(request):
-    response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="vehicle_mileage.csv"'
-    writer = csv.writer(response)
-    writer.writerow(['Vehicle Plate', 'Current Mileage'])
-
-    for vehicle in Vehicle.objects.all():
-        writer.writerow([vehicle.vehicle_plate, vehicle.mileage])
-    return response
-
-@login_required
-def export_all_vehicles_csv(request):
-    response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="all_vehicles.csv"'
-    writer = csv.writer(response)
-    writer.writerow(['Vehicle Plate', 'Model', 'Make', 'Year', 'Mileage', 'Status'])
-
-    for v in Vehicle.objects.all():
-        writer.writerow([v.vehicle_plate, v.model, v.make, v.year, v.mileage, v.status])
-    return response
-
-@login_required
-def export_serviced_vehicles_csv(request):
-    response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="serviced_vehicles.csv"'
-    writer = csv.writer(response)
-    writer.writerow(['Vehicle Plate', 'Service Type', 'Service Date', 'Cost'])
-
-    for record in ServiceRecord.objects.select_related('vehicle').order_by('-service_date'):
-        writer.writerow([
-            record.vehicle.vehicle_plate,
-            record.service_type,
-            record.service_date.strftime('%Y-%m-%d'),
-            record.service_cost
-        ])
-    return response
-
-@login_required
-def export_available_vehicles_csv(request):
-    response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="available_vehicles.csv"'
-    writer = csv.writer(response)
-    writer.writerow(['Vehicle Plate', 'Model', 'Make', 'Year'])
-
-    assigned_ids = Request.objects.filter(request_status__in=['P', 'O']).values_list('vehicle_id', flat=True)
-    available = Vehicle.objects.exclude(id__in=assigned_ids)
-
-    for vehicle in available:
-        writer.writerow([vehicle.vehicle_plate, vehicle.model, vehicle.make, vehicle.year])
-    return response
- 
-@login_required
-def export_vehicle_requests_csv(request):
-    response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="vehicle_requests.csv"'
-    writer = csv.writer(response)
-    writer.writerow(['Requestor', 'Destination', 'Vehicle', 'Driver', 'Status', 'Request Date'])
-
-    for r in Request.objects.all().order_by('-request_date'):
-        writer.writerow([
-            r.requestor.username,
-            r.destination,
-            r.vehicle.vehicle_plate if r.vehicle else 'N/A',
-            r.driver.driver_name if r.driver else 'N/A',
-            r.request_status,
-            r.request_date.strftime('%Y-%m-%d')
-        ])
-    return response
-
-@login_required
-def export_closure_rate_csv(request):
-    response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="closure_rate.csv"'
-    writer = csv.writer(response)
-    writer.writerow(['Total Requests', 'Closed Requests', 'Closure Rate (%)'])
-
-    total = Request.objects.count()
-    closed = Request.objects.filter(request_status='C').count()
-    rate = (closed / total * 100) if total > 0 else 0
-
-    writer.writerow([total, closed, round(rate, 2)])
-    return response
 
   
 #Trip Views

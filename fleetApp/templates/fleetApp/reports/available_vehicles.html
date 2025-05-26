@@ -24,4 +24,8 @@
         </tbody>
     </table>
 </div>
+<a href="{% url 'report_selection' %}" class="btn btn-secondary">Cancel</a>
+<a href="{% url 'export_available_vehicles_pdf' %}" class="btn btn-success ms-2">
+    <i class="bi bi-file-earmark-pdf"></i> Download PDF
+</a>
 {% endblock %}

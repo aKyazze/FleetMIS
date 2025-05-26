@@ -220,3 +220,20 @@ class GroupForm(forms.ModelForm):
     class Meta:
         model = Group
         fields = ['name', 'permissions']
+        
+class AdminPasswordResetForm(forms.Form):
+    user = forms.ModelChoiceField(queryset=User.objects.all())
+    new_password = forms.CharField(widget=forms.PasswordInput)
+    confirm_password = forms.CharField(widget=forms.PasswordInput)
+
+class AdminPasswordResetForm(forms.Form):
+    new_password = forms.CharField(widget=forms.PasswordInput, label="New Password")
+    confirm_password = forms.CharField(widget=forms.PasswordInput, label="Confirm Password")
+
+    def clean(self):
+        cleaned_data = super().clean()
+        pw1 = cleaned_data.get('new_password')
+        pw2 = cleaned_data.get('confirm_password')
+        if pw1 and pw2 and pw1 != pw2:
+            raise forms.ValidationError("Passwords do not match.")
+        return cleaned_data

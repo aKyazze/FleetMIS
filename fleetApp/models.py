@@ -5,6 +5,25 @@ from django.db import models
 from django.utils import timezone
 
 # Create your models here.
+class Staff(models.Model):
+    GENDER_CHOICES = [
+        ('M', 'Male'),
+        ('F', 'Female'),
+    ]
+    
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='staff_profile')
+    first_name = models.CharField(max_length=30)
+    last_name = models.CharField(max_length=30)
+    email = models.EmailField()
+    department = models.CharField(max_length=100)
+    contact = models.CharField(max_length=15)
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
+    staff_photo = models.ImageField(upload_to='staff_photos/', null=True, blank=True)
+    
+    def __str__(self):
+        return f"{self.user.get_full_name()} ({self.department})"
+
+
 
 # Vehicle Entity:
 class Vehicle(models.Model):
@@ -194,24 +213,6 @@ class Alert(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     
     
-class Staff(models.Model):
-    GENDER_CHOICES = [
-        ('M', 'Male'),
-        ('F', 'Female'),
-    ]
-    
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='staff_profile')
-    first_name = models.CharField(max_length=30)
-    last_name = models.CharField(max_length=30)
-    email = models.EmailField()
-    department = models.CharField(max_length=100)
-    contact = models.CharField(max_length=15)
-    gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
-    staff_photo = models.ImageField(upload_to='staff_photos/', null=True, blank=True)
-    
-    def __str__(self):
-        return f"{self.user.get_full_name()} ({self.department})"
-
 class Department(models.Model):
     DEPARTMENT_LIST = [
         ("HR", "Human Resource"), 
