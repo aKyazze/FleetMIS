@@ -69,6 +69,9 @@ urlpatterns = [
     path('my-requests/', views.user_requests, name='user_requests'),
     path('trips/history/', views.trip_history, name='trip_history'),
     path('trips/assigned/', views.assigned_trips, name='assigned_trips'),
+    path('requisition/<int:request_id>/reject/', views.reject_request, name='reject_request'),
+    path('requisition/<int:request_id>/approve/', views.approve_request, name='approve_request'),
+
 
     
   #################################################################### API & Registration URLs
@@ -137,6 +140,9 @@ urlpatterns = [
     path("reports/available/", views.report_available_vehicles, name="report_available_vehicles"),
     path("reports/requests/", views.report_vehicle_requests, name="report_vehicle_requests"),
     path("reports/closure_rate/", views.report_closure_rate, name="report_closure_rate"),
+    path('reports/filtered-requests/', views.filtered_requests_report, name='filtered_requests_report'),
+    
+
     
     # PDF and CSV export options
     path("reports/closed_trips/", views.export_trip_logs_pdf, name="export_trip_logs_pdf"),

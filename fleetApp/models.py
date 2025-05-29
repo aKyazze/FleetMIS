@@ -100,6 +100,7 @@ class Request(models.Model):
     REQUEST_STATE = [
         ("P", "Pending"),
         ("O", "Open"),
+        ("R", "Rejected"),
         ("C", "Closed"),
     ]
 
@@ -116,6 +117,8 @@ class Request(models.Model):
     request_status = models.CharField(max_length=1, choices=REQUEST_STATE, default="P")
     mileage_at_assignment = models.IntegerField(null=True, blank=True)
     mileage_at_return = models.IntegerField(null=True, blank=True)
+    rejection_reason = models.TextField(blank=True, null=True)
+
     
 
     def __str__(self):

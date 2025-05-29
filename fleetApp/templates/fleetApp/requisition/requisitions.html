@@ -9,7 +9,7 @@
     <ul class="nav nav-tabs mb-3" id="requestTabs" role="tablist">
         <li class="nav-item" role="presentation">
             <button class="nav-link active" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending" type="button" role="tab" aria-controls="pending" aria-selected="true">
-                 Requests
+                Pending Requests
             </button>
         </li>
         <li class="nav-item" role="presentation">
@@ -21,15 +21,15 @@
 
     <!-- Tab Contents -->
     <div class="tab-content" id="requestTabsContent">
-        <!-- Pending & Open Requests Tab -->
+        <!-- Pending -->
         <div class="tab-pane fade show active" id="pending" role="tabpanel" aria-labelledby="pending-tab">
-            <h2 class="text-secondary"> Closed & Pending Requests</h2>
+            <h4>⏳ Pending Requests</h4>
             <table class="table table-striped">
                 <thead>
                     <tr>
                         <th>#</th>
                         <th>Requestor</th>
-                        <th>Current Location</th>
+                        <th>Location</th>
                         <th>Destination</th>
                         <th>Need Date</th>
                         <th>Status</th>
@@ -38,53 +38,39 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for request in requests %}
+                    {% for request in pending_requests %}
                     <tr>
                         <td>{{ forloop.counter }}</td>
                         <td>{{ request.requestor.username }}</td>
                         <td>{{ request.current_location }}</td>
                         <td>{{ request.destination }}</td>
                         <td>{{ request.required_date }}</td>
+                        <td><span class="badge bg-warning">{{ request.get_request_status_display }}</span></td>
+                        <td>{% if request.vehicle %}{{ request.vehicle.vehicle_plate }}{% else %}<span class="badge bg-secondary">Unassigned</span>{% endif %}</td>
                         <td>
-                            <span class="badge 
-                                {% if request.request_status == "P" %} bg-warning
-                                {% elif request.request_status == "O" %} bg-success
-                                {% else %} bg-secondary {% endif %}">
-                                {{ request.get_request_status_display }}
-                            </span>
-                        </td>
-                        <td>
-                            {% if request.vehicle %}
-                                {{ request.vehicle.vehicle_plate }}
-                            {% else %}
-                                <span class="badge bg-secondary">Unassigned</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if request.request_status == "P" %}
-                                <form action="{% url 'approve_request' request.id %}" method="post" class="d-flex gap-1">
-                                    {% csrf_token %}
-                                    <select name="vehicle" class="form-select form-select-sm" required>
-                                        <option value="">Select Vehicle</option>
-                                        {% for vehicle in vehicles %}
-                                            <option value="{{ vehicle.id }}">{{ vehicle.vehicle_plate }}</option>
-                                        {% empty %}
-                                            <option disabled>No vehicles available</option>
-                                        {% endfor %}
-                                    </select>
-                                    <button type="submit" class="btn btn-sm btn-success">Approve</button>
-                                </form>
-                            {% endif %}
+                            <form action="{% url 'approve_request' request.id %}" method="post" class="d-flex gap-1 mb-1">
+                                {% csrf_token %}
+                                <select name="vehicle" class="form-select form-select-sm" required>
+                                    <option value="">Select Vehicle</option>
+                                    {% for vehicle in vehicles %}
+                                        <option value="{{ vehicle.id }}">{{ vehicle.vehicle_plate }}</option>
+                                    {% endfor %}
+                                </select>
+                                <button type="submit" class="btn btn-sm btn-success">Approve</button>
+                            </form>
+                            <a href="{% url 'reject_request' request.id %}" class="btn btn-sm btn-outline-danger">Reject</a>
                         </td>
                     </tr>
+                    {% empty %}
+                    <tr><td colspan="8">No pending requests found.</td></tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
 
-        <!-- Approved Requests Tab -->
+        <!-- Approved -->
         <div class="tab-pane fade" id="approved" role="tabpanel" aria-labelledby="approved-tab">
-            <h2 class="text-secondary">Approved Requests</h2>
+            <h4>✅ ApprovedRequests</h4>
             <table class="table table-bordered">
                 <thead>
                     <tr>
@@ -105,7 +91,7 @@
                         <td>{{ request.time_of_allocation|date:"Y-m-d H:i" }}</td>
                     </tr>
                     {% empty %}
-                    <tr><td colspan="4">No approved requests found.</td></tr>
+                    <tr><td colspan="5">No approved requests found.</td></tr>
                     {% endfor %}
                 </tbody>
             </table>

@@ -41,7 +41,7 @@ from django.views.decorators.http import require_GET
 from fleetApp.utils.email_utils import send_notification
 from .forms import (
     AdminPasswordResetForm, AlertForm, DriverForm, GroupForm, GSMsensorDataForm,
-    RequestApprovalForm, RequestForm, RequestorForm,
+    RequestApprovalForm, RequestForm, RequestorForm, RequestRejectionForm,
     ServiceForm, ServiceFeedbackForm, ServiceProviderForm, StaffEditForm,
     UserCredentialForm, UserProfileForm, 
     VehicleAllocationForm, VehicleForm, VehicleReturnForm
@@ -730,6 +730,8 @@ def home_view(request):
         pending_requests = Request.objects.filter(requestor=user, request_status="P")
         approved_requests = Request.objects.filter(requestor=user, request_status="O") 
         completed_requests = Request.objects.filter(requestor=user, request_status="C").select_related('vehicle')
+        rejected_requests = Request.objects.filter(requestor=user, request_status="R")
+
 
         for req in completed_requests:
             req.assigned_driver = Driver.objects.filter(vehicle=req.vehicle).first() if req.vehicle else None
@@ -738,6 +740,7 @@ def home_view(request):
             'pending_requests': pending_requests,
             'approved_requests': approved_requests,
             'completed_requests': completed_requests,
+            "rejected_requests": rejected_requests,
         })
 
     # FleetDrivers - Assigned Trips
@@ -1124,12 +1127,28 @@ def add_request(request):
     if request.method == 'POST':
         form = RequestForm(request.POST)
         if form.is_valid():
+            destination = form.cleaned_data['destination']
+            required_date = form.cleaned_data['required_date']
+
+            # Check for duplicate pending request
+            duplicate = Request.objects.filter(
+                requestor=request.user,
+                destination=destination,
+                required_date=required_date,
+                request_status='P'  # Only check against Pending ones
+            ).exists()
+
+            if duplicate:
+                messages.warning(request, "You already submitted a similar request that is pending approval.")
+                return redirect('user_requests')
+
+            # Save new request
             new_request = form.save(commit=False)
             new_request.requestor = request.user
-            new_request.request_status = 'P'  
+            new_request.request_status = 'P'
             new_request.save()
 
-            #Notify Fleet Managers about new request
+            # Notify Fleet Managers
             try:
                 fleet_manager_group = Group.objects.get(name='FleetManagers')
                 fleet_managers = fleet_manager_group.user_set.all()
@@ -1145,12 +1164,11 @@ def add_request(request):
                                 'destination': new_request.destination,
                                 'purpose': new_request.purpose,
                                 'request_date': new_request.request_date,
-                                'required_date':new_request.required_date,
+                                'required_date': new_request.required_date,
                             },
                             recipient_email=manager.email
                         )
             except Group.DoesNotExist:
-                # Skip if group is not found, avoid breaking the request flow
                 pass
 
             messages.success(request, "Request added successfully!")
@@ -1163,7 +1181,6 @@ def add_request(request):
         'requestor': requestor
     }
     return render(request, 'fleetApp/requisition/add_request.html', context)
-
 
 @login_required
 def edit_request(request, request_id):
@@ -1194,20 +1211,18 @@ def delete_request(request, request_id):
     }
     return render(request, 'fleetApp/requisition/delete_request.html', context)
 
-# List all requests
 @login_required
 def request_list(request):
-    # Get the status filter from the query parameters
-    status_filter = request.GET.get('status')
-    if status_filter == 'pending':
-        requests = Request.objects.filter(request_status='P')  # 'P' for Pending
-    elif status_filter == 'closed':
-        requests = Request.objects.filter(request_status='C')  # 'C' for Closed
-    else:
-        requests = Request.objects.all()  
+    pending_requests = Request.objects.filter(request_status='P')
+    approved_requests = Request.objects.filter(request_status='O')
+    rejected_requests = Request.objects.filter(request_status='R')
+    vehicles = Vehicle.objects.filter(status='Av')  
 
     context = {
-        'requests': requests
+        'pending_requests': pending_requests,
+        'approved_requests': approved_requests,
+        'rejected_requests': rejected_requests,
+        'vehicles': vehicles
     }
     return render(request, 'fleetApp/requisition/request_list.html', context)
 
@@ -1267,6 +1282,37 @@ def approve_request(request, request_id):
         messages.success(request, "Request approved successfully!")
         return redirect('requisitions')
     return redirect('requisitions')
+
+@login_required
+def reject_request(request, request_id):
+    request_obj = get_object_or_404(Request, id=request_id)
+
+    if request.method == 'POST':
+        form = RequestRejectionForm(request.POST, instance=request_obj)
+        if form.is_valid():
+            request_obj = form.save(commit=False)
+            request_obj.request_status = 'R'
+            request_obj.save()
+
+            # Notify the requestor
+            send_notification(
+                subject='Trip Request Rejected',
+                template_name='emails/trip_rejected_requestor.html',
+                context={
+                    'requestor_name': request_obj.requestor.username,
+                    'destination': request_obj.destination,
+                    'reason': request_obj.rejection_reason
+                },
+                recipient_email=request_obj.requestor.email
+            )
+
+            messages.success(request, "Request has been rejected with remarks.")
+            return redirect('requisitions')
+    else:
+        form = RequestRejectionForm(instance=request_obj)
+
+    return render(request, 'fleetApp/requisition/reject_request.html', {'form': form, 'request_obj': request_obj})
+
 
 @login_required
 def request_summary(request):
@@ -1542,34 +1588,44 @@ def report_selection_view(request):
 @login_required
 def generate_report_view(request):
     report_type = request.GET.get("report_type")
+    report_format = request.GET.get("report_format")  # Support format selection
 
-    if report_type == "closed_trips":
-        return redirect('export_trip_logs_pdf')  # or another view
-    elif report_type == "assigned_trips":
-        return redirect('report_assigned_trips')
-    elif report_type == "vehicle_mileage":
-        return redirect('report_vehicle_mileage')
-    elif report_type == "vehicle_info":
-        return redirect('report_all_vehicles')
-    elif report_type == "serviced_vehicles":
-        return redirect('report_serviced_vehicles')
-    elif report_type == "available_vehicles":
-        return redirect('report_available_vehicles')
-    elif report_type == "vehicle_requests":
-        return redirect('report_vehicle_requests')
-    elif report_type == "closure_rate":
-        return redirect('report_closure_rate')
-    else:
-        return redirect('report_selection')
-  
-  
+    # Mapping for cleaner logic
+    report_routes = {
+        "closed_trips": "export_trip_logs_pdf",
+        "assigned_trips": "report_assigned_trips",
+        "vehicle_mileage": "report_vehicle_mileage",
+        "vehicle_info": "report_all_vehicles",
+        "serviced_vehicles": "report_serviced_vehicles",
+        "available_vehicles": "report_available_vehicles",
+        "vehicle_requests": "report_vehicle_requests",
+        "closure_rate": "report_closure_rate",
+        "filtered_requests": "filtered_requests_report",  # New addition
+    }
 
+    # Ensure the report_type is valid
+    if report_type in report_routes:
+        return redirect(report_routes[report_type])
+
+    # If not recognized, redirect back to report selection
+    return redirect('report_selection')
 # === REPORT 1: Assigned Trips ===
 @login_required
+@login_required
 def report_assigned_trips(request):
+    driver_id = request.GET.get('driver')
     trips = Request.objects.filter(vehicle__isnull=False)
-    return render(request, 'fleetApp/reports/assigned_trips.html', {'trips': trips})
 
+    if driver_id:
+        trips = trips.filter(driver__id=driver_id)
+
+    drivers = Driver.objects.all()
+    return render(request, 'fleetApp/reports/assigned_trips.html', {
+        'trips': trips,
+        'drivers': drivers,
+        'selected_driver': int(driver_id) if driver_id else None
+    })
+    
 @login_required
 def export_assigned_trips_csv(request):
     response = HttpResponse(content_type='text/csv')
@@ -1584,8 +1640,26 @@ def export_assigned_trips_csv(request):
 # === REPORT 2: Vehicle Mileage ===
 @login_required
 def report_vehicle_mileage(request):
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+
     vehicles = Vehicle.objects.all()
-    return render(request, 'fleetApp/reports/vehicle_mileage.html', {'vehicles': vehicles})
+
+    if start_date and end_date:
+        try:
+            from datetime import datetime
+            start = datetime.strptime(start_date, "%Y-%m-%d")
+            end = datetime.strptime(end_date, "%Y-%m-%d")
+            vehicles = vehicles.filter(updated_at__range=[start, end])
+        except ValueError:
+            messages.warning(request, "Invalid date format.")
+
+    return render(request, 'fleetApp/reports/vehicle_mileage.html', {
+        'vehicles': vehicles,
+        'start_date': start_date,
+        'end_date': end_date
+    })
+    
 
 # === REPORT 3: All Vehicle Information ===
 @login_required
@@ -1657,6 +1731,32 @@ def export_vehicle_requests_pdf(request):
     response['Content-Disposition'] = 'attachment; filename="vehicle_requests.pdf"'
     pisa.CreatePDF(html, dest=response)
     return response
+
+
+@login_required
+def filtered_requests_report(request):
+    status = request.GET.get('status')
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+
+    requests_qs = Request.objects.all()
+
+    if status in ['P', 'O', 'R', 'C']:
+        requests_qs = requests_qs.filter(request_status=status)
+
+    if start_date:
+        requests_qs = requests_qs.filter(request_date__gte=start_date)
+
+    if end_date:
+        requests_qs = requests_qs.filter(request_date__lte=end_date)
+
+    context = {
+        'requests': requests_qs,
+        'status': status,
+        'start_date': start_date,
+        'end_date': end_date,
+    }
+    return render(request, 'fleetApp/reports/filtered_requests.html', context)
 
 @login_required
 def export_vehicle_mileage_pdf(request):

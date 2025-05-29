@@ -3,6 +3,7 @@
 {% block content %}
 <div class="page-container mt-4">
     <h3 class="mb-3">⛽ Vehicle Mileage Report</h3>
+
     <table class="table table-bordered">
         <thead>
             <tr>
@@ -23,7 +24,4 @@
     </table>
 </div>
 <a href="{% url 'report_selection' %}" class="btn btn-secondary">Cancel</a>
-<a href="{% url 'export_vehicle_mileage_pdf' %}" class="btn btn-success ms-2">
-    <i class="bi bi-file-earmark-pdf"></i> Download PDF
-</a>
 {% endblock %}

@@ -132,6 +132,18 @@ class RequestApprovalForm(forms.ModelForm):
         self.fields['driver'].queryset = Driver.objects.all()  # You can filter based on custom logic
 
 
+class RequestRejectionForm(forms.ModelForm):
+    rejection_reason = forms.CharField(
+        widget=forms.Textarea(attrs={'rows': 3, 'placeholder': 'Provide reason for rejection...'}),
+        required=True,
+        label="Rejection Remarks"
+    )
+
+    class Meta:
+        model = Request
+        fields = ['rejection_reason']
+
+
 class ServiceProviderForm(forms.ModelForm):
     class Meta:
         model = ServiceProvider
